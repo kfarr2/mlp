@@ -1,0 +1,13 @@
+Django
+PyMySQL
+coverage
+mock
+model-mommy
+pytz
+django-cloak
+setuptools
+-e git://github.com/PSU-OIT-ARC/django-bootstrap-form.git#egg=django-bootstrap-form
+-e git://github.com/PSU-OIT-ARC/django-arc.git#egg=django-arc
+#celery
+#elasticsearch
+#-e git://github.com/PSU-OIT-ARC/djangocas.git#egg=djangocas
