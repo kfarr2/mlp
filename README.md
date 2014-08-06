@@ -1,52 +1,25 @@
-# Project Template
+# MLP
 
 ## Introduction
 
-Quick Start Template for ARC projects.
-No need to download! Just follow the instructions below.
+MLP
 
 ## Installation
 
-Start a new Django project using this template
-
-    project_name="lame"
-    django-admin.py startproject --name=project_name.conf,README.md,Makefile --extension=template,py --template=https://github.com/PSU-OIT-ARC/project_template/archive/master.zip $project_name
-
-    cd $project_name
+In your working directory
 
     virtualenv --no-site-packages .env
     source .env/bin/activate
     pip install -r requirements.txt
 
-    chmod +x ./manage.py
-
-    mv $project_name/settings/local.py.template $project_name/settings/local.py
-    vi $project_name/settings/local.py
-
-Sync the database
-
-    ./manage.py syncdb
-    ./manage.py migrate
-
-Run the server
-
-    make
-
-or
-
-    ./manage.py runserver
-
-## Extras
+    mv mlp/settings/local.py.template $project_name/settings/local.py
+    vi mlp/settings/local.py
 
 Install RabbitMQ if you need it
 
     yum install rabbitmq-server
     service rabbitmq-server start
     chkconfig rabbitmq-server on
-
-Run Celery if you are working with task queues
-
-    celery -A project_name.celery worker --loglevel=info
 
 Install ElasticSearch if you need it
 
@@ -68,3 +41,21 @@ If you get an error saying "Can't start up: Not enough memory", update your vers
 Rebuild the search index
 
     ./manage.py rebuild_index
+
+Run Celery if you are working with task queues
+
+    celery -A project_name.celery worker --loglevel=info
+
+Sync the database
+
+    ./manage.py syncdb
+    ./manage.py migrate
+
+Run the server
+
+    make
+
+or
+
+    ./manage.py runserver
+
