@@ -1,4 +1,4 @@
-from arc import ChoiceEnum
+from arcutils import ChoiceEnum
 
 class UserRole(ChoiceEnum):
     RESEARCHER = 1

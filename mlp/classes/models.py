@@ -20,7 +20,7 @@ class Roster(models.Model):
     Used to map users to classes
     """
     roster_id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey("users.User")
+    user_id = models.ForeignKey(User)
     class_id = models.ForeignKey(Class)
     role = models.IntegerField(choices=UserRole)
 
