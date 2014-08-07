@@ -23,15 +23,19 @@ LOGIN_URL = reverse_lazy("home")
 LOGIN_REDIRECT_URL = reverse_lazy("users-home")
 LOGOUT_URL = reverse_lazy("home")
 
-# uncomment to use celery, also update celery.py, and requirements.txt
-#BROKER_URL = 'amqp://guest:guest@localhost//'
-#CELERY_ACKS_LATE = True
-#CELERY_RESULT_BACKEND = 'amqp'
+BROKER_URL = 'amqp://guest:guest@localhost//'
+CELERY_ACKS_LATE = True
+CELERY_RESULT_BACKEND = 'amqp'
 
 # uncomment to use CAS. You need to update requirements.txt too
 # CAS_SERVER_URL = 'https://sso.pdx.edu/cas/'
 # AUTHENTICATION_BACKENDS += ('djangocas.backends.CASBackend',)
 
+ITEMS_PER_PAGE = 50
+
+# file upload stuff
+MAX_UPLOAD_SIZE = 50 * 2**20
+CHUNK_SIZE = 1 * 2**20
 
 AUTH_USER_MODEL = 'users.User'
 
