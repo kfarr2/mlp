@@ -1,5 +1,6 @@
 import re
 import os
+from elasticmodels import make_searchable
 from django.db import models
 from django.conf import settings
 from mlp.users.models import User
@@ -19,9 +20,18 @@ class File(models.Model):
     uploaded_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     uploaded_on = models.DateTimeField(auto_now_add=True)
     edited_on = models.DateTimeField(auto_now=True)
+    md5_sum = models.CharField(max_length=32, blank=True)
 
     class Meta:
         db_table = "files"
+
+    #@classmethod
+    def save(self, *args, **kwargs):
+        """
+        Make searchable on save
+        """
+        #make_searchable(self)
+        super(File, self).save(*args, **kwargs)
 
     @classmethod
     def sanitize_filename(cls, filename):
@@ -50,29 +60,72 @@ class File(models.Model):
         return settings.MEDIA_URL + os.path.relpath(path, settings.MEDIA_ROOT)
 
     @property
+    def size(self):
+        if not hasattr(self, "_size"):
+            self._size = get_size(self.directory)
+        return self._size
+
+    @property
+    def directory(self):
+        """
+        Returns the directory path that stores all the files
+        related to this File object (like the original file,
+        the converted ones, the log, etc)
+        """
+        return os.path.join(settings.MEDIA_ROOT, str(self.pk))
+
+    def path_with_extension(self, ext):
+        """
+        Returns the full path to the file with an extension of `ext`
+        """
+        return os.path.normpath(os.path.join(os.path.dirname(self.file.path), "file." + ext))
+
+    def url_with_extension(self, ext):
+        """
+        Returns a path to the file from the MEDIA_URL with an extension of `ext`
+        """
+        return os.path.normpath(settings.MEDIA_URL + os.path.relpath(os.path.dirname(self.file.path), settings.MEDIA_ROOT) + "/file." + ext)
+
+    @property
     def video_urls(self):
         """
-        Returns a list of two-tuples, with each tuple containing 
-        the URL to the video file, and the mimetype of the video
+        Returns a list of two-tuples, with each tuple containing the URL to the
+        video file, and the mimetype of the video
         """
         if not self.file:
             return []
 
         return [
-            (settings.MEDIA_URL + os.path.relpath(os.splitext(self.file.path)[0] + ".ogv", settings.MEDIA_ROOT), "video/ogg"),
-            (settings.MEDIA_URL + os.path.relpath(os.splitext(self.file.path)[0] + ".mp4", settings.MEDIA_ROOT), "video/mp4"),
-
+            (self.url_with_extension("ogv"), "video/ogg"),
+            (self.url_with_extension("mp4"), "video/mp4"),
         ]
+        
+    @property
+    def audio_urls(self):
+        """
+        Returns a list of two-tuples, with each tuple containing the URL to the
+        audio file, and the mimetype of the audio
+        """
+        if not self.file:
+            return []
 
+        return [
+            (self.url_with_extension("ogg"), "audio/ogg"),
+            (self.url_with_extension("mp3"), "audio/mp3"),
+        ]
+        
+    def __unicode__(self):
+        return "%s (%s)" % (self.name, FileType._choices[self.type][1])
 
 class FileTag(models.Model):
     """
     Used to map files to tags
     """
     file_tag_id = models.AutoField(primary_key=True)
+    tagged_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     created_on = models.DateTimeField(auto_now_add=True)
     file_id = models.ForeignKey(File)
-    tag_id = models.ForeignKey(Tag)
+    tag_id = models.ForeignKey(Tag, related_name="filetag_set")
 
     class Meta:
         db_table = "file_tag"
