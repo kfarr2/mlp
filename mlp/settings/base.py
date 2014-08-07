@@ -19,9 +19,9 @@ DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'no-reply@pdx.edu'
 # in test mode?
 TEST = False
 
-#LOGIN_URL = reverse_lazy("home")
-#LOGIN_REDIRECT_URL = reverse_lazy("users-home")
-#LOGOUT_URL = reverse_lazy("home")
+LOGIN_URL = reverse_lazy("home")
+LOGIN_REDIRECT_URL = reverse_lazy("users-home")
+LOGOUT_URL = reverse_lazy("home")
 
 # uncomment to use celery, also update celery.py, and requirements.txt
 #BROKER_URL = 'amqp://guest:guest@localhost//'
@@ -64,7 +64,10 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bootstrapform',
-    'arc',
+    'arcutils',
+    'south',
+    'celery',
+    'mlp.home',
     'mlp.users',
     'mlp.files',
     'mlp.tags',
@@ -79,6 +82,15 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'djangocas.middleware.CASMiddleware',
+)
+
+PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
+    'django.contrib.auth.hashers.SHA1PasswordHasher',
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+    'django.contrib.auth.hashers.CryptPasswordHasher',
 )
 
 ROOT_URLCONF = 'mlp.urls'

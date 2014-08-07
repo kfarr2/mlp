@@ -1,4 +1,5 @@
-from arc import ChoiceEnum
+from django.conf import settings
+from arcutils import ChoiceEnum
 
 VIDEO_FILE_MIME_TYPES = set([
     'video/x-flv',
