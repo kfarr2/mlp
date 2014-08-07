@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <a href="{% url 'files-upload' %}" class="btn btn-default pull-right" type=button>Upload</a>
+    <h3>Files</h3>
+    <br />
+    <div class="file-list">
+        {% if files %}
+            {% for file in files %}
+                {{ file.as_li }}
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-warning">
+                You have not uploaded any files!
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
