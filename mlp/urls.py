@@ -5,6 +5,7 @@ from django.conf import settings
 
 from mlp.home import views as home
 from mlp.users import views as users
+from mlp.files import views as files
 
 admin.autodiscover()
 
@@ -21,6 +22,13 @@ urlpatterns = patterns('',
     url(r'^users/admin/$', users.admin, name='users-admin'),
     url(r'^users/workflow/$', users.workflow, name='users-workflow'),
     url(r'^users/edit/(?P<user_id>\d+)/?$', users.edit, name='users-edit'),
+
+    # files
+    url(r'^files/?$', files.list, name='files-list'),
+    url(r'^files/detail/(?P<file_id>\d+)/?$', files.detail, name='files-detail'),
+    url(r'^files/upload/?$', files.upload, name='files-upload'),
+    url(r'^files/store/?$', files.store, name='files-store'),
+    url(r'^files/download/(?P<file_id>\d+)/?$', files.download, name="files-download"),
 
     url(r'', include('django.contrib.auth.urls')),
     url(r'^cloak/', include('cloak.urls'))
