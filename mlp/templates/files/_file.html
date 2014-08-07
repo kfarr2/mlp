@@ -1,0 +1,18 @@
+<div class="media">
+    <a class="pull-left media-thumbnail-link" href="{% url 'files-download' file.pk %}">
+        <img class="media-object" src="{{ file.thumbnail_url|default:"holder.js/64x64" }}">
+    </a>
+    <div class="media-body">
+        <h5 class="media-heading">
+            <a href="{% url 'files-detail' file.pk %}"><strong>{{ file.name }}</strong></a> <em>(uploaded {{ file.uploaded_on }})</em>
+        </h5>
+        <p class="pull-right" style="padding-left:5px">
+        {% for file_tag in file.filetag_set.all %}
+            {{ file_tag.tag }}
+        {% empty %}
+            <em>Untagged</em>
+        {% endfor %}
+        </p>
+        <p>{{ file.description|default:"(no description)" }}</p>
+    </div>
+</div>

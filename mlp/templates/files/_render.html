@@ -1,0 +1,29 @@
+{% if file.type == FileType.VIDEO %}
+    <div class="video-block">
+        <video id="video">
+            {% for path, mime in file.video_urls %}
+                <source src="{{ path }}" type="{{ mime }}">
+            {% endfor %}
+            Your browser failed failed to load the video
+        </video>
+
+        <div class="timeline" data-controls="#video-media-controls"></div>
+        <div class="media-control" id="video-media-controls">
+            <span class="controls">
+                <span class="back glyphicon glyphicon-step-backward" data-toggle="tooltip" title="Previous Segment"></span>
+                <span class="fast-backward glyphicon glyphicon-fast-backward" data-toggle="tooltip" title="Back 5 seconds"></span>
+                <span class="play glyphicon glyphicon-play"></span>
+                <span class="pause glyphicon glyphicon-pause"></span>
+                <span class="fast-forward glyphicon glyphicon-fast-forward" data-toggle="tooltip" title="Forward 5 seconds"></span>
+                <span class="forward glyphicon glyphicon-step-forward" data-toggle="tooltip" title="Next Segment"></span>
+                {% if show_clip %}
+                    <span class="clip glyphicon glyphicon-film" data-toggle="tooltip" title="Create a clip"></span>
+                {% endif %}
+                {% if show_snap_checkbox %}
+                    <label class="snap-to-checkbox"><input type="checkbox">Snap to segment</label>
+                {% endif %}
+            </span>
+            <span class="time pull-right"></span>
+        </div>
+    </div>
+{% endif %}
