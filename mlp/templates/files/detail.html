@@ -1,5 +1,48 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="container">
+    <h3>Detail</h3>
+    <hr />
+    {% if file and user.is_admin %}
+        {% if file.status == FileStatus.READY %}
+            <a class="btn btn-default" href="{% url 'files-edit' file.pk %}">Edit Data</a>
+        {% else %}
+            <a class="btn btn-danger" href="{% url 'files-delete' file.pk %}">Delete</a>
+        {% endif %}
+    {% endif %}
+    <h4>{{ file.name }}</h4>
+    <p>
+    {% for file_tag in file_tags %}
+        {{ file_tag.tag_id }}
+    {% endfor %}
+    </p>
+    <p>{{ file.description }}</p>
 
+    {% if file.type == FileType.VIDEO %}
+        <video controls>
+            {% for path, mime in file.video_urls %}
+                <source src="{{ path }}" type="{{ mime }}">
+            {% endfor %}
+            Your browser failed to load the video.
+        </video>
+    {% endif %}
+
+    {% if file.type == FileType.AUDIO %}
+        {% if file.audio_urls %}
+        <audio controls>
+        {% for path, mime in file.audio_urls %}
+            <source src="{{ path }}" type="{{ mime }}">
+        {% endfor %}
+        Your browser failed to load the audio.
+        </audio>
+        {% else%}
+            No audio urls were specified.
+        {% endif %}
+    {% endif %}
+
+    {% if file.file and user.is_authenticated %}
+        <p><a class="btn btn-default" href="{% url 'files-download' file.pk %}">Download Original</a></p>
+    {% endif %}
+</div>
 {% endblock %}
