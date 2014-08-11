@@ -23,6 +23,27 @@ LOGIN_URL = reverse_lazy("home")
 LOGIN_REDIRECT_URL = reverse_lazy("users-home")
 LOGOUT_URL = reverse_lazy("home")
 
+ELASTIC_SEARCH_CONNECTION = {
+    "urls": ["http://localhost:9200/"],
+    "index": "mlp_dev",
+}
+
+ELASTIC_SEARCH_URL = "http://127.0.0.1:9200/"
+ELASTIC_SEARCH_INDEX = "mlp_dev"
+ELASTIC_SEARCH_SETTINGS = {
+    "settings": {
+        "analysis": {
+            "analyzer": {
+                "snowball": {
+                    "type": "snowball",
+                    "stopwords": "_none_"
+                }
+            }
+        }
+    }
+}
+
+
 BROKER_URL = 'amqp://guest:guest@localhost//'
 CELERY_ACKS_LATE = True
 CELERY_RESULT_BACKEND = 'amqp'
