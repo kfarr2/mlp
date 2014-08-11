@@ -29,6 +29,8 @@ urlpatterns = patterns('',
     url(r'^files/upload/?$', files.upload, name='files-upload'),
     url(r'^files/store/?$', files.store, name='files-store'),
     url(r'^files/download/(?P<file_id>\d+)/?$', files.download, name="files-download"),
+    url(r'^files/delete/(?P<file_id>\d+)/?$', files.delete, name="files-delete"),
+    url(r'^files/edit/(?P<file_id>\d+)/?$', files.edit, name="files-edit"),
 
     url(r'', include('django.contrib.auth.urls')),
     url(r'^cloak/', include('cloak.urls'))
