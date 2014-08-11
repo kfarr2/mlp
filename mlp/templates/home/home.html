@@ -1,9 +1,28 @@
 {% extends "base.html" %}
 {% load arc %}
 {% block content %}
-<form method="post">
-    {% csrf_token %}
-    {{ form|bootstrap }}
-    <input type="submit" name="submit" value="submit" />
-</form>
+<div class="col-md-4">
+    <h3>Login</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|bootstrap }}
+        <input class="btn btn-default" type="submit" name="submit" value="Submit" />
+        <a class="btn btn-default" href="#">New User</a>
+    </form>
+</div>
+<div class="col-md-8">
+    <h3>Latest Submissions</h3>
+    <hr />
+    <div class="file-list">
+        <table class="table table-bordered">
+        {% for file in files %}
+            <tr>{% include "files/_file.html" %}</tr>
+        {% empty %}
+            <div class="alert alert-warning">
+                You have not uploaded any files!
+            </div>
+        {% endfor %}
+        </table>
+    </div>
+</div>
 {% endblock %}

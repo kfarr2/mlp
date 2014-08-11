@@ -7,12 +7,13 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.utils.http import is_safe_url
 from mlp.users.forms import LoginForm
-
+from mlp.files.models import File
 
 def home(request):
     """
     Default home view
     """
+    files = File.objects.order_by('-uploaded_on')
 
     if request.user.is_authenticated():
         return HttpResponseRedirect(reverse("users-home"))
@@ -31,5 +32,6 @@ def home(request):
         form = LoginForm(initial=request.GET)
 
     return render(request, 'home/home.html', {
+        "files": files,
         "form": form,
     })
