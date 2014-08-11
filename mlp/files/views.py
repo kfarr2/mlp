@@ -43,13 +43,50 @@ def list(request):
         'failed': failed,
         'form': form,
     })
+
+def delete(request, file_id):
+    """
+    Delete a file
+    """
+    file = get_object_or_404(File, pk=file_id)
+    if request.POST or file.status == FileStatus.FAILED:
+        file.delete()
+        return HttpResponseRedirect(reverse('files-list'))
+
+    return render(request, 'files/delete.html', {
+        "file": file,        
+    })
+
+def edit(request, file_id):
+    """
+    Delete a file
+    """
+    file = get_object_or_404(File, pk=file_id)
+    if request.POST:
+        form = FileForm(request.POST, instance=file)
+        if form.is_valid():
+            form.save(user=request.user)
+            messages.success(request, "File edited!")
+            return HttpResponseRedirect(reverse("files-edit", args=(file.pk,)))
+    else:
+        form = FileForm(instance=file)
+
+    return render(request, 'files/edit.html', {
+        'form': form,
+        'file': file,
+    })
    
 def detail(request, file_id):
     """
     Detail views
     """
+    file = get_object_or_404(File, pk=file_id)
+    file_tags = file.filetag_set.all().select_related("tag")
     return render(request, 'files/detail.html', {
-        
+        'file': file,
+        'file_tags': file_tags,
+        'FileType': FileType,
+        'FileStatus': FileStatus,
     })
 
 def upload(request):

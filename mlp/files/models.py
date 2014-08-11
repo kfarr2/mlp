@@ -4,7 +4,7 @@ from elasticmodels import make_searchable
 from django.db import models
 from django.conf import settings
 from mlp.users.models import User
-from mlp.tags.models import Tag
+from mlp.tags.models import Tag, TaggableManager
 from .enums import FileType, FileStatus
 
 class File(models.Model):
@@ -25,13 +25,6 @@ class File(models.Model):
     class Meta:
         db_table = "files"
 
-    #@classmethod
-    def save(self, *args, **kwargs):
-        """
-        Make searchable on save
-        """
-        #make_searchable(self)
-        super(File, self).save(*args, **kwargs)
 
     @classmethod
     def sanitize_filename(cls, filename):
@@ -124,9 +117,11 @@ class FileTag(models.Model):
     file_tag_id = models.AutoField(primary_key=True)
     tagged_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     created_on = models.DateTimeField(auto_now_add=True)
-    file_id = models.ForeignKey(File)
-    tag_id = models.ForeignKey(Tag, related_name="filetag_set")
+    file = models.ForeignKey(File)
+    tag = models.ForeignKey(Tag, related_name="filetag_set")
 
+    objects = TaggableManager()
+    
     class Meta:
         db_table = "file_tag"
 

@@ -67,7 +67,7 @@ class FileForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(FileForm, self).__init__(*args, **kwargs)
-        self.fields['tags'].initial = Tag.objects.filter(filetag_set__file=self.instance)
+        self.fields['tags'].initial = Tag.objects.filter(filetag_set__file_id=self.instance)
         self.fields['tags'].choices = Tag.objects.all()
 
     def save(self, *args, **kwargs):
