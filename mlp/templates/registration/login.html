@@ -4,7 +4,8 @@
 <form action="" method="post">
     {% csrf_token %}
     {{ form|bootstrap }}
-    <input type="submit" name="submit" value="Submit" />
+    <input type="submit" name="submit" value="Submit" class="btn btn-default" />
+    <a class="btn btn-default" href="#">New User</a>
 </form>
 <hr />
 <p><a href="{% url 'password_reset' %}">Forgot your password?</a></p>
