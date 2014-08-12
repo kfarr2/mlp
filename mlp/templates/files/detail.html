@@ -4,7 +4,7 @@
 <div class="container">
     <h3>Detail</h3>
     <hr />
-    {% if file and user.is_admin %}
+    {% if file and user.is_staff %}
         {% if file.status == FileStatus.READY %}
             <a class="btn btn-default" href="{% url 'files-edit' file.pk %}">Edit Data</a>
         {% else %}
