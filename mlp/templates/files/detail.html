@@ -12,12 +12,11 @@
         {% endif %}
     {% endif %}
     <h4>{{ file.name }}</h4>
-    <p>
+    <p>Tags: 
     {% for file_tag in file_tags %}
-        {{ file_tag.tag_id }}
+        {{ file_tag.tag }}
     {% endfor %}
     </p>
-    <p>{{ file.description }}</p>
 
     {% if file.type == FileType.VIDEO %}
         <video controls>
@@ -40,6 +39,7 @@
             No audio urls were specified.
         {% endif %}
     {% endif %}
+    <p>Description: {{ file.description }}</p>
 
     {% if file.file and user.is_authenticated %}
         <p><a class="btn btn-default" href="{% url 'files-download' file.pk %}">Download Original</a></p>

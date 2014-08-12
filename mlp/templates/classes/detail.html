@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load permissions %}
 {% block content %}
 <div class="container">
     {% if user.is_staff %}<a href="{% url 'classes-edit' class.pk %}" class="btn btn-default pull-right">Edit Class</a>{% endif %}
@@ -12,6 +12,7 @@
         <p>Number of students enrolled in this class: {{ enrolled }}</p>
         {{ roster.as_p }}
         {% if user.is_staff %}<a href="{% url 'classes-enroll' class.pk %}" class="btn btn-default">Enroll Students</a>{% endif %}
+        {% if user.is_staff %}<a href="{% url 'classes-delete' class.pk %}" class="btn btn-danger">Delete</a>{% endif %}
     </div>
 </div>
 {% endblock %}

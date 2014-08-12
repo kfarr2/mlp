@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load permissions %}
 {% block content %}
 <div class="containter">
     {% if user.is_staff %}<a href="{% url 'classes-create' %}" class="btn btn-default pull-right">Add Class</a>{% endif %}
