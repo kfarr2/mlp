@@ -145,4 +145,38 @@ class EditViewTest(TestCase):
         self.client.login(email=self.admin.email, password='foobar')
         response = self.client.get(reverse('files-edit', args=(self.file.pk,)))
         self.assertEqual(response.status_code, 200)
-        
+
+class DetailViewTest(TestCase):
+    def setUp(self):
+        super(DetailViewTest, self).setUp()
+        create_users(self)
+        create_files(self)
+
+    def test_not_logged_in(self):
+        response = self.client.get(reverse('files-detail', args=(self.file.pk,)))
+        self.assertEqual(response.status_code, 302)
+
+    def test_logged_in(self):
+        self.client.login(email=self.user.email, password='foobar')
+        response = self.client.get(reverse('files-detail', args=(self.file.pk,)))
+        self.assertEqual(response.status_code, 200)
+
+class UploadViewTest(TestCase):
+    def setUp(self):
+        super(UploadViewTest, self).setUp()
+        create_users(self)
+        create_files(self)
+    
+    def test_not_logged_in(self):
+        response = self.client.get(reverse('files-upload'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_logged_in_get(self):
+        self.client.login(email=self.admin.email, password='foobar')
+        response = self.client.get(reverse('files-upload'))
+        self.assertEqual(response.status_code, 200)
+    
+    def test_logged_in_post(self):
+        self.client.login(email=self.admin.email, password='foobar')
+        response = self.client.post(reverse('files-upload'))
+        self.assertEqual(response.status_code, 302)
