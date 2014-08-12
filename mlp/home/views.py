@@ -2,6 +2,7 @@ import os
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth import login as django_login, logout as django_logout, get_user_model
+from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib import messages
@@ -35,3 +36,4 @@ def home(request):
         "files": files,
         "form": form,
     })
+
