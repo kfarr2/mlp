@@ -19,7 +19,7 @@
                     <td>{{ class.name }}</td>
                     <td>{{ class.crn }}</td>
                     <td>{{ class.description|truncatewords:10 }}</td>
-                    <td><a href="{% url 'classes-detail' class.pk %}" class="btn btn-default">View</a></td>
+                    <td><a href="{% url 'classes-detail' class.pk %}" class="btn btn-default">View Detail</a></td>
                 </tr>
             {% endfor %}
         </table>
