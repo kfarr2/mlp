@@ -13,12 +13,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.conf import settings
-#from .perms import decorators, can_list_all_files
+from .perms import decorators, can_list_all_files
 from .models import File
 from .enums import FileType, FileStatus
 from .forms import FileForm, FileSearchForm
 from .tasks import process_uploaded_file
 
+@decorators.can_list_file
 def list_(request):
     """
     List all the files
@@ -44,6 +45,7 @@ def list_(request):
         'form': form,
     })
 
+@decorators.can_edit_file
 def delete(request, file_id):
     """
     Delete a file
@@ -57,6 +59,7 @@ def delete(request, file_id):
         "file": file,        
     })
 
+@decorators.can_edit_file
 def edit(request, file_id):
     """
     Delete a file
@@ -76,6 +79,7 @@ def edit(request, file_id):
         'file': file,
     })
    
+@decorators.can_view_file
 def detail(request, file_id):
     """
     Detail views
@@ -89,6 +93,7 @@ def detail(request, file_id):
         'FileStatus': FileStatus,
     })
 
+@decorators.can_upload_file
 def upload(request):
     """
     Basic upload view
@@ -104,6 +109,7 @@ def upload(request):
         'chunk_size': settings.CHUNK_SIZE    
     })
 
+@decorators.can_download_file
 def download(request, file_id):
     """
     Basic download view
@@ -113,6 +119,7 @@ def download(request, file_id):
     })
 
 @csrf_exempt
+@decorators.can_upload_file
 def store(request):
     """
     This view recieves a chunk of a file and saves it. When all

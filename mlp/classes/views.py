@@ -6,10 +6,11 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from mlp.users.models import User
+from .perms import decorators
 from .models import Class, Roster
 from .forms import ClassForm, RosterForm
 
-
+@decorators.can_list_all_classes
 def list_(request):
     """
     List all classes
@@ -20,12 +21,13 @@ def list_(request):
         "classes": classes,    
     })
 
+@decorators.can_list_class
 def detail(request, class_id):
     """
     Detail view for classes
     """
     class_ = get_object_or_404(Class, pk=class_id)
-    roster = Roster.objects.filter(_class=class_) 
+    roster = Roster.objects.filter(_class=class_).exclude(role=4) 
     instructor = Roster.objects.filter(_class=class_, role=4).values('user')
     instructor = User.objects.get(user_id__in=instructor)
     enrolled = len(roster)
@@ -37,12 +39,13 @@ def detail(request, class_id):
     })
 
 @login_required
+@decorators.can_enroll_students
 def enroll(request, class_id):
     """
     View that allows admins to enroll students in a class
     """
     _class = get_object_or_404(Class, pk=class_id)
-    roster = Roster.objects.filter(_class=_class)
+    roster = Roster.objects.filter(_class=_class).exclude(role=4)
     students = User.objects.exclude(user_id__in=roster.values_list('user'))
     
     return render(request, "classes/enroll.html", {
@@ -52,6 +55,7 @@ def enroll(request, class_id):
     })
 
 @login_required
+@decorators.can_edit_class
 def edit(request, class_id):
     """
     Edit a class
@@ -59,6 +63,7 @@ def edit(request, class_id):
     return _edit(request, class_id)
 
 @login_required
+@decorators.can_create_class
 def create(request):
     """
     Create a class
@@ -76,17 +81,15 @@ def _edit(request, class_id):
         class_ = get_object_or_404(Class, pk=class_id)
 
     if request.POST:
-        form = ClassForm(request.POST, instance=class_)
+        form = ClassForm(request.POST, instance=class_, user=request.user)
         if form.is_valid():
             form.save()
             instructor = Roster.objects.filter(_class=class_, role=4)
-            if not instructor:
-                Roster.objects.create(user=request.user, _class=class_, role=4) # create admin
             messages.success(request, "Class saved")
             return HttpResponseRedirect(reverse("classes-list"))
 
     else:
-        form = ClassForm(instance=class_)
+        form = ClassForm(instance=class_, user=request.user)
 
     return render(request, 'classes/edit.html', {
         "form": form,    
@@ -94,6 +97,18 @@ def _edit(request, class_id):
     })
 
 @login_required
+@decorators.can_edit_class
+def delete(request, class_id):
+    """
+    Delete a class
+    """
+    _class = get_object_or_404(Class, pk=class_id)
+    _class.delete()
+    messages.success(request, "Class deleted")
+    return HttpResponseRedirect(reverse('classes-list'))
+
+@login_required
+@decorators.can_enroll_students
 def roster_add(request, class_id, user_id):
     """
     Takes a class id and a student id and adds them to the roster
@@ -110,6 +125,7 @@ def roster_add(request, class_id, user_id):
     return HttpResponseRedirect(reverse('classes-enroll', args=class_id))
 
 @login_required
+@decorators.can_enroll_students
 def roster_remove(request, class_id, user_id):
     """
     Takes a class id and user id and removes the matching entry from the roster
