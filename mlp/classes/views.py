@@ -25,9 +25,12 @@ def detail(request, class_id):
     Detail view for classes
     """
     class_ = get_object_or_404(Class, pk=class_id)
-    roster = Roster.objects.filter(_class=class_.class_id) 
+    roster = Roster.objects.filter(_class=class_) 
+    instructor = Roster.objects.filter(_class=class_, role=4).values('user')
+    instructor = User.objects.get(user_id__in=instructor)
     enrolled = len(roster)
     return render(request, "classes/detail.html", {
+        "instructor": instructor,
         "enrolled": enrolled,
         "roster": roster,
         "class": class_,    
@@ -76,7 +79,10 @@ def _edit(request, class_id):
         form = ClassForm(request.POST, instance=class_)
         if form.is_valid():
             form.save()
-            messages.success(request, "Class created")
+            instructor = Roster.objects.filter(_class=class_, role=4)
+            if not instructor:
+                Roster.objects.create(user=request.user, _class=class_, role=4) # create admin
+            messages.success(request, "Class saved")
             return HttpResponseRedirect(reverse("classes-list"))
 
     else:
