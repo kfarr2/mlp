@@ -19,7 +19,7 @@ from .enums import FileType, FileStatus
 from .forms import FileForm, FileSearchForm
 from .tasks import process_uploaded_file
 
-def list(request):
+def list_(request):
     """
     List all the files
     """
