@@ -31,7 +31,9 @@ class ClassForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         super(ClassForm, self).save(*args, **kwargs)
-        Roster.objects.create(user=self.user, _class=self.instance, role=4)
+        roster = Roster.objects.filter(user=self.user, _class=self.instance, role=4)
+        if not roster:
+            Roster.objects.create(user=self.user, _class=self.instance, role=4)
 
 class RosterForm(forms.ModelForm):
     """
