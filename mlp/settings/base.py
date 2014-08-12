@@ -90,6 +90,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'bootstrapform',
     'arcutils',
+    'permissions',
     'south',
     'celery',
     'mlp.home',
