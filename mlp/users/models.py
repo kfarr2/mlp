@@ -35,3 +35,4 @@ class User(AbstractBaseUser):
             return self.get_full_name()
         else:
             return self.email
+

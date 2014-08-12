@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
+from mlp.files.models import File
 from .models import User
 from .forms import UserForm
 
@@ -24,8 +25,11 @@ def admin(request):
     """
     Admin page
     """
+    files = File.objects.all()
+    users = User.objects.all()
     return render(request, "users/admin.html", {
-        
+        "files": files,
+        "users": users,
     })
 
 @login_required
@@ -63,4 +67,5 @@ def _edit(request, user_id):
 
     return render(request, "users/edit.html", {
         "form": form,
+        "user": user,
     })
