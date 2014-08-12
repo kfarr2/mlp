@@ -20,8 +20,8 @@ class Roster(models.Model):
     Used to map users to classes
     """
     roster_id = models.AutoField(primary_key=True)
-    user_id = models.ForeignKey(User)
-    class_id = models.ForeignKey(Class)
+    user = models.ForeignKey(User)
+    _class = models.ForeignKey(Class)
     role = models.IntegerField(choices=UserRole)
 
     class Meta:
@@ -32,8 +32,8 @@ class ClassFile(models.Model):
     Used to map files to classes
     """
     class_file_id = models.AutoField(primary_key=True)
-    class_id = models.ForeignKey(Class)
-    file_id = models.ForeignKey(File)
+    _class = models.ForeignKey(Class)
+    file = models.ForeignKey(File)
     created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
