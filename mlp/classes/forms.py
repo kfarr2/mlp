@@ -9,6 +9,7 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from elasticmodels.forms import BaseSearchForm, SearchForm
 from elasticmodels import make_searchable
+from mlp.users.models import User
 from .models import Class, Roster
 
 class ClassForm(forms.ModelForm):
@@ -23,6 +24,14 @@ class ClassForm(forms.ModelForm):
             'crn',
             'description',
         )
+    
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super(ClassForm, self).__init__(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        super(ClassForm, self).save(*args, **kwargs)
+        Roster.objects.create(user=self.user, _class=self.instance, role=4)
 
 class RosterForm(forms.ModelForm):
     """
