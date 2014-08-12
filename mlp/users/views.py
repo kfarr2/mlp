@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from mlp.files.models import File
+from mlp.classes.models import Class, Roster
 from .models import User
 from .forms import UserForm
 
@@ -37,8 +38,11 @@ def workflow(request):
     """
     Workflow page
     """
+    roster = Roster.objects.filter(user=request.user)
+    classes = Class.objects.filter(class_id__in=roster)
+
     return render(request, "users/workflow.html", {
-        
+        "classes": classes,    
     })
 
 @login_required
