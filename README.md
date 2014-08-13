@@ -12,7 +12,7 @@ In your working directory
     source .env/bin/activate
     pip install -r requirements.txt
 
-    mv mlp/settings/local.py.template $project_name/settings/local.py
+    mv mlp/settings/local.py.template mlp/settings/local.py
     vi mlp/settings/local.py
 
 Install RabbitMQ if you need it
@@ -38,6 +38,7 @@ If you get an error saying "Can't start up: Not enough memory", update your vers
 
     yum install java-1.6.0-openjdk
 
+
 Rebuild the search index
 
     ./manage.py rebuild_index
@@ -59,3 +60,22 @@ or
 
     ./manage.py runserver
 
+## Setup a User
+
+    from mlp.users.models import User
+
+    # create a user
+    u = User(first_name='foo', last_name='bar', email='foobar@foo.bar', is_staff=True)
+    u.set_password("foo")
+    u.save()
+
+## Testing and Coverage
+
+    # export FULL=1
+    coverage run ./manage.py test && coverage html
+
+If you don't set FULL in your environment, the long FFMPEG test is skipped.
+
+Then visit:
+
+10.0.0.10:8000/htmlcov/index.html
