@@ -22,6 +22,8 @@ urlpatterns = patterns('',
     url(r'^users/home/$', users.home, name='users-home'),
     url(r'^users/admin/$', users.admin, name='users-admin'),
     url(r'^users/workflow/$', users.workflow, name='users-workflow'),
+    url(r'^users/list/?$', users.list_, name='users-list'),
+    url(r'^users/create/?$', users.create, name='users-create'),
     url(r'^users/edit/(?P<user_id>\d+)/?$', users.edit, name='users-edit'),
 
     # files
