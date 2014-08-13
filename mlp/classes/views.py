@@ -6,8 +6,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from mlp.users.models import User
+from mlp.files.models import File
 from .perms import decorators
-from .models import Class, Roster
+from .models import Class, Roster, ClassFile
 from .forms import ClassForm, RosterForm
 
 @decorators.can_list_all_classes
@@ -15,10 +16,13 @@ def list_(request):
     """
     List all classes
     """
+    user_classes_list = Roster.objects.filter(user=request.user).values('_class')
+    user_classes = Class.objects.filter(class_id__in=user_classes_list)
     classes = Class.objects.all()
-    
+
     return render(request, "classes/list.html", {
-        "classes": classes,    
+        "classes": classes,
+        "user_classes": user_classes,
     })
 
 @decorators.can_list_class
@@ -30,11 +34,14 @@ def detail(request, class_id):
     roster = Roster.objects.filter(_class=class_).exclude(role=4) 
     instructor = Roster.objects.filter(_class=class_, role=4).values('user')
     instructor = User.objects.get(user_id__in=instructor)
+    class_files = ClassFile.objects.filter(_class=class_).values('file') 
+    files = File.objects.filter(file_id__in=class_files)
     enrolled = len(roster)
     return render(request, "classes/detail.html", {
         "instructor": instructor,
         "enrolled": enrolled,
         "roster": roster,
+        "files": files,
         "class": class_,    
     })
 
@@ -53,6 +60,55 @@ def enroll(request, class_id):
         "roster": roster, 
         "students": students,
     })
+
+@login_required
+@decorators.can_edit_class
+def file_list(request, class_id):
+    """
+    View that allows an admin to view the files in their class
+    """
+    _class = get_object_or_404(Class, pk=class_id)
+    class_files = ClassFile.objects.filter(_class=_class).values('file')
+    class_files = File.objects.filter(file_id__in=class_files)
+    files = File.objects.exclude(file_id__in=class_files)
+
+    return render(request, "classes/add_file.html", {
+        "files": files,
+        "class": _class,
+        "class_files": class_files,
+    })
+
+@login_required
+@decorators.can_edit_class
+def file_add(request, class_id, file_id):
+    """
+    Adds a file to a class
+    """
+    _class = get_object_or_404(Class, pk=class_id)
+    file = get_object_or_404(File, pk=file_id)
+    class_file = ClassFile.objects.filter(_class=_class, file=file)
+    if not class_file:
+        ClassFile.objects.create(_class=_class, file=file)
+        messages.success(request, "File added to class.")
+    else:
+        messages.warning(request, "File already added to class.")
+    return HttpResponseRedirect(reverse('classes-file_list', args=(class_id,)))
+
+@login_required
+@decorators.can_edit_class
+def file_remove(request, class_id, file_id):
+    """
+    Removes a file from the class
+    """
+    _class = get_object_or_404(Class, pk=class_id)
+    file = get_object_or_404(File, pk=file_id)
+    class_file = ClassFile.objects.filter(_class=_class, file=file)
+    if class_file:
+        class_file.delete()
+        messages.success(request, "File removed from class.")
+    else:
+        messages.warning(request, "File not found in class.")
+    return HttpResponseRedirect(reverse('classes-file_list', args=(class_id,)))
 
 @login_required
 @decorators.can_edit_class

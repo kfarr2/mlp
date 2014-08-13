@@ -1,0 +1,18 @@
+<table class="table table-striped">
+    <tr>
+        <td><strong />Class ID</td>
+        <td><strong />Name</td>
+        <td><strong />CRN</td>
+        <td><strong />Description</td>
+        <td></td>
+    </tr>
+    {% for class in classes %}
+        <tr>
+            <td>{{ class.class_id }}</td>
+            <td>{{ class.name }}</td>
+            <td>{{ class.crn }}</td>
+            <td>{{ class.description|truncatewords:10 }}</td>
+            <td><a href="{% url 'classes-detail' class.pk %}" class="btn btn-default">View</a></td>
+        </tr>
+    {% endfor %}
+</table>

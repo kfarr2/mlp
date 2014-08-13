@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="col-md-6">
+        <h3>Files</h3>
+        <hr />
+        {% if files %}
+            <table class="table table-striped">
+            {% for file in files %}
+            <tr>
+                <td>
+                    <a href="{% url 'classes-file_add' class.pk file.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-plus" /></a>
+                </td>
+                <td>{% include "files/_file.html" %}</td>
+            </tr>
+            {% endfor %}
+            </table>
+        {% else %}
+            <div class="alert alert-info">No files have been uploaded yet.</div>
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <h3>Class Files</h3> 
+        <hr />
+        {% if class_files %}
+            <table class="table table-striped">
+            {% for file in class_files %}
+            <tr>
+                <td>
+                    <a href="{% url 'classes-file_remove' class.pk file.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-minus" /></a>
+                </td>
+                <td>{% include "files/_file.html" %}</td>
+            </tr>
+            {% endfor %}
+            </table>
+        {% else %}
+            <div class="alert alert-info">No files have been added to this class yet.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -2,27 +2,31 @@
 {% load permissions %}
 {% block content %}
 <div class="containter">
-    {% if user.is_staff %}<a href="{% url 'classes-create' %}" class="btn btn-default pull-right">Add Class</a>{% endif %}
-    <h3>Classes</h3>
-    {% if classes %}
-        <table class="table tbale-striped">
-            <tr>
-                <td><strong />Class ID</td>
-                <td><strong />Name</td>
-                <td><strong />CRN</td>
-                <td><strong />Description</td>
-                <td></td>
-            </tr>
-            {% for class in classes %}
-                <tr>
-                    <td>{{ class.class_id }}</td>
-                    <td>{{ class.name }}</td>
-                    <td>{{ class.crn }}</td>
-                    <td>{{ class.description|truncatewords:10 }}</td>
-                    <td><a href="{% url 'classes-detail' class.pk %}" class="btn btn-default">View Detail</a></td>
-                </tr>
-            {% endfor %}
-        </table>
-    {% endif %}
+    <div class="col-md-6">
+        <h3>All Classes</h3>
+        {% if user.is_staff %}
+        <a href="{% url 'classes-create' %}" class="btn btn-default pull-right" style="margin-top: -40px;">
+            <span class="glyphicon glyphicon-plus"></span> Class
+        </a>
+        <hr />
+        {% endif %}
+        {% if classes %}
+            {% include "classes/_class.html" %}
+        {% else %}
+            <div class="alert alert-info">No classes have been created yet.</div>
+        {% endif %}
+    </div>
+    <div class="col-md-6">
+        <h3>Your Classes</h3>
+        <hr />
+        {% if user_classes %}
+            {% with user_classes as classes %} 
+            {% include "classes/_class.html" %}
+            {% endwith %}
+        {% else %}
+            <div class="alert alert-info">No classes have been created yet.</div>
+        {% endif %}
+
+    </div>
 </div>
 {% endblock %}
