@@ -12,7 +12,7 @@ In your working directory
     source .env/bin/activate
     pip install -r requirements.txt
 
-    mv mlp/settings/local.py.template $project_name/settings/local.py
+    cp mlp/settings/local.py.template mlp/settings/local.py
     vi mlp/settings/local.py
 
 Install RabbitMQ if you need it
