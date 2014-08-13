@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h3>User List</h3>
+    <a href="{% url 'users-create' %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-plus"></span> User</a>
+    <hr />
+    <table class="table table-striped">
+    <tr>
+        <td>ID</td>
+        <td>First Name</td>
+        <td>Last Name</td>
+        <td>Email</td>
+        <td>Date Joined</td>
+        <td>Staff</td>
+        <td>Active</td>
+    </tr>
+    {% for user in users %}
+    <tr>
+        <td>{{ user.user_id }}</td>
+        <td>{{ user.first_name }}</td>
+        <td>{{ user.last_name }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.date_joined|date }}</td>
+        <td>{{ user.is_staff }}</td>
+        <td>{{ user.is_active }}</td>
+    </tr>
+    {% endfor %}
+    </table>
+</div>
+{% endblock %}
