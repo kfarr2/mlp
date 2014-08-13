@@ -19,7 +19,7 @@ from .enums import FileType, FileStatus
 from .forms import FileForm, FileSearchForm
 from .tasks import process_uploaded_file
 
-@decorators.can_list_file
+@decorators.can_list_all_files
 def list_(request):
     """
     List all the files
@@ -70,7 +70,7 @@ def edit(request, file_id):
         if form.is_valid():
             form.save(user=request.user)
             messages.success(request, "File edited!")
-            return HttpResponseRedirect(reverse("files-edit", args=(file.pk,)))
+            return HttpResponseRedirect(reverse("files-detail", args=(file.pk,)))
     else:
         form = FileForm(instance=file)
 
@@ -78,7 +78,8 @@ def edit(request, file_id):
         'form': form,
         'file': file,
     })
-   
+
+@decorators.can_list_file   
 def detail(request, file_id):
     """
     Detail views

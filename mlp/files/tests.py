@@ -117,7 +117,6 @@ class DeleteViewTest(TestCase):
     # double check this one
     def test_delete_failed_file(self):
         self.client.login(email=self.user.email, password='foobar')
-        self.file.status = FileStatus.FAILED
         response = self.client.post(reverse('files-delete', args=(self.file.pk,)))
         self.assertTrue(response.status_code, 200)
        
@@ -145,6 +144,25 @@ class EditViewTest(TestCase):
         self.client.login(email=self.admin.email, password='foobar')
         response = self.client.get(reverse('files-edit', args=(self.file.pk,)))
         self.assertEqual(response.status_code, 200)
+
+    def test_valid_post(self):
+        self.client.login(email=self.user.email, password='foobar')
+        data = {
+            "name": self.file.name + " RANDOM STRING",
+            "description": self.file.description,
+            "tags": "Robit",
+        }
+        response = self.client.post(reverse('files-edit', args=(self.file.pk,)), data)
+        self.assertEqual(response.status_code, 302)
+
+    def test_invalid_post(self):
+        self.client.login(email=self.user.email, password='foobar')
+        data = {
+            "name": self.file.name,        
+        }
+        response = self.client.post(reverse('files-edit', args=(self.file.pk,)), data)
+        self.assertEqual(response.status_code, 200)
+        
 
 class DetailViewTest(TestCase):
     def setUp(self):

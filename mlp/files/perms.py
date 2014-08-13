@@ -18,8 +18,8 @@ def can_edit_file(user, file):
     else:
         return file.uploaded_by == user
 
-@permission
-def can_list_file(user):
+@permission(model=File)
+def can_list_file(user, file):
     return can_list_all_files(user) or user.is_staff
 
 @permission
