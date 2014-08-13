@@ -61,6 +61,21 @@ def workflow(request):
     })
 
 @login_required
+def detail(request, user_id):
+    """
+    User detail page
+    """
+    user = get_object_or_404(User, pk=user_id)
+    class_list = Roster.objects.filter(user=user).values('_class')
+    classes = Class.objects.filter(class_id__in=class_list)
+
+    return render(request, "users/detail.html", {
+        "user": user,
+        "classes": classes,
+    })
+
+
+@login_required
 def edit(request, user_id):
     """
     Edit

@@ -7,6 +7,7 @@
     <hr />
     <table class="table table-striped">
     <tr>
+        <td>View</td>
         <td>ID</td>
         <td>First Name</td>
         <td>Last Name</td>
@@ -17,6 +18,7 @@
     </tr>
     {% for user in users %}
     <tr>
+        <td><a href="{% url 'users-detail' user.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-zoom-in"></span></a></td>
         <td>{{ user.user_id }}</td>
         <td>{{ user.first_name }}</td>
         <td>{{ user.last_name }}</td>
