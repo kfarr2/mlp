@@ -113,9 +113,14 @@ def download(request, file_id):
     """
     Basic download view
     """
-    return render(request, 'files/download.html', {
-        
-    })
+    file = get_object_or_404(File, pk=file_id)
+    response = HttpResponse()
+    response['Content-Type'] = mimetypes.guess_type(file.file.path)[0]
+    response['X-Sendfile'] = file.file.path
+    # Django doesn't support x-sendfile, so write the file in debug mode
+    if settings.DEBUG:
+        shutil.copyfileobj(open(file.file.path), response)
+    return response
 
 @csrf_exempt
 @decorators.can_upload_file
