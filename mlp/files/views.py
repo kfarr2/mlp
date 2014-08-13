@@ -112,6 +112,9 @@ def upload(request):
 def download(request, file_id):
     """
     Basic download view
+    
+    TODO: this will actually need to be fixed to stop XSS injections in files.
+    Files should be downloaded over a completely different domain.
     """
     file = get_object_or_404(File, pk=file_id)
     response = HttpResponse()
