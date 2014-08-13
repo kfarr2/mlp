@@ -40,9 +40,11 @@ def workflow(request):
     """
     roster = Roster.objects.filter(user=request.user)
     classes = Class.objects.filter(class_id__in=roster)
+    files = File.objects.filter(uploaded_by=request.user)
 
     return render(request, "users/workflow.html", {
-        "classes": classes,    
+        "classes": classes,
+        "files": files,
     })
 
 @login_required

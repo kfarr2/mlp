@@ -1,28 +1,50 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <h3>Home</h3>
+<div class="container" id="user-info">
+    <h2>Welcome, {{ user.first_name }}!</h2>
     <hr />
-    <div class="col-md-6">
-        <h4>Classes you are enrolled in</h4>
+    <div class="col-md-5">
+        <h3>User Info</h3>
+        <a href="{% url 'users-edit' user.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;">
+            <span class="glyphicon glyphicon-pencil"></span> Edit
+        </a>
+        <hr />
         <table class="table table-striped">
             <tr>
-                <td>Name</td>
-                <td>CRN</td>
-                <td>Description</td>
+                <td>
+                    <img src="http://www.fashionally.com/images/default_profile_pic.jpg" height="180px" width="180px" alt="Default profile picture placeholder" /> 
+                </td>
+                <td>
+                    <p><strong>{{ user.last_name }}, {{ user.first_name }}</strong></p>
+                    <p>Email: {{ user.email }}</p>
+                    {% if user.is_staff %}<p>Staff: True</p>{% endif %}
+                </td>
             </tr>
-            {% for class in classes %}
             <tr>
-                <td>{{ class.name }}</td>
-                <td>{{ class.crn }}</td>
-                <td>{{ class.description|truncatewords:10 }}</td>
+                <td>
+                    <p><strong>Date Joined:</strong> {{ user.date_joined|date }}</p> 
+                    <p><strong>Last Login:</strong> {{ user.last_login|date }}</p>
+                </td>
             </tr>
-            {% endfor %}
         </table>
+        <br />
+        <h3>Recent Files</h3>
+        <hr />
+        {% for file in files %}
+            <p>{% include "files/_file.html" %}</p>
+        {% empty %}
+            <div class="alert alert-info">You have not uploaded any files yet.</div>
+        {% endfor %}
     </div>
-    <div class="col-md-4">
-        <h4>Recent Files</h4>
+    <div class="col-md-6" id="classes">
+        <h3>Current Classes</h3>
+        <hr />
+            {% if classes %}
+                {% include "classes/_class.html" %}
+            {% else %}
+                <div class="alert alert-info">You are not enrolled in any classes.</div>
+            {% endif %}
     </div>
 </div>
 {% endblock %}
