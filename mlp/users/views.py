@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from mlp.files.models import File
 from mlp.classes.models import Class, Roster
+from .perms import decorators
 from .models import User
 from .forms import UserForm
 
@@ -22,6 +23,7 @@ def home(request):
         return HttpResponseRedirect(reverse("users-workflow"))
 
 @login_required
+@decorators.has_admin_access
 def admin(request):
     """
     Admin page
@@ -30,6 +32,17 @@ def admin(request):
     users = User.objects.all()
     return render(request, "users/admin.html", {
         "files": files,
+        "users": users,
+    })
+
+@login_required
+@decorators.can_view_users
+def list_(request):
+    """
+    List users
+    """
+    users = User.objects.all()
+    return render(request, "users/list.html", {
         "users": users,
     })
 
@@ -53,6 +66,14 @@ def edit(request, user_id):
     Edit
     """
     return _edit(request, user_id)
+
+@login_required
+@decorators.can_create_users
+def create(request):
+    """
+    Create
+    """
+    return _edit(request, user_id=None)
 
 @login_required
 def _edit(request, user_id):
