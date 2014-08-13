@@ -3,7 +3,6 @@
 {{ form.media }}
 {% endblock %}
 {% block content %}
-<div class="container">
     <a href="{% url 'files-upload' %}" class="btn btn-default pull-right">Upload</a>
     <h3>Files</h3>
     <hr />
@@ -49,6 +48,4 @@
             </div>
         {% endfor %}
     </div>
-
-</div>
 {% endblock %}
