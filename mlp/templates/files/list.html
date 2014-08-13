@@ -3,49 +3,49 @@
 {{ form.media }}
 {% endblock %}
 {% block content %}
-    <a href="{% url 'files-upload' %}" class="btn btn-default pull-right">Upload</a>
-    <h3>Files</h3>
-    <hr />
+<a href="{% url 'files-upload' %}" class="btn btn-default pull-right">Upload</a>
+<h3>Files</h3>
+<hr />
 
-    {% if failed %}
+{% if failed %}
     <div class="alert alert-danger">
         <p>The following files failed to upload</p>
         {% for fail in failed %}
             {{ failed.as_li }}
         {% endfor %}
     </div>
-    {% endif %}
+{% endif %}
 
-    {% if uploaded %}
+{% if uploaded %}
     <div class="alert alert-info">
         <p>The following files are being uploaded</p>
         {% for upload in uploaded %}
             {{ upload.name }}
         {% endfor %}
     </div>
-    {% endif %}
+{% endif %}
 
-    <form method='get' class='form-inline' id='search-form' action="{{ request.path }}">
-        {% include "_field.html" with field=form.q %}
-        {% include "_field.html" with field=form.tags %}
-        <div class="btn-group btn-group-sm">
-            <button type="submit" name="search" class="btn btn-default btn-sm">Search</button>
-            <a href="{% url 'files-list' %}" class="btn btn-default btn-sm">Clear</a>
-        </div>
-    </form>
-    <br />
-
-    <div class="file-list">
-        {% for file in files %}
-            {% include "files/_file.html" %}
-        {% empty %}
-            <div class="alert alert-warning">
-                {% if form.in_search_mode %}
-                    No files match your search!
-                {% else %}
-                    You have not uploaded any files!
-                {% endif %}
-            </div>
-        {% endfor %}
+<form method='get' class='form-inline' id='search-form' action="{{ request.path }}">
+    {% include "_field.html" with field=form.q %}
+    {% include "_field.html" with field=form.tags %}
+    <div class="btn-group btn-group-sm">
+        <button type="submit" name="search" class="btn btn-default btn-sm">Search</button>
+        <a href="{% url 'files-list' %}" class="btn btn-default btn-sm">Clear</a>
     </div>
+</form>
+<br />
+
+<div class="file-list">
+    {% for file in files %}
+        {% include "files/_file.html" %}
+    {% empty %}
+        <div class="alert alert-warning">
+            {% if form.in_search_mode %}
+                No files match your search!
+            {% else %}
+                You have not uploaded any files!
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
 {% endblock %}
