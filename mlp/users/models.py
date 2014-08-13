@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, UserManager
+from mlp.classes.enums import UserRole
 
 class User(AbstractBaseUser):
     user_id = models.AutoField(primary_key=True)
@@ -30,9 +31,31 @@ class User(AbstractBaseUser):
     def has_perm(self, perm, obj=None): return self.is_staff
     def has_module_perms(self, app_label): return self.is_staff
 
+    def __unicode__(self):
+        if self.last_name and self.first_name:
+            return self.get_full_name()
+        else:
+            return self.email
+
+    def get_absolute_url(self):
+        return reverse("users-detail", args=[self.pk])
+
+
     def __str__(self):
         if self.last_name and self.first_name:
             return self.get_full_name()
         else:
             return self.email
 
+    def __getattr__(self, attr):
+        """
+        Instead of creating a bunch of user.is_admin, user.is_uploader,
+        user.is_whatever convenience methods, just overload getattr to check
+        for user roles when the method name starts with "is_"
+        """
+        role_names = set(role.lower() for role in UserRole.__dict__.keys())
+        # is this a role check?
+        if attr.startswith("is_") and attr[len("is_"):] in role_names:
+            return getattr(UserRole, attr[len("is_"):].upper()) in self.roles
+
+        raise AttributeError("You tried to access the attribute '%s' on an instance of a User model. That attribute isn't defined" % attr)
