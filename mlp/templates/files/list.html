@@ -37,9 +37,8 @@
     <br />
 
     <div class="file-list">
-        <table class="table table-bordered">
         {% for file in files %}
-            <tr>{% include "files/_file.html" %}</tr>
+            {% include "files/_file.html" %}
         {% empty %}
             <div class="alert alert-warning">
                 {% if form.in_search_mode %}
@@ -49,7 +48,6 @@
                 {% endif %}
             </div>
         {% endfor %}
-        </table>
     </div>
 
 </div>
