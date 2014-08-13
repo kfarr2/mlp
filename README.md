@@ -11,6 +11,23 @@ In your working directory
     virtualenv --no-site-packages .env
     source .env/bin/activate
     pip install -r requirements.txt
+    
+    
+Try to download ffmpeg.
+
+    wget http://johnvansickle.com/ffmpeg/releases/ffmpeg-2.2.4-64bit-static.tar.bz2
+    tar -xjvf ffmpeg-2.2.4-64bit-static.tar.bz2
+    mv ffmpeg-2.2.4-64bit-static/ffmpeg .env/bin
+    rm -rf ffmpeg-2.2.4-64bit-static ffmpeg-2.2.4-64bit-static.tar.bz2
+
+If the URL doesn't work, it means the listed version is no longer current.
+Go to the following url, find the link to the latest version and replace
+the version numbers in the previous syntax. 
+e.g. if the link says "ffmpeg-2.3.1-64bit-static.tar.bz2", the version is 2.3.1.
+
+    http://johnvansickle.com/ffmpeg/
+
+Configure the settings files
 
     mv mlp/settings/local.py.template mlp/settings/local.py
     vi mlp/settings/local.py
