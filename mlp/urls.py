@@ -25,6 +25,7 @@ urlpatterns = patterns('',
     url(r'^users/list/?$', users.list_, name='users-list'),
     url(r'^users/create/?$', users.create, name='users-create'),
     url(r'^users/edit/(?P<user_id>\d+)/?$', users.edit, name='users-edit'),
+    url(r'^users/detail/(?P<user_id>\d+)/?$', users.detail, name='users-detail'),
 
     # files
     url(r'^files/?$', files.list_, name='files-list'),
