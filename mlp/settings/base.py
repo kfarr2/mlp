@@ -28,8 +28,6 @@ ELASTIC_SEARCH_CONNECTION = {
     "index": "mlp_dev",
 }
 
-ELASTIC_SEARCH_URL = "http://127.0.0.1:9200/"
-ELASTIC_SEARCH_INDEX = "mlp_dev"
 ELASTIC_SEARCH_SETTINGS = {
     "settings": {
         "analysis": {
