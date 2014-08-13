@@ -2,6 +2,7 @@ import os
 from permissions import permission
 from django.db.models import Q
 from mlp.users.models import User
+from .enums import UserRole
 from .models import Class, Roster
 
 @permission(model=Class)
@@ -14,14 +15,14 @@ def can_list_all_classes(user):
 
 @permission(model=Class)
 def can_edit_class(user, _class):
-    roster = Roster.objects.filter(user=user, _class=_class, role=4)
+    roster = Roster.objects.filter(user=user, _class=_class, role=UserRole.ADMIN)
     if user.is_staff or roster:
         return True
     return False
 
 @permission
 def can_create_class(user):
-    roster = Roster.objects.filter(user=user, role=4)
+    roster = Roster.objects.filter(user=user, role=UserRole.ADMIN)
     if user.is_staff or roster:
         return True
     return False
