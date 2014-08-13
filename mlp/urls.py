@@ -45,6 +45,11 @@ urlpatterns = patterns('',
     url(r'^roster/add/(?P<class_id>\d+)/(?P<user_id>\d+)/?$', classes.roster_add, name='roster-add'),
     url(r'^roster/remove/(?P<class_id>\d+)/(?P<user_id>\d+)/?$', classes.roster_remove, name='roster-remove'),
 
+    # class files
+    url(r'^classes/(?P<class_id>\d+)/files/?$', classes.file_list, name='classes-file_list'),
+    url(r'^classes/(?P<class_id>\d+)/files/add/(?P<file_id>\d+)/?$', classes.file_add, name='classes-file_add'),
+    url(r'^classes/(?P<class_id>\d+)/files/remove/(?P<file_id>\d+)/?$', classes.file_remove, name='classes-file_remove'),
+
     # standard
     url(r'', include('django.contrib.auth.urls')),
     url(r'^cloak/', include('cloak.urls'))
