@@ -1,5 +1,7 @@
 import os
 import sys
+from elasticmodels.forms import BaseSearchForm, SearchForm
+from elasticmodels import make_searchable
 from django import forms
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -36,14 +38,19 @@ class UserForm(forms.ModelForm):
             except User.DoesNotExist as e:
                 user = None
 
+        return cleaned_data
+
     def in_create_mode(self):
         return self.instance.pk is None
 
     def save(self, *args, **kwargs):
         if self.in_create_mode():
             self.instance.set_password(self.cleaned_data.pop("password"))
-        
-        return super(UserForm, self).save(*args, **kwargs)
+
+        user = super(UserForm, self).save(*args, **kwargs)
+
+        make_searchable(self.instance)
+        return user
 
 class LoginForm(forms.Form):
     """
