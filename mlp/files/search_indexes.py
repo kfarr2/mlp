@@ -3,6 +3,9 @@ from django.template.loader import render_to_string
 from .models import File, FileTag
 
 class FileIndex(Indexable):
+    """
+    Search index for files.
+    """
     model = File
 
     def mapping(self):

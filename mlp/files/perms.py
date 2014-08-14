@@ -24,7 +24,7 @@ def can_list_file(user, file):
 
 @permission
 def can_list_all_files(user):
-    return user.is_authenticated
+    return user.is_staff
 
 @permission(model=File)
 def can_view_file(user, file):

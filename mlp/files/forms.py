@@ -7,10 +7,13 @@ from elasticmodels import make_searchable
 from .search_indexes import FileIndex
 from .models import FileTag, File
 from .enums import FileStatus
-#from .perms import can_list_all_files
+from .perms import can_list_all_files
 from bootstrap3_datetime.widgets import DateTimePicker
 
 class FileSearchForm(SearchForm):
+    """
+    Form for searching for files.
+    """
     tags = TagField(required=False, label="")
     start_date = DateTimeField(required=False, label="", widget=DateTimePicker(options={"format": "YYYY-MM-DD", "pickTime": False}))
     end_date = DateTimeField(required=False, label="", widget=DateTimePicker(options={"format": "YYYY-MM-DD", "pickTime": False}))
@@ -20,8 +23,6 @@ class FileSearchForm(SearchForm):
         super(FileSearchForm, self).__init__(*args, **kwargs)
         self.fields['tags'].choices = Tag.objects.all()
         self.fields['tags'].widget.attrs['placeholder'] = "Tags"
-        self.fields['start_date'].widget.attrs['placeholder'] = "Start Date"
-        self.fields['end_date'].widget.attrs['placeholder'] = "End Date"
 
     def queryset(self):
         files = File.objects.filter(
@@ -29,9 +30,8 @@ class FileSearchForm(SearchForm):
         ).select_related("uploaded_by").prefetch_related("filetag_set__tag")
 
         # filter the querysets based on the role
-        #if not can_list_all_files(self.user):
-        #    files = files.filter(uploaded_by=self.user)
-        #
+        if not can_list_all_files(self.user):
+            files = files.filter(uploaded_by=self.user)
 
         return files
 
@@ -39,8 +39,8 @@ class FileSearchForm(SearchForm):
         files = FileIndex.objects.all()
 
         # filter the querysets based on the role
-        #if not can_list_all_files(self.user):
-        #    files = files.filter(uploaded_by_id=self.user.pk)
+        if not can_list_all_files(self.user):
+            files = files.filter(uploaded_by_id=self.user.pk)
 
         if self.cleaned_data.get("tags"):
             files = files.query(tags__in=self.cleaned_data['tags'])

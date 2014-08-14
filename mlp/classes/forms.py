@@ -30,6 +30,10 @@ class ClassForm(forms.ModelForm):
         super(ClassForm, self).__init__(*args, **kwargs)
 
     def save(self, *args, **kwargs):
+        """
+        Overridden save function automatically adds the user to the roster as 
+        the admin of the class they created.
+        """
         super(ClassForm, self).save(*args, **kwargs)
         roster = Roster.objects.filter(user=self.user, _class=self.instance, role=4)
         if not roster:

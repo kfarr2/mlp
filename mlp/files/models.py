@@ -8,6 +8,9 @@ from mlp.tags.models import Tag, TaggableManager
 from .enums import FileType, FileStatus
 
 class File(models.Model):
+    """
+    Model for a file.
+    """
     file_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     type = models.IntegerField(choices=FileType)
