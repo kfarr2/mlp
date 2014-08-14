@@ -5,25 +5,23 @@
 <script>var CHUNK_SIZE = {{ chunk_size }};</script>
 <script src="{{ STATIC_URL }}js/upload.js"></script>
 
-<div class="container">
-    <h3>Upload</h3>
-    <input type="file" name="file" id="file" style="display:none" />
+<h3>Upload</h3>
+<input type="file" name="file" id="file" style="display:none" />
 
-    <div id="dropbox" class="alert alert-warning">
-        <div class="text-center"><strong>Click here to choose a file <em>or</em> drag a file into this area</strong></div>
-    </div>
-
-    <label class="checkbox"><input type="checkbox" id="agree" />I have obtained all necessary consents and permissions to share this content through MLP</label>
-
-    <button id="submit">Upload</button>
-
-    <div class="progress" style="display:none">
-        <div class="progress-bar" role="progressbar" style="width: 0%;" id="progress-bar"></div>
-    </div>
-
-    <form method="post" id="form">
-        {% csrf_token %}
-        <input id="error-message" type="hidden" name="error_message" />
-    </form>
+<div id="dropbox" class="alert alert-warning">
+    <div class="text-center"><strong>Click here to choose a file <em>or</em> drag a file into this area</strong></div>
 </div>
+
+<label class="checkbox"><input type="checkbox" id="agree" />I have obtained all necessary consents and permissions to share this content through MLP</label>
+
+<button id="submit">Upload</button>
+
+<div class="progress" style="display:none">
+    <div class="progress-bar" role="progressbar" style="width: 0%;" id="progress-bar"></div>
+</div>
+
+<form method="post" id="form">
+    {% csrf_token %}
+    <input id="error-message" type="hidden" name="error_message" />
+</form>
 {% endblock %}

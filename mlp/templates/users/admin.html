@@ -1,44 +1,42 @@
 {% extends "base.html" %}
 {% load arc %}
 {% block content %}
-<div class="container">
-    <h3>Admin Control</h3>
-    <hr />
-    <div class="col-md-5">
-        <h4>Users</h4>
-        <table class="table table-striped">
+<h3>Admin Control</h3>
+<hr />
+<div class="col-md-5">
+    <h4>Users</h4>
+    <table class="table table-striped">
+        <tr>
+            <td><strong>Email</strong></td>
+            <td><strong>First</strong></td>
+            <td><strong>Last</strong></td>
+            <td><strong>Date Joined</strong></td>
+        </tr>
+    {% if users %}
+        {% for user in users %}
             <tr>
-                <td><strong/>Email</td>
-                <td><strong/>First</td>
-                <td><strong/>Last</td>
-                <td><strong/>Date Joined</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.first_name }}</td>
+                <td>{{ user.last_name }}</td>
+                <td>{{ user.date_joined|date }}</td>
             </tr>
-        {% if users %}
-            {% for user in users %}
-                <tr>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.first_name }}</td>
-                    <td>{{ user.last_name }}</td>
-                    <td>{{ user.date_joined|date }}</td>
-                </tr>
-            {% endfor %}
-        {% endif %}
+        {% endfor %}
+    {% endif %}
+    </table>
+</div>
+
+<div class="col-md-5">
+    <h4>Files</h4>
+    <div class="file-list">
+        <table class="table table-bordered">
+        {% for file in files %}
+            <tr>{% include "files/_file.html" %}</tr>
+        {% empty %}
+            <div class="alert alert-warning">
+                You have not uploaded any files!
+            </div>
+        {% endfor %}
         </table>
-    </div>
-    
-    <div class="col-md-5">
-        <h4>Files</h4>
-        <div class="file-list">
-            <table class="table table-bordered">
-            {% for file in files %}
-                <tr>{% include "files/_file.html" %}</tr>
-            {% empty %}
-                <div class="alert alert-warning">
-                    You have not uploaded any files!
-                </div>
-            {% endfor %}
-            </table>
-        </div>
     </div>
 </div>
 {% endblock %}

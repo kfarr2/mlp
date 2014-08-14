@@ -1,55 +1,53 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <h3>{{ file.name }}</h3>
-    <hr />
-    <div class="col-md-7">
-        {% if file and user.is_staff %}
-            {% if file.status == FileStatus.READY %}
-            <div class="btn-group pull-right">
-                <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
-                <a class="btn btn-danger" href="{% url 'files-delete' file.pk %}"><span class="glyphicon glyphicon-trash"></span></a>
-            </div>
-            <br />
-            {% endif %}
+<h3>{{ file.name }}</h3>
+<hr />
+<div class="col-md-7">
+    {% if file and user.is_staff %}
+        {% if file.status == FileStatus.READY %}
+        <div class="btn-group pull-right">
+            <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
+            <a class="btn btn-danger" href="{% url 'files-delete' file.pk %}"><span class="glyphicon glyphicon-trash"></span></a>
+        </div>
+        <br />
         {% endif %}
-        <p>Tags: 
-        {% for file_tag in file_tags %}
-            {{ file_tag.tag }}
-        {% endfor %}
-        </p>
+    {% endif %}
+    <p>Tags: 
+    {% for file_tag in file_tags %}
+        {{ file_tag.tag }}
+    {% endfor %}
+    </p>
 
-        {% if file.type == FileType.VIDEO %}
-            <video controls>
-                {% for path, mime in file.video_urls %}
-                    <source src="{{ path }}" type="{{ mime }}">
-                {% endfor %}
-                Your browser failed to load the video.
-            </video>
-        {% endif %}
-
-        {% if file.type == FileType.AUDIO %}
-            {% if file.audio_urls %}
-            <audio controls>
-            {% for path, mime in file.audio_urls %}
+    {% if file.type == FileType.VIDEO %}
+        <video controls>
+            {% for path, mime in file.video_urls %}
                 <source src="{{ path }}" type="{{ mime }}">
             {% endfor %}
-            Your browser failed to load the audio.
-            </audio>
-            {% else%}
-                No audio urls were specified.
-            {% endif %}
-        {% endif %}
-        <div class="well">
-            <p><strong>Duration:</strong> {{ file.duration }} seconds</p>
-            <p><strong>Description:</strong> {{ file.description }}</p>
-        
-        </div>
+            Your browser failed to load the video.
+        </video>
+    {% endif %}
 
-        {% if file.file and user.is_authenticated %}
-        <p><a class="btn btn-default" href="{% url 'files-download' file.pk %}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
+    {% if file.type == FileType.AUDIO %}
+        {% if file.audio_urls %}
+        <audio controls>
+        {% for path, mime in file.audio_urls %}
+            <source src="{{ path }}" type="{{ mime }}">
+        {% endfor %}
+        Your browser failed to load the audio.
+        </audio>
+        {% else%}
+            No audio urls were specified.
         {% endif %}
+    {% endif %}
+    <div class="well">
+        <p><strong>Duration:</strong> {{ file.duration }} seconds</p>
+        <p><strong>Description:</strong> {{ file.description }}</p>
+    
     </div>
+
+    {% if file.file and user.is_authenticated %}
+    <p><a class="btn btn-default" href="{% url 'files-download' file.pk %}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
+    {% endif %}
 </div>
 {% endblock %}
