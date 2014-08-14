@@ -8,7 +8,9 @@ from django.core.validators import validate_email
 from .models import User
 
 class UserForm(forms.ModelForm):
-
+    """
+    Form for creating and editing a user.
+    """
     class Meta:
         model = User
         fields = (
@@ -44,6 +46,9 @@ class UserForm(forms.ModelForm):
         return super(UserForm, self).save(*args, **kwargs)
 
 class LoginForm(forms.Form):
+    """
+    Form for a user to login.
+    """
     email = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
     next = forms.CharField(widget=forms.HiddenInput, required=False)

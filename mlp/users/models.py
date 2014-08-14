@@ -3,6 +3,12 @@ from django.contrib.auth.models import AbstractBaseUser, UserManager
 from mlp.classes.enums import UserRole
 
 class User(AbstractBaseUser):
+    """
+    Model for a user. Users that have the staff flag raised are
+    considered 'super-admins' and have all priviledges.
+    Users that want to be admins for their class must set
+    that flag in the roster.
+    """
     user_id = models.AutoField(primary_key=True)
     email = models.EmailField(max_length=255, unique=True)
     first_name = models.CharField(max_length=255)

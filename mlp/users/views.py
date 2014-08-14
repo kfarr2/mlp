@@ -15,7 +15,7 @@ from .forms import UserForm
 @login_required
 def home(request):
     """
-    User-home. Either redirect to the workflow or admin page
+    User-home. Either redirect to the workflow or admin page.
     """
     if request.user.is_staff:
         return HttpResponseRedirect(reverse("users-admin"))
@@ -26,7 +26,8 @@ def home(request):
 @decorators.has_admin_access
 def admin(request):
     """
-    Admin page
+    Admin page. Only users with the is_staff
+    flag set can use this page.
     """
     files = File.objects.all()
     users = User.objects.all()
@@ -39,7 +40,7 @@ def admin(request):
 @decorators.can_view_users
 def list_(request):
     """
-    List users
+    List users.
     """
     users = User.objects.all()
     return render(request, "users/list.html", {
@@ -49,7 +50,8 @@ def list_(request):
 @login_required
 def workflow(request):
     """
-    Workflow page
+    Workflow page. Basically a home/profile page for users
+    that do not have admin access.
     """
     roster = Roster.objects.filter(user=request.user)
     classes = Class.objects.filter(class_id__in=roster)
@@ -63,7 +65,7 @@ def workflow(request):
 @login_required
 def detail(request, user_id):
     """
-    User detail page
+    User detail page. Admins and admins of classes can view user details.
     """
     user = get_object_or_404(User, pk=user_id)
     class_list = Roster.objects.filter(user=user).values('_class')
@@ -78,7 +80,7 @@ def detail(request, user_id):
 @login_required
 def edit(request, user_id):
     """
-    Edit
+    Edit a user.
     """
     return _edit(request, user_id)
 
@@ -86,7 +88,7 @@ def edit(request, user_id):
 @decorators.can_create_users
 def create(request):
     """
-    Create
+    Create a user.
     """
     return _edit(request, user_id=None)
 
