@@ -60,7 +60,7 @@ def workflow(request):
         "files": files,
     })
 
-@login_required
+@decorators.can_view_user_detail
 def detail(request, user_id):
     """
     User detail page. Admins and admins of classes can view user details.
@@ -74,15 +74,13 @@ def detail(request, user_id):
         "classes": classes,
     })
 
-
-@login_required
+@decorators.can_edit_user
 def edit(request, user_id):
     """
     Edit a user.
     """
     return _edit(request, user_id)
 
-@login_required
 @decorators.can_create_users
 def create(request):
     """
@@ -90,7 +88,6 @@ def create(request):
     """
     return _edit(request, user_id=None)
 
-@login_required
 def _edit(request, user_id):
     """Creates a new user if user_id=None, otherwise, it will edit the user"""
     if user_id is None:
