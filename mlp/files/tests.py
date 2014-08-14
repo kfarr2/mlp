@@ -1,10 +1,12 @@
 from model_mommy.mommy import make
-import os, sys, shutil, mimetypes, math, tempfile, mock
+import os, sys, shutil, mimetypes, math, tempfile, threading, mock
 from django.http import HttpResponse, HttpResponseRedirect
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.utils.unittest import skipIf
 from mlp.users.models import User
+from mlp.tags.models import Tag
 from .models import File, FileTag
 from .enums import FileType, FileStatus
 from .forms import FileForm
@@ -327,4 +329,161 @@ class StoreViewTest(TestCase):
         self.assertEqual(self.file_content*2, open(file_path).read())
 
 
+class FileTest(TestCase):
+    def test_sanitize_filename(self):
+        self.assertEqual(File.sanitize_filename("../../%^&*("), "")
+        self.assertEqual(File.sanitize_filename("../foo..^&*"), "..foo..")
+        self.assertEqual(File.sanitize_filename("FOOBAr"), "FOOBAr")
+        self.assertEqual(File.sanitize_filename("."), "")
+
+    def test_thumbnail_url_does_not_exist(self):
+        f = File(file=os.path.join(settings.MEDIA_ROOT, "test.mov"))
+        self.assertEqual(f.thumbnail_url, None)
+
+        f = File()
+        self.assertEqual(f.thumbnail_url, None)
+
+    def test_directory(self):
+        f = make(File)
+        self.assertEqual(f.directory, os.path.join(settings.MEDIA_ROOT, str(f.pk)))
+
+    def test_size(self):
+        file = make(File)
+        os.makedirs(file.directory)
+        with open(os.path.join(file.directory, "a.txt"), 'w') as f:
+            f.write("a"*500)
+
+        self.assertEqual(file.size, 500)
+        shutil.rmtree(file.directory)
+
+    def test_thumbnail_url_does_exist(self):
+        path = os.path.join(settings.MEDIA_ROOT, "file.png")
+        with open(path, "w") as f:
+            f.write('hi')
+
+        f = File(file="test.mov")
+        self.assertEqual(f.thumbnail_url, settings.MEDIA_URL + "file.png")
+        os.remove(path)
+
+    def test_video_urls(self):
+        f = File(file="test.mov")
+        urls = f.video_urls
+        self.assertEqual(urls, [
+            (("/media/file.ogv"), "video/ogg"),
+            (("/media/file.mp4"), "video/mp4"),
+        ])
+
+        f = File()
+        self.assertEqual(f.video_urls, [])
+
+
+class FileFormTest(TestCase):
+    def setUp(self):
+        super(FileFormTest, self).setUp()
+        create_users(self)
+        create_files(self)
+        # create a tag on the Dog file
+        tag = Tag(name="Mango", created_by=self.admin)
+        tag.save()
+        FileTag(file=File.objects.get(name="Mango"), tag=tag, tagged_by=self.admin).save()
+        tag = Tag(name="Peach", created_by=self.admin)
+        tag.save()
+
+    def test_init(self):
+        form = FileForm(instance=self.file)
+        # make sure the tags get set on it
+        self.assertEqual(set(str(t) for t in form.fields['tags'].initial), set(["Mango"]))
+        self.assertEqual(set(str(t) for t in form.fields['tags'].choices), set(["Peach","Mango"]))
+
+    def test_save(self):
+        data = {
+            "name": "Kittens + UNIQUESTRING",
+            "description": "hello",
+            "tags": "Mango",
+        }
+        form = FileForm(data, instance=self.file)
+        form.save(user=self.admin)
+        # make sure the object got saved
+        f = File.objects.get(pk=self.file.pk)
+        self.assertEqual(f.name, data['name'])
+        # make sure the "Foo" tag got added (this will throw an exception if it doesn't)
+        Tag.objects.get(name="Mango")
+        # make sure the tags changed
+        self.assertEqual(set(str(ft.tag) for ft in FileTag.objects.filter(file=f)), set(["Mango"]))
+
+
+class ProcessUploadedFileTest(TestCase):
+    def setUp(self):
+        create_users(self)
+        super(ProcessUploadedFileTest, self).setUp()
+        f = File(
+            name="Kittens",
+            description="Kittens and stuff",
+            file="test.txt",
+            type=FileType.UNKNOWN,
+            status=FileStatus.UPLOADED,
+            uploaded_by=self.admin,
+        )
+        f.save()
+        self.file = f
+
+    def test_chunks_are_merged_and_cleaned_up(self):
+        path = tempfile.mkdtemp()
+        with open(os.path.join(path, "1.part"), "w") as f:
+            f.write("hello")
+        with open(os.path.join(path, "2.part"), "w") as f:
+            f.write("world")
+        with open(os.path.join(path, "3.part"), "w") as f:
+            f.write("and stuff")
+
+        self.file.name = "test.txt"
+        self.file.tmp_path = path
+        process_uploaded_file(3, self.file)
+
+        # this directory should be gone now
+        self.assertFalse(os.path.exists(path))
+        # this file should
+        self.assertEqual("helloworldand stuff", open(self.file.file.path).read())
+        file = File.objects.get(pk=self.file.pk)
+        # this will be failed since it didn't convert
+        self.assertEqual(file.status, FileStatus.FAILED)
+
+    # to run this test (since it takes so long) you have to explicitly run
+    # ./manage.py vcp.files
+    @skipIf("FULL" not in os.environ, "Video conversions take forever")
+    def test_media_conversion_success(self):
+        sys.stderr.write("patience")
+        mov_path = os.path.join(settings.STATICFILES_DIRS[0], "test.mov")
+        mov = open(mov_path)
+        path = tempfile.mkdtemp()
+        with open(os.path.join(path, "1.part"), "w") as f:
+            f.write(mov.read())
+
+        self.file.name = "file.mov"
+        self.file.tmp_path = path
+        process_uploaded_file(1, self.file)
+        file = File.objects.get(pk=self.file.pk)
+        self.assertEqual(file.status, FileStatus.READY)
+        # make sure the files got saved
+        self.assertTrue(os.path.exists(os.path.join(os.path.dirname(file.file.path), "file.mp4")))
+        self.assertTrue(os.path.exists(os.path.join(os.path.dirname(file.file.path), "file.ogv")))
+        self.assertTrue(os.path.exists(os.path.join(os.path.dirname(file.file.path), "file.png")))
+
+    def test_duration_calculation(self):
+        duration = get_duration(os.path.join(settings.STATICFILES_DIRS[0], "test.mov"))
+        delta = .00000000001 # that ought to be close enough for government work
+        self.assertAlmostEqual(21.90, duration, delta=delta)
+
+    def test_media_conversion_fail(self):
+        mov_path = os.path.join(settings.STATICFILES_DIRS[0], "test.mov")
+        mov = open(mov_path)
+        path = tempfile.mkdtemp()
+        with open(os.path.join(path, "1.part"), "w") as f:
+            f.write(mov.read(1000))
+
+        self.file.name = "file.mov"
+        self.file.tmp_path = path
+        process_uploaded_file(1, self.file)
+        file = File.objects.get(pk=self.file.pk)
+        self.assertEqual(file.status, FileStatus.FAILED) 
 
