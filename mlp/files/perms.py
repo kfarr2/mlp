@@ -20,7 +20,7 @@ def can_edit_file(user, file):
 
 @permission(model=File)
 def can_list_file(user, file):
-    return can_list_all_files(user) or user.is_staff
+    return can_list_all_files(user) or file.uploaded_by == user
 
 @permission
 def can_list_all_files(user):

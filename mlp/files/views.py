@@ -51,7 +51,7 @@ def delete(request, file_id):
     Delete a file
     """
     file = get_object_or_404(File, pk=file_id)
-    if request.POST or file.status == FileStatus.FAILED:
+    if request.method == "POST" or file.status == FileStatus.FAILED:
         file.delete()
         return HttpResponseRedirect(reverse('files-list'))
 
@@ -62,7 +62,7 @@ def delete(request, file_id):
 @decorators.can_edit_file
 def edit(request, file_id):
     """
-    Delete a file
+    Edit a file
     """
     file = get_object_or_404(File, pk=file_id)
     if request.POST:
@@ -100,7 +100,7 @@ def upload(request):
     """
     if request.method == "POST":
         if request.POST.get("error_message"):
-            return HttpResponse(request.POST["error_message"])
+            messages.error(request, request.POST["error_message"])
         else:
             messages.success(request, "Files Uploaded!")
         return HttpResponseRedirect(reverse('files-list'))
