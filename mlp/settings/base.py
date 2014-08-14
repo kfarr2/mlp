@@ -25,11 +25,9 @@ LOGOUT_URL = reverse_lazy("home")
 
 ELASTIC_SEARCH_CONNECTION = {
     "urls": ["http://localhost:9200/"],
-    "index": "mlp_dev",
 }
 
 ELASTIC_SEARCH_URL = "http://127.0.0.1:9200/"
-ELASTIC_SEARCH_INDEX = "mlp_dev"
 ELASTIC_SEARCH_SETTINGS = {
     "settings": {
         "analysis": {
@@ -162,6 +160,7 @@ TMP_ROOT = ROOT("tmp")
 
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
     'django.core.context_processors.request',
+    'django.contrib.messages.context_processors.messages',
 )
 
 TEMPLATE_DIRS = (
