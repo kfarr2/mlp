@@ -66,7 +66,7 @@ class ListViewTest(TestCase):
         """
         Login and list all
         """
-        self.client.login(email=self.user.email, password='foobar')
+        self.client.login(email=self.admin.email, password='foobar')
         response = self.client.get(reverse('files-list'))
         self.assertTrue(len(response.context['files']), 1)
 
@@ -81,45 +81,19 @@ class DeleteViewTest(TestCase):
     def setUp(self):
         super(DeleteViewTest, self).setUp()
         create_users(self)
+        self.client.login(email=self.admin.email, password='foobar')
         create_files(self)
 
-    def test_not_logged_in(self):
-        """
-        Try to delete without logging on
-        """
-        response = self.client.get(reverse('files-delete', args=(self.file.pk,))) 
-        self.assertEqual(response.status_code, 302)
-
-    def test_logged_in_correct_user(self):
-        """
-        Try to delete without being admin, but did upload the file
-        """
-        self.client.login(email=self.user.email, password='foobar')
-        response = self.client.get(reverse('files-delete', args=(self.file.pk,)))
+    def test_get(self):
+        response = self.client.get(reverse("files-delete", args=[self.file.pk]))
         self.assertEqual(response.status_code, 200)
 
-    def test_logged_in_user(self):
-        """
-        Try to delete without being admin, and did not upload the file
-        """
-        self.client.login(email=self.user.email, password='foobar')
-        response = self.client.get(reverse('files-delete', args=(self.adminfile.pk,)))
-        self.assertEqual(response.status_code, 403)
+    def test_post(self):
+        pre_count = File.objects.count()
+        response = self.client.post(reverse('files-delete', args=[self.file.pk]))
+        self.assertRedirects(response, reverse('files-list'))
+        self.assertEqual(pre_count-1, File.objects.count())
 
-    def test_logged_in_admin(self):
-        """
-        Login as admin and try to delete files
-        """
-        self.client.login(email=self.admin.email, password='foobar')
-        response = self.client.get(reverse('files-delete', args=(self.file.pk,)))
-        self.assertEqual(response.status_code, 200)
-
-    # double check this one
-    def test_delete_failed_file(self):
-        self.client.login(email=self.user.email, password='foobar')
-        response = self.client.post(reverse('files-delete', args=(self.file.pk,)))
-        self.assertTrue(response.status_code, 200)
-       
 class EditViewTest(TestCase):
     def setUp(self):
         super(EditViewTest, self).setUp()
@@ -198,3 +172,159 @@ class UploadViewTest(TestCase):
         self.client.login(email=self.admin.email, password='foobar')
         response = self.client.post(reverse('files-upload'))
         self.assertEqual(response.status_code, 302)
+
+    def test_logged_in_post_with_error(self):
+        self.client.login(email=self.admin.email, password='foobar')
+        response = self.client.post(reverse('files-upload'), {'error_message': "ERROR"}, follow=True)
+        self.assertRedirects(response, reverse('files-list'))
+        self.assertIn("ERROR", [str(m) for m in response.context['messages']])
+
+class DownloadViewTest(TestCase):
+    def setUp(self):
+        super(DownloadViewTest, self).setUp()
+        create_users(self)
+        self.client.login(email=self.admin.email, password='foobar')
+        create_files(self)
+        self.f = open(os.path.join(settings.MEDIA_ROOT, "test.txt"), "w")
+        self.f.write("hello, world!")
+        settings.DEBUG = True
+
+    def test_download(self):
+        response = self.client.get(reverse('files-download', args=[self.file.pk]))
+        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response['X-Sendfile'], os.path.join(settings.MEDIA_ROOT, "test.txt"))
+
+class StoreViewTest(TestCase):
+    def setUp(self):
+        super(StoreViewTest, self).setUp()
+        create_users(self)
+        self.client.login(email=self.admin.email, password='foobar')
+        
+        self.file_content = "THIS IS A TEST"
+        self.f = open(os.path.join(settings.MEDIA_ROOT, "test.txt"), "w")
+        self.f.write(self.file_content)
+        self.f.close()
+        self.f = open(os.path.join(settings.MEDIA_ROOT, "test.txt"), "r")
+
+    def test_bad_resumable_id(self):
+        response = self.client.post(reverse('files-store'), {
+            "resumableIdentifier": "../../"    
+        })
+        self.assertEqual(response.status_code, 404)
+
+    def test_single_chunk_upload(self):
+        original_num_files_in_temp = len(os.listdir(settings.TMP_ROOT))
+        pre_count = File.objects.count()
+        response = self.client.post(reverse('files-store'), {
+            "file": self.f,
+            "resumableIdentifier": "abcd1234",
+            "resumableChunkNumber": "1",
+            "resumableTotalChunks": "1",
+            "resumableFilename": "UNIQUE_STRING.txt",
+            "resumableTotalSize": len(self.file_content),            
+        })
+        self.assertEqual(response.status_code, 200)
+
+        # make sure the file was added correctly
+        post_count = File.objects.count()
+        self.assertEqual(pre_count+1, post_count)
+        f = File.objects.order_by("-pk").first()
+        self.assertEqual(f.status, FileStatus.FAILED)
+        self.assertEqual(f.type, FileType.UNKNOWN)
+        self.assertEqual(f.uploaded_by, self.admin)
+
+        # make sure temp was cleaned up correctly
+        self.assertEqual(original_num_files_in_temp, len(os.listdir(settings.TMP_ROOT)))
+        # and the file was put together correctly in the media dir
+        f = File.objects.all().order_by("-pk").first()
+        self.assertEqual(f.name, "UNIQUE_STRING.txt")
+        file_path = os.path.join(settings.MEDIA_ROOT, str(f.pk), "original.txt")
+        self.assertEqual(self.file_content, open(file_path).read())
+
+    def test_single_chunk_upload_too_big(self):
+        original_settings = settings.MAX_UPLOAD_SIZE
+        settings.MAX_UPLOAD_SIZE = 2
+        response = self.client.post(reverse('files-store'), {
+            "file": self.f,
+            "resumableIdentifier": "abcd1234",
+            "resumableChunkNumber": "1",
+            "resumableTotalChunks": "1",
+            "resumableFilename": "UNIQUE_STRING.txt",
+            "resumableTotalSize": len(self.file_content),            
+        })
+        self.assertEqual(response.status_code, 404)
+        settings.MAX_UPLOAD_SIZE = original_settings
+    
+    def test_single_chunk_upload_chunk_too_big(self):
+        original_settings = settings.MAX_UPLOAD_SIZE
+        settings.CHUNK_SIZE = 2
+        response = self.client.post(reverse('files-store'), {
+            "file": self.f,
+            "resumableIdentifier": "abcd1234",
+            "resumableChunkNumber": "1",
+            "resumableTotalChunks": "1",
+            "resumableFilename": "UNIQUE_STRING.txt",
+            "resumableTotalSize": len(self.file_content),            
+        })
+        self.assertEqual(response.status_code, 404)
+        settings.CHUNK_SIZE = original_settings
+
+    def test_multiple_chunk_upload_too_big(self):
+        original_settings = settings.MAX_UPLOAD_SIZE
+        settings.MAX_UPLOAD_SIZE = len(self.f.read())+1
+        self.f.seek(0)
+
+        response = self.client.post(reverse('files-store'), {
+            "file": self.f,
+            "resumableIdentifier": "abcd1234",
+            "resumableChunkNumber": "1",
+            "resumableTotalChunks": "2",
+            "resumableFilename": "UNIQUE_STRING.txt",
+            "resumableTotalSize": len(self.file_content)*2,            
+        })
+        self.assertEqual(response.status_code, 200)
+        self.f.seek(0)
+        response = self.client.post(reverse('files-store'), {
+            "file": self.f,
+            "resumableIdentifier": "abcd1234",
+            "resumableChunkNumber": "2",
+            "resumableTotalChunks": "2",
+            "resumableFilename": "UNIQUE_STRING.txt",
+            "resumableTotalSize": len(self.file_content)*2,            
+        })
+        self.assertEqual(response.status_code, 404)
+        settings.MAX_UPLOAD_SIZE = original_settings
+
+    def test_multiple_chunk_upload(self):
+        original_num_files_in_tmp = len(os.listdir(settings.TMP_ROOT))
+
+        response = self.client.post(reverse('files-store'), {
+            "file": self.f,
+            "resumableIdentifier": "abcd1234",
+            "resumableChunkNumber": "1",
+            "resumableTotalChunks": "2",
+            "resumableFilename": "UNIQUE_STRING.txt",
+            "resumableTotalSize": len(self.file_content)*2,            
+        })
+        self.assertEqual(response.status_code, 200)
+        self.f.seek(0)
+        response = self.client.post(reverse('files-store'), {
+            "file": self.f,
+            "resumableIdentifier": "abcd1234",
+            "resumableChunkNumber": "2",
+            "resumableTotalChunks": "2",
+            "resumableFilename": "UNIQUE_STRING.txt",
+            "resumableTotalSize": len(self.file_content)*2,            
+        })
+        self.assertEqual(response.status_code, 200)
+        
+        # make sure temp was cleaned up correctly
+        self.assertEqual(original_num_files_in_tmp, len(os.listdir(settings.TMP_ROOT)))
+        # and the file was put together correctly in the media dir
+        f = File.objects.all().order_by("-pk").first()
+        self.assertEqual(f.name, "UNIQUE_STRING.txt")
+        file_path = os.path.join(settings.MEDIA_ROOT, str(f.pk), "original.txt")
+        self.assertEqual(self.file_content*2, open(file_path).read())
+
+
+
