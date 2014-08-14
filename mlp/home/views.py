@@ -14,8 +14,6 @@ def home(request):
     """
     Default home view
     """
-    files = File.objects.order_by('-uploaded_on')
-
     if request.user.is_authenticated():
         return HttpResponseRedirect(reverse("users-home"))
 
@@ -33,7 +31,6 @@ def home(request):
         form = LoginForm(initial=request.GET)
 
     return render(request, 'home/home.html', {
-        "files": files,
         "form": form,
     })
 

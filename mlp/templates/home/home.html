@@ -11,18 +11,25 @@
     </form>
 </div>
 <div class="col-md-8">
-    <h3>Latest Submissions</h3>
-    <hr />
-    <div class="file-list">
-        <table class="table table-bordered">
-        {% for file in files %}
-            <tr>{% include "files/_file.html" %}</tr>
-        {% empty %}
-            <div class="alert alert-warning">
-                You have not uploaded any files!
-            </div>
-        {% endfor %}
-        </table>
+    <br />
+    <div class="panel panel-default">
+        <div class="panel-heading"><h3>Welcome to the Mobile Learning Project!</h3></div>
+        <div class="panel-body">
+            <p>
+                The mobile learning project is about blah blah 
+                blah intro text that is going to change eventually.
+                I really ought to put some stuff in (parenthesis) 
+                just to make it look like there's some actual stuff
+                going on here. I could have just gone and got a bunch
+                of filler text somewhere online but nooooo that would 
+                have just been too easy.
+            </p>
+            <p>
+                Sneak attack! Paragraph break! There's definitely a
+                lot of cool stuff happening with this text box. 
+                Just you wait and see.
+            </p>
+        </div>
     </div>
 </div>
 {% endblock %}
