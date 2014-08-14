@@ -154,6 +154,11 @@ def store(request):
         shutil.rmtree(dir_path)
         return HttpResponseNotFound("Too many chunks")
 
+    max_number_of_chunks = math.ceil(float(settings.MAX_UPLOAD_SIZE) / settings.CHUNK_SIZE)
+    if int(request.POST['resumableChunkNumber']) > max_number_of_chunks:
+        shutil.rmtree(dir_path)
+        return HttpResponseNotFound("Too many chunks")
+
     with open(file_path, 'wb') as dest:
         for chunk in file.chunks():
             dest.write(chunk)

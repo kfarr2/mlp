@@ -1,5 +1,5 @@
 import re
-import os
+import os, sys
 from elasticmodels import make_searchable
 from django.db import models
 from django.conf import settings
@@ -28,7 +28,6 @@ class File(models.Model):
     class Meta:
         db_table = "files"
 
-
     @classmethod
     def sanitize_filename(cls, filename):
         """
@@ -49,7 +48,7 @@ class File(models.Model):
         if not self.file:
             return None
 
-        path = os.path.splitext(self.file.path)[0] + ".png"
+        path = self.path_with_extension("png")
         if not os.path.exists(path):
             return None
 
@@ -57,9 +56,16 @@ class File(models.Model):
 
     @property
     def size(self):
+        start_path = self.directory
         if not hasattr(self, "_size"):
-            self._size = get_size(self.directory)
+            total_size = 0
+            for dirpath, dirnames, filenames in os.walk(start_path):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    total_size += os.path.getsize(fp)
+            self._size = total_size 
         return self._size
+
 
     @property
     def directory(self):
