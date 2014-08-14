@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, UserManager
+from django.core.urlresolvers import reverse
+from django.core.exceptions import PermissionDenied
 from mlp.classes.enums import UserRole
 
 class User(AbstractBaseUser):
@@ -52,6 +54,18 @@ class User(AbstractBaseUser):
             return self.get_full_name()
         else:
             return self.email
+
+    def bind_to_class(self, _class):
+        """
+        Bind this user to the class and populate their roles based on it.
+        """
+        roles = set(mlp.classes.models.Roster.objects.filter(user=self, _class=_class).values_list("role", flat=True))
+        if not roles:
+            # the user doesn't have any roles in this class
+            raise PermissionDenied()
+
+        self.roles = roles
+        self._class = _class
 
     def __getattr__(self, attr):
         """

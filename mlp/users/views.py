@@ -22,7 +22,6 @@ def home(request):
     else:
         return HttpResponseRedirect(reverse("users-workflow"))
 
-@login_required
 @decorators.has_admin_access
 def admin(request):
     """
@@ -36,7 +35,6 @@ def admin(request):
         "users": users,
     })
 
-@login_required
 @decorators.can_view_users
 def list_(request):
     """
