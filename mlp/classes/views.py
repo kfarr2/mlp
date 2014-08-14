@@ -3,7 +3,6 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from mlp.users.models import User
 from mlp.files.models import File
@@ -45,7 +44,6 @@ def detail(request, class_id):
         "class": class_,    
     })
 
-@login_required
 @decorators.can_enroll_students
 def enroll(request, class_id):
     """
@@ -61,7 +59,6 @@ def enroll(request, class_id):
         "students": students,
     })
 
-@login_required
 @decorators.can_edit_class
 def file_list(request, class_id):
     """
@@ -78,7 +75,6 @@ def file_list(request, class_id):
         "class_files": class_files,
     })
 
-@login_required
 @decorators.can_edit_class
 def file_add(request, class_id, file_id):
     """
@@ -94,7 +90,6 @@ def file_add(request, class_id, file_id):
         messages.warning(request, "File already added to class.")
     return HttpResponseRedirect(reverse('classes-file_list', args=(class_id,)))
 
-@login_required
 @decorators.can_edit_class
 def file_remove(request, class_id, file_id):
     """
@@ -110,7 +105,6 @@ def file_remove(request, class_id, file_id):
         messages.warning(request, "File not found in class.")
     return HttpResponseRedirect(reverse('classes-file_list', args=(class_id,)))
 
-@login_required
 @decorators.can_edit_class
 def edit(request, class_id):
     """
@@ -118,7 +112,6 @@ def edit(request, class_id):
     """
     return _edit(request, class_id)
 
-@login_required
 @decorators.can_create_class
 def create(request):
     """
@@ -126,7 +119,6 @@ def create(request):
     """
     return _edit(request, class_id=None)
 
-@login_required
 def _edit(request, class_id):
     """
     Create or edit a class
@@ -152,7 +144,6 @@ def _edit(request, class_id):
         "class": class_,
     })
 
-@login_required
 @decorators.can_edit_class
 def delete(request, class_id):
     """
@@ -163,7 +154,6 @@ def delete(request, class_id):
     messages.success(request, "Class deleted")
     return HttpResponseRedirect(reverse('classes-list'))
 
-@login_required
 @decorators.can_enroll_students
 def roster_add(request, class_id, user_id):
     """
@@ -180,7 +170,6 @@ def roster_add(request, class_id, user_id):
     
     return HttpResponseRedirect(reverse('classes-enroll', args=class_id))
 
-@login_required
 @decorators.can_enroll_students
 def roster_remove(request, class_id, user_id):
     """
