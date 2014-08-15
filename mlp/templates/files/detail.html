@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load permissions %}
 {% block content %}
 <h3>{{ file.name }}</h3>
 <hr />
@@ -43,9 +43,7 @@
     <div class="well">
         <p><strong>Duration:</strong> {{ file.duration }} seconds</p>
         <p><strong>Description:</strong> {{ file.description }}</p>
-    
     </div>
-
     {% if file.file and user.is_authenticated %}
     <p><a class="btn btn-default" href="{% url 'files-download' file.pk %}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
     {% endif %}

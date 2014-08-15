@@ -29,9 +29,12 @@
     <h4>Files</h4>
     <div class="file-list">
     {% if files %}
-        <table class="table table-bordered">
+        <table class="table table-striped">
         {% for file in files %}
-            <tr>{% include "files/_file.html" %}</tr>
+            <tr>
+	    	<td>{% include "files/_file.html" %}</td>
+		<td><a href="{% url 'files-delete' file.pk %}" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></td>
+	    </tr>
         {% endfor %}
         </table>
     {% else %}
