@@ -7,11 +7,11 @@ from .models import Class, Roster
 
 @permission(model=Class)
 def can_list_class(user, _class):
-    return user.is_staff or can_list_all_files(user)
+    return user.is_staff or can_list_all_classes(user)
 
 @permission
 def can_list_all_classes(user):
-    return user.is_staff or user.is_authenticated
+    return user.is_authenticated
 
 @permission(model=Class)
 def can_edit_class(user, _class):
