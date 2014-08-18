@@ -54,6 +54,9 @@ class User(AbstractBaseUser):
         else:
             return self.email
 
+    def can_cloak_as(self, other_user):
+        return self.is_staff
+
     def __getattr__(self, attr):
         """
         Instead of creating a bunch of user.is_admin, user.is_uploader,

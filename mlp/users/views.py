@@ -51,7 +51,7 @@ def workflow(request):
     Workflow page. Basically a home/profile page for users
     that do not have admin access.
     """
-    roster = Roster.objects.filter(user=request.user)
+    roster = Roster.objects.filter(user=request.user).values('_class')
     classes = Class.objects.filter(class_id__in=roster)
     files = File.objects.filter(uploaded_by=request.user)
 
