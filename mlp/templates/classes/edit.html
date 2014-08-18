@@ -12,4 +12,20 @@
         {% endif%}
     </form>
 </div>
+<div class="col-md-5">
+    <form method="post">
+        <h3>Teacher: </h3>
+        {% csrf_token %}
+        <table class="table table-striped">
+            {% for instruct in instructor %}
+            <tr>
+                <td>{{ instruct.last_name }}</td>
+                <td>{{ instruct.first_name }}</td>
+                <td>{{ instruct.email }}</td> 
+                <td><a class="btn btn-default btn-small pull-right" href="{% url 'classes-make_instructor' class.pk instruct.pk %}">Teacher</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </form>
+</div>
 {% endblock %}
