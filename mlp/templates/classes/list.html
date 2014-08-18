@@ -7,8 +7,8 @@
     <a href="{% url 'classes-create' %}" class="btn btn-default pull-right" style="margin-top: -40px;">
         <span class="glyphicon glyphicon-plus"></span> Class
     </a>
-    <hr />
     {% endif %}
+    <hr />
     {% if classes %}
         {% include "classes/_class.html" %}
     {% else %}
