@@ -59,7 +59,8 @@ urlpatterns = patterns('',
 
     # standard
     url(r'', include('django.contrib.auth.urls')),
-    url(r'^cloak/', include('cloak.urls'))
+    url(r'^cloak/', include('cloak.urls')),
+    url(r'^u/', include('unfriendly.urls')),
 )
 
 if settings.DEBUG:
