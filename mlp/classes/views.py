@@ -144,7 +144,7 @@ def _edit(request, class_id):
 
     else:
         form = ClassForm(instance=class_, user=request.user)
-        instructor = Roster.objects.all().values('user')
+        instructor = Roster.objects.filter(_class=class_).values('user')
         instructor = User.objects.filter(user_id__in=instructor)
     
     return render(request, 'classes/edit.html', {

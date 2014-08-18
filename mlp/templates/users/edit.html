@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
+<h3>{% if user %}Edit User: {{ user.last_name }}, {{ user.first_name }}{% else %}Create User{% endif %}</h3>
+<button class="btn btn-default pull-right" onclick="window.history.go(-1); return false" style="margin-top: -40px;">Back</button>
+<hr />
 <div class="col-md-5">
-    <h3>{% if user %}Edit User: {{ user.last_name }}, {{ user.first_name }}{% else %}Create User{% endif %}</h3>
-    <hr />
     <p><strong>User ID:</strong> {{ user.user_id }}</p>
     <p><strong>Date Joined:</strong> {{ user.date_joined|date }}</p>
     <p><strong>Staff:</strong> {% if user.is_staff %}True{% else %}False{% endif %}</p>

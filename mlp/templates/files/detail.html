@@ -2,6 +2,7 @@
 {% load permissions %}
 {% block content %}
 <h3>{{ file.name }}</h3>
+<button class="btn btn-default pull-right" onclick="window.history.go(-1); return false" style="margin-top: -40px;">Back</button>
 <hr />
 <div class="col-md-7">
     {% if file and perms.can_view_file %}
