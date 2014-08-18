@@ -43,6 +43,7 @@ urlpatterns = patterns('',
     url(r'^classes/detail/(?P<class_id>\d+)/?$', classes.detail, name='classes-detail'),
     url(r'^classes/enroll/(?P<class_id>\d+)/?$', classes.enroll, name='classes-enroll'),
     url(r'^classes/delete/(?P<class_id>\d+)/?$', classes.delete, name='classes-delete'),
+    url(r'^classes/edit/instructor/(?P<class_id>\d+)/(?P<user_id>\d+)/?$', classes.make_instructor, name='classes-make_instructor'),
 
     # roster
     url(r'^roster/add/(?P<class_id>\d+)/(?P<user_id>\d+)/?$', classes.roster_add, name='roster-add'),
