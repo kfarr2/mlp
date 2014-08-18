@@ -7,7 +7,8 @@ from django.contrib import messages
 from mlp.users.models import User
 from mlp.files.models import File
 from .perms import decorators
-from .models import Class, Roster, ClassFile
+from .enums import UserRole
+from .models import Class, Roster, ClassFile, SignedUp
 from .forms import ClassForm, RosterForm
 
 @decorators.can_list_all_classes
@@ -30,15 +31,20 @@ def detail(request, class_id):
     Detail view for classes
     """
     class_ = get_object_or_404(Class, pk=class_id)
-    roster = Roster.objects.filter(_class=class_).exclude(role=4) 
-    instructor = Roster.objects.filter(_class=class_, role=4).values('user')
+    roles = Roster.objects.filter(_class=class_).exclude(role=UserRole.ADMIN) 
+    roster = User.objects.filter(user_id__in=roles.values('user'))
+    instructor = Roster.objects.filter(_class=class_, role=UserRole.ADMIN).values('user')
     instructor = User.objects.get(user_id__in=instructor)
     class_files = ClassFile.objects.filter(_class=class_).values('file') 
     files = File.objects.filter(file_id__in=class_files)
-    enrolled = len(roster)
+    signed_up = SignedUp.objects.filter(_class=class_).values('user')
+    signed_up = User.objects.filter(user_id__in=signed_up)
+    enrolled = len(roles)
     return render(request, "classes/detail.html", {
         "instructor": instructor,
         "enrolled": enrolled,
+        "signed_up": signed_up,
+        "roles": roles,
         "roster": roster,
         "files": files,
         "class": class_,    
@@ -165,7 +171,9 @@ def roster_add(request, class_id, user_id):
     if roster:
         messages.warning(request, "User already enrolled")
     else:
-        student = Roster.objects.create(user=user, _class=_class, role=1)
+        Roster.objects.create(user=user, _class=_class, role=UserRole.STUDENT)
+        delete = SignedUp.objects.filter(user=user, _class=_class)
+        delete.delete()
         messages.success(request, "User successfully enrolled in class")
     
     return HttpResponseRedirect(reverse('classes-enroll', args=class_id))
@@ -187,3 +195,17 @@ def roster_remove(request, class_id, user_id):
     return HttpResponseRedirect(reverse('classes-enroll', args=class_id))
 
 
+def signed_up_add(request, class_id, user_id):
+    """
+    Takes a class id and a student id and adds them to the roster
+    """
+    user = get_object_or_404(User, pk=user_id)
+    _class = get_object_or_404(Class, pk=class_id)
+    signed_up = SignedUp.objects.filter(_class=_class, user=user)
+    if signed_up:
+        messages.warning(request, "User already enrolled")
+    else:
+        SignedUp.objects.create(user=user, _class=_class)
+        messages.success(request, "User successfully signed up for class")
+    
+    return HttpResponseRedirect(reverse('classes-detail', args=class_id))
