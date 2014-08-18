@@ -2,7 +2,7 @@
     <a class="pull-left media-thumbnail-link" href="{% url 'files-download' file.pk %}">
         <img class="media-object" src="{{ file.thumbnail_url|default:"holder.js/64x64" }}" alt="Thumbnail"/>
     </a>
-    <div class="media-body">
+    <div class="media-body" style="background-color:{{ file.filetag_set.0.tag.background_color }};">
         <h5 class="media-heading">
             <a href="{% url 'files-detail' file.pk %}"><strong>{{ file.name }}</strong></a> <em>(uploaded {{ file.uploaded_on }})</em>
         </h5>
