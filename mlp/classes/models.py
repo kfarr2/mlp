@@ -27,6 +27,17 @@ class Roster(models.Model):
     class Meta:
         db_table = "roster"
 
+class SignedUp(models.Model):
+    """
+    Used to map users to classes they have signed up for but are not in yet
+    """
+    signed_up_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User)
+    _class = models.ForeignKey(Class)
+    
+    class Meta:
+        db_table = "signed_up"
+
 class ClassFile(models.Model):
     """
     Used to map files to classes
