@@ -90,6 +90,7 @@ INSTALLED_APPS = (
     'arcutils',
     'permissions',
     'south',
+    'cloak',
     'celery',
     'mlp.home',
     'mlp.users',
@@ -106,6 +107,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # 'djangocas.middleware.CASMiddleware',
+    'cloak.middleware.CloakMiddleware',
+
 )
 
 PASSWORD_HASHERS = (
