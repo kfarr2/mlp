@@ -170,15 +170,15 @@ def get_md5_sum(filename):
 def path_has_extension(path):
     return True if len(os.path.splitext(path)[1]) > 0 else False
 
-
+'''
 def get_or_import_video(path, name, description, created_date, changed_date):
-    '''
+    """
     Returns a File object (if possible)
     and starts importing it using Celery.
     
     Returns None on error.
     
-    '''
+    """
     
     # check if our path has an extension. if it does, exit out.
     if path_has_extension(path):
@@ -285,7 +285,7 @@ def process_imported_file(file):
         
     file.save()
     return file.status
-
+'''
 
 def get_duration(video_path):
     """Returns the duration of the file in seconds"""

@@ -148,7 +148,7 @@ class DetailViewTest(TestCase):
 
     def test_not_logged_in(self):
         response = self.client.get(reverse('files-detail', args=(self.file.pk,)))
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
     def test_logged_in(self):
         self.client.login(email=self.user.email, password='foobar')
@@ -486,4 +486,5 @@ class ProcessUploadedFileTest(TestCase):
         process_uploaded_file(1, self.file)
         file = File.objects.get(pk=self.file.pk)
         self.assertEqual(file.status, FileStatus.FAILED) 
+
 
