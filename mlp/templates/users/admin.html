@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% load permissions %}
 {% load arc %}
 {% block content %}
 <h3>Admin Control</h3>
 <hr />
-<div class="col-md-5">
+<div class="col-md-6">
     <h4>Users</h4>
     <table class="table table-striped">
         <tr>
@@ -11,6 +12,7 @@
             <td><strong>First</strong></td>
             <td><strong>Last</strong></td>
             <td><strong>Date Joined</strong></td>
+            <td></td>
         </tr>
     {% if users %}
         {% for user in users %}
@@ -19,6 +21,12 @@
                 <td>{{ user.first_name }}</td>
                 <td>{{ user.last_name }}</td>
                 <td>{{ user.date_joined|date }}</td>
+                <td>
+                    <form method="post" action="{% url 'cloak' user.pk %}" style="display:inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-default" name="submit">Cloak</button>
+                    </form>
+                </td>
             </tr>
         {% endfor %}
     {% endif %}
@@ -31,9 +39,9 @@
     {% if files %}
         <table class="table table-striped">
         {% for file in files %}
-            <tr>
+        <tr>
 	    	<td>{% include "files/_file.html" %}</td>
-		<td><a href="{% url 'files-delete' file.pk %}" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></td>
+            <td><a href="{% url 'files-delete' file.pk %}" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></td>
 	    </tr>
         {% endfor %}
         </table>

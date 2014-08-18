@@ -4,7 +4,7 @@
 <h3>{{ file.name }}</h3>
 <hr />
 <div class="col-md-7">
-    {% if file and user.is_staff %}
+    {% if file and perms.can_view_file %}
         {% if file.status == FileStatus.READY %}
         <div class="btn-group pull-right">
             <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
