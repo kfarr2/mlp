@@ -1,10 +1,12 @@
+{% load unfriendly_tags %}
 <div class="media">
     <a class="pull-left media-thumbnail-link" href="{% url 'files-download' file.pk %}">
         <img class="media-object" src="{{ file.thumbnail_url|default:"holder.js/64x64" }}" alt="Thumbnail"/>
     </a>
     <div class="media-body" style="background-color:{{ file.filetag_set.0.tag.background_color }};">
         <h5 class="media-heading">
-            <a href="{% url 'files-detail' file.pk %}"><strong>{{ file.name }}</strong></a> <em>(uploaded {{ file.uploaded_on }})</em>
+            {% url 'files-detail' file.pk as file_url%}
+            <a href="{{ file_url|obfuscate }}"><strong>{{ file.name }}</strong></a> <em>(uploaded {{ file.uploaded_on }})</em>
         </h5>
         <p class="pull-right" style="padding-left:5px">
         {% for file_tag in file.filetag_set.all %}

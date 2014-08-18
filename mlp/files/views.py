@@ -79,7 +79,6 @@ def edit(request, file_id):
         'file': file,
     })
 
-@decorators.can_view_file   
 def detail(request, file_id):
     """
     Detail views
