@@ -2,12 +2,13 @@ import os
 from permissions import permission
 from django.db.models import Q
 from mlp.users.models import User
-from mlp.classes.models import Class, Roster
+from mlp.classes.enums import UserRole
+from mlp.classes.models import Class, Roster, ClassFile
 from .models import File
 
 @permission
 def can_upload_file(user):
-    roster = Roster.objects.filter(user=user, role=4)
+    roster = Roster.objects.filter(user=user, role=UserRole.ADMIN)
     if user.is_staff or roster:
         return True
 
@@ -28,7 +29,9 @@ def can_list_all_files(user):
 
 @permission(model=File)
 def can_view_file(user, file):
-    return can_list_all_files(user) or can_edit_file(user, file)
+    roster = Roster.objects.filter(user=user).values('_class')
+    file = ClassFile.objects.filter(_class__in=roster)
+    return file.exists() or can_list_all_files(user) or can_edit_file(user, file)
 
 @permission(model=File)
 def can_download_file(user, file):
