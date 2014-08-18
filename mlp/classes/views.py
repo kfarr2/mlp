@@ -104,7 +104,7 @@ def file_remove(request, class_id, file_id):
     _class = get_object_or_404(Class, pk=class_id)
     file = get_object_or_404(File, pk=file_id)
     class_file = ClassFile.objects.filter(_class=_class, file=file)
-    if class_file:
+    if class_file.exists():
         class_file.delete()
         messages.success(request, "File removed from class.")
     else:
@@ -163,56 +163,6 @@ def delete(request, class_id):
     messages.success(request, "Class deleted")
     return HttpResponseRedirect(reverse('classes-list'))
 
-@decorators.can_enroll_students
-def roster_add(request, class_id, user_id):
-    """
-    Takes a class id and a student id and adds them to the roster
-    """
-    user = get_object_or_404(User, pk=user_id)
-    _class = get_object_or_404(Class, pk=class_id)
-    roster = Roster.objects.filter(_class=_class, user=user)
-    if roster:
-        messages.warning(request, "User already enrolled")
-    else:
-        Roster.objects.create(user=user, _class=_class, role=UserRole.STUDENT)
-        delete = SignedUp.objects.filter(user=user, _class=_class)
-        delete.delete()
-        messages.success(request, "User successfully enrolled in class")
-    
-    return HttpResponseRedirect(reverse('classes-enroll', args=class_id))
-
-@decorators.can_enroll_students
-def roster_remove(request, class_id, user_id):
-    """
-    Takes a class id and user id and removes the matching entry from the roster
-    """
-    user = get_object_or_404(User, pk=user_id)
-    _class = get_object_or_404(Class, pk=class_id)
-    roster = Roster.objects.filter(_class=_class, user=user)
-    if roster:
-        roster.delete()
-        messages.success(request, "User successfully dropped from class")
-    else:
-        messages.danger(request, "Error: User not found")
-
-    return HttpResponseRedirect(reverse('classes-enroll', args=class_id))
-
-
-def signed_up_add(request, class_id, user_id):
-    """
-    Takes a class id and a student id and adds them to the roster
-    """
-    user = get_object_or_404(User, pk=user_id)
-    _class = get_object_or_404(Class, pk=class_id)
-    signed_up = SignedUp.objects.filter(_class=_class, user=user)
-    if signed_up:
-        messages.warning(request, "User already enrolled")
-    else:
-        SignedUp.objects.create(user=user, _class=_class)
-        messages.success(request, "User successfully signed up for class")
-    
-    return HttpResponseRedirect(reverse('classes-detail', args=class_id))
-
 def make_instructor(request, class_id, user_id):
     """
     Takes a user and makes them the instructor for a class
@@ -230,4 +180,55 @@ def make_instructor(request, class_id, user_id):
     new_teacher = Roster.objects.create(_class=_class, user=user, role=UserRole.ADMIN)
     
 
-    return HttpResponseRedirect(reverse('classes-detail', args=class_id))
+    return HttpResponseRedirect(reverse('classes-detail', args=(class_id,)))
+
+@decorators.can_enroll_students
+def roster_add(request, class_id, user_id):
+    """
+    Takes a class id and a student id and adds them to the roster
+    """
+    user = get_object_or_404(User, pk=user_id)
+    _class = get_object_or_404(Class, pk=class_id)
+    roster = Roster.objects.filter(_class=_class, user=user)
+    if roster.exists():
+        messages.warning(request, "User already enrolled")
+    else:
+        Roster.objects.create(user=user, _class=_class, role=UserRole.STUDENT)
+        delete = SignedUp.objects.filter(user=user, _class=_class)
+        delete.delete()
+        messages.success(request, "User successfully enrolled in class")
+    
+    return HttpResponseRedirect(reverse('classes-enroll', args=(class_id,)))
+
+@decorators.can_enroll_students
+def roster_remove(request, class_id, user_id):
+    """
+    Takes a class id and user id and removes the matching entry from the roster
+    """
+    user = get_object_or_404(User, pk=user_id)
+    _class = get_object_or_404(Class, pk=class_id)
+    roster = Roster.objects.filter(_class=_class, user=user)
+    if roster:
+        roster.delete()
+        messages.success(request, "User successfully dropped from class")
+    else:
+        messages.warning(request, "Error: User not found")
+
+    return HttpResponseRedirect(reverse('classes-enroll', args=(class_id,)))
+
+
+def signed_up_add(request, class_id, user_id):
+    """
+    Takes a class id and a student id and adds them to the roster
+    """
+    user = get_object_or_404(User, pk=user_id)
+    _class = get_object_or_404(Class, pk=class_id)
+    signed_up = SignedUp.objects.filter(_class=_class, user=user)
+    if signed_up:
+        messages.warning(request, "User already enrolled")
+    else:
+        SignedUp.objects.create(user=user, _class=_class)
+        messages.success(request, "User successfully signed up for class")
+    
+    return HttpResponseRedirect(reverse('classes-detail', args=(class_id,)))
+
