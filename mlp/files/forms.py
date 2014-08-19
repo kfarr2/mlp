@@ -4,6 +4,7 @@ from mlp.tags.models import Tag
 from mlp.tags.forms import TagField
 from elasticmodels.forms import SearchForm
 from elasticmodels import make_searchable
+from mlp.users.models import User
 from .search_indexes import FileIndex
 from .models import FileTag, File
 from .enums import FileStatus
