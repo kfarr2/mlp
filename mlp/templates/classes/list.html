@@ -9,6 +9,13 @@
     </a>
     {% endif %}
     <hr />
+    <form method='get' class='form-inline' id='search-form' action="{{ request.path }}">
+        {% include "_field.html" with field=form.q %}
+        <div class="btn-group btn-group-sm">
+            <button type="submit" name="search" class="btn btn-default btn-sm">Search</button>
+            <a href="{% url 'classes-list' %}" class="btn btn-default btn-sm">Clear</a>
+        </div>
+    </form>
     {% if classes %}
         {% include "classes/_class.html" %}
     {% else %}

@@ -9,7 +9,7 @@ from mlp.files.models import File
 from .perms import decorators
 from .enums import UserRole
 from .models import Class, Roster, ClassFile, SignedUp
-from .forms import ClassForm, RosterForm
+from .forms import ClassForm, RosterForm, ClassSearchForm
 
 @decorators.can_list_all_classes
 def list_(request):
@@ -18,9 +18,11 @@ def list_(request):
     """
     user_classes_list = Roster.objects.filter(user=request.user).values('_class')
     user_classes = Class.objects.filter(class_id__in=user_classes_list)
-    classes = Class.objects.all()
+    form = ClassSearchForm(request.GET)
+    classes = form.results(page=request.GET.get("page"))
 
     return render(request, "classes/list.html", {
+        "form": form,
         "classes": classes,
         "user_classes": user_classes,
     })

@@ -1,0 +1,3 @@
+{{ object.name }}
+{{ object.crn }}
+{{ object.description }}
