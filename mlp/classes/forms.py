@@ -47,16 +47,15 @@ class ClassSearchForm(SearchForm):
     Form for searching classes
     """
     def __init__(self, *args, **kwargs):
-        if kwargs:
-            self.user = kwargs.pop('user')
+        self.user = kwargs.pop('user')
         super(ClassSearchForm, self).__init__(*args, **kwargs)
 
     def queryset(self):
-        classes = Class.objects.all().distinct()
+        roster = Roster.objects.filter(user=self.user).values('_class')
+        classes = Class.objects.filter(class_id__in=roster)
 
-        if not can_list_all_classes:
-            roster = Roster.objects.filter(user=self.user).values('_class')
-            classes = classes.filter(class_id__in=roster)
+        if can_list_all_classes:
+            classes = Class.objects.all()
 
         return classes
 

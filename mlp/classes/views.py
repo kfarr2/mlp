@@ -20,7 +20,7 @@ def list_(request):
     """
     user_classes_list = Roster.objects.filter(user=request.user).values('_class')
     user_classes = Class.objects.filter(class_id__in=user_classes_list)
-    form = ClassSearchForm(request.GET)
+    form = ClassSearchForm(request.GET, user=request.user)
     classes = form.results(page=request.GET.get("page"))
 
     return render(request, "classes/list.html", {
@@ -69,7 +69,7 @@ def enroll(request, class_id):
         "students": students,
     })
 
-@decorators.can_edit_class
+@decorators.can_list_class
 def file_list(request, class_id):
     """
     View that allows an admin to view the files in their class
@@ -87,7 +87,7 @@ def file_list(request, class_id):
         "class_files": class_files,
     })
 
-@decorators.can_edit_class
+@decorators.can_list_class
 def file_add(request, class_id, file_id):
     """
     Adds a file to a class
