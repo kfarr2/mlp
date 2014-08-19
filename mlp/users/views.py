@@ -118,8 +118,6 @@ def delete(request, user_id):
     if user:
         messages.warning(request, "User is deleted.")
         user.delete()
-    else:
-        messages.warning(request, "No such user.")
 
     return HttpResponseRedirect(reverse('users-list'))
 
