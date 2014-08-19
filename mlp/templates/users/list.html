@@ -4,6 +4,14 @@
 <h3>User List</h3>
 <a href="{% url 'users-create' %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-plus"></span> User</a>
 <hr />
+<form method='get' class='form-inline' id='search-form' action="{{ request.path }}">
+    {% include "_field.html" with field=form.q %}
+    <div class="btn-group btn-group-sm">
+        <button type="submit" name="search" class="btn btn-default btn-sm">Search</button>
+        <a href="{% url 'users-list' %}" class="btn btn-default btn-sm">Clear</a>
+    </div>
+</form>
+<br />
 <table class="table table-striped">
 <tr>
     <td>View</td>
@@ -14,6 +22,9 @@
     <td>Date Joined</td>
     <td>Staff</td>
     <td>Active</td>
+    {% if perms.can_edit_user %}
+        <td>Edit</td>
+    {% endif %}
 </tr>
 {% for user in users %}
 <tr>
@@ -25,6 +36,14 @@
     <td>{{ user.date_joined|date }}</td>
     <td>{{ user.is_staff }}</td>
     <td>{{ user.is_active }}</td>
+    {% if perms.can_edit_user %}
+    <td>
+        <div class="btn-group">
+            <a href="{% url 'users-edit' user.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
+            <a href="{% url 'users-delete' user.pk %}" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></a>
+        </div>
+    </td>
+    {% endif %}
 </tr>
 {% endfor %}
 </table>

@@ -10,7 +10,7 @@ from mlp.files.models import File
 from mlp.classes.models import Class, Roster
 from .perms import decorators
 from .models import User
-from .forms import UserForm
+from .forms import UserForm, UserSearchForm
 
 @login_required
 def home(request):
@@ -40,8 +40,12 @@ def list_(request):
     """
     List users.
     """
-    users = User.objects.all()
+    form = UserSearchForm(request.GET, user=request.user)
+    form.is_valid()
+    users = form.results(page=request.GET.get("page"))
+
     return render(request, "users/list.html", {
+        "form": form,
         "users": users,
     })
 
@@ -106,5 +110,16 @@ def _edit(request, user_id):
 
     return render(request, "users/edit.html", {
         "form": form,
-        "user": user,
     })
+
+@decorators.can_edit_user
+def delete(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    if user:
+        messages.warning(request, "User is deleted.")
+        user.delete()
+    else:
+        messages.warning(request, "No such user.")
+
+    return HttpResponseRedirect(reverse('users-list'))
+
