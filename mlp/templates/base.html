@@ -35,7 +35,6 @@
                         <li><a href="{% url 'classes-list' %}"><span class="glyphicon glyphicon-book"></span> Classes</a></li>
                         {% if perms.has_admin_access %}
                             <li><a href="{% url 'files-list' %}"><span class="glyphicon glyphicon-folder-open"></span> Files</a></li>
-                            <li><a href="{% url 'users-admin' %}"><span class="glyphicon glyphicon-lock"></span> Admin</a></li>
                             <li><a href="{% url 'users-list' %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>
                         {% endif %}
                     </ul>
