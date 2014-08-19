@@ -25,6 +25,9 @@
     {% if perms.can_edit_user %}
         <td>Edit</td>
     {% endif %}
+    {% if perms.has_admin_access %}
+        <td>Cloak</td>
+    {% endif %}
 </tr>
 {% for user in users %}
 <tr>
@@ -43,6 +46,14 @@
             <a href="{% url 'users-delete' user.pk %}" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></a>
         </div>
     </td>
+    {% endif %}
+    {% if perms.has_admin_access %}
+        <td>
+            <form method="post" action="{% url 'cloak' user.pk %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-default" name="submit">Cloak</button>
+            </form>
+        </td>
     {% endif %}
 </tr>
 {% endfor %}

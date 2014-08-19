@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% load permissions %}
+{{ form.media }}
 {% block content %}
-{% if user.is_staff %}
+{% if user|can_edit_class:class %}
 <div class="btn-group pull-right">
     <a href="{% url 'classes-edit' class.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
     <a href="{% url 'classes-delete' class.pk %}" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></a>
 </div>
 {% endif %}
 <h3>{{ class.name }}</h3>
-{% if user not in roster and not user.is_staff %}
+{% if not user|can_edit_class:class %}
     <a href="{% url 'signed_up-add' class.pk user.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;">Sign Up</a>
 {% endif %}
 <hr />
@@ -20,8 +21,7 @@
     <p><strong>Description:</strong> {{ class.description }}</p>
     <p><strong>Number of students enrolled in this class:</strong> {{ enrolled }}</p>
     <br />
-
-    {% if perms.can_enroll_students %}
+    {% if user|can_enroll_students:class %}
         <h3>Students Waiting for Approval</h3>
         <table class="table table-striped">
             <tr>
@@ -41,9 +41,9 @@
     {% endif %}
 
     <h3>Roster</h3>
-    {% if perms.can_enroll_students %}
+    {% if user|can_edit_class:class %}
         <a href="{% url 'classes-enroll' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-plus"></span></a>
-    {% endif %}    
+    {% endif %}
     <table class="table table-striped">
         <tr>
             <td>Last</td>
@@ -79,7 +79,7 @@
 </div>
 <div class="col-md-7">
     <h3>Files</h3>
-    {% if perms.can_edit_class %}<a href="{% url 'classes-file_list' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-plus"></span></a>{% endif %}
+    {% if user|is_enrolled:class %}<a href="{% url 'classes-file_list' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-plus"></span></a>{% endif %}
     <hr />
     {% for file in files %}
         {% include "files/_file.html" %} 
