@@ -3,8 +3,8 @@
 {% block content %}
 {% if user.is_staff %}
 <div class="btn-group pull-right">
-    <a href="{% url 'classes-edit' class.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
-    <a href="{% url 'classes-delete' class.pk %}" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Delete</a>
+    <a href="{% url 'classes-edit' class.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
+    <a href="{% url 'classes-delete' class.pk %}" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></a>
 </div>
 {% endif %}
 <h3>{{ class.name }}</h3>
@@ -41,7 +41,9 @@
     {% endif %}
 
     <h3>Roster</h3>
-    <a href="{% url 'classes-enroll' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-plus"></span></a>
+    {% if perms.can_enroll_students %}
+        <a href="{% url 'classes-enroll' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-plus"></span></a>
+    {% endif %}    
     <table class="table table-striped">
         <tr>
             <td>Last</td>
@@ -77,7 +79,7 @@
 </div>
 <div class="col-md-7">
     <h3>Files</h3>
-    {% if user.is_staff %}<a href="{% url 'classes-file_list' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-plus"></span> Files</a>{% endif %}
+    {% if perms.can_edit_class %}<a href="{% url 'classes-file_list' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-plus"></span></a>{% endif %}
     <hr />
     {% for file in files %}
         {% include "files/_file.html" %} 

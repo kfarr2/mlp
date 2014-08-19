@@ -3,6 +3,15 @@
 {% block content %}
 <h3>Add a File</h3>
 <button class="btn btn-default pull-right" onclick="window.history.go(-1); return false" style="margin-top: -40px;">Back</button>
+<form method='get' class='form-inline' id='search-form' action="{{ request.path }}">
+    {% include "_field.html" with field=form.q %}
+    {% include "_field.html" with field=form.tags %}
+    <div class="btn-group btn-group-sm">
+        <button type="submit" name="search" class="btn btn-default btn-sm">Search</button>
+        <a href="{% url 'files-list' %}" class="btn btn-default btn-sm">Clear</a>
+    </div>
+</form>
+
 <div class="col-md-6">
     <h3>Files</h3>
     <hr />
