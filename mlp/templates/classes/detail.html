@@ -9,7 +9,7 @@
 </div>
 {% endif %}
 <h3>{{ class.name }}</h3>
-{% if not user|can_edit_class:class %}
+{% if not user|can_edit_class:class and user not in roster %}
     <a href="{% url 'signed_up-add' class.pk user.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;">Sign Up</a>
 {% endif %}
 <hr />

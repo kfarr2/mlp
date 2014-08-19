@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load permissions %}
 {% block content %}
 <h3>Add a File</h3>
 <button class="btn btn-default pull-right" onclick="window.history.go(-1); return false" style="margin-top: -40px;">Back</button>
@@ -30,6 +30,7 @@
         <div class="alert alert-info">No files have been uploaded yet.</div>
     {% endif %}
 </div>
+{% if user|can_edit_class:class %}
 <div class="col-md-6">
     <h3>Class Files</h3> 
     <hr />
@@ -48,4 +49,5 @@
         <div class="alert alert-info">No files have been added to this class yet.</div>
     {% endif %}
 </div>
+{% endif %}
 {% endblock %}
