@@ -18,22 +18,9 @@ def home(request):
     User-home. Either redirect to the workflow or admin page.
     """
     if request.user.is_staff:
-        return HttpResponseRedirect(reverse("users-admin"))
+        return HttpResponseRedirect(reverse("users-list"))
     else:
         return HttpResponseRedirect(reverse("users-workflow"))
-
-@decorators.has_admin_access
-def admin(request):
-    """
-    Admin page. Only users with the is_staff
-    flag set can use this page.
-    """
-    files = File.objects.all()
-    users = User.objects.all()
-    return render(request, "users/admin.html", {
-        "files": files,
-        "users": users,
-    })
 
 @decorators.can_view_users
 def list_(request):
