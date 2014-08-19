@@ -10,6 +10,7 @@ from mlp.tags.models import Tag
 from .models import File, FileTag
 from .enums import FileType, FileStatus
 from .forms import FileForm
+from .perms import can_upload_file, can_edit_file, can_list_file, can_list_all_files, can_view_file, can_download_file
 from .tasks import process_uploaded_file, generate_thumbnail, convert_video, get_duration
 
 def create_files(self):
@@ -486,5 +487,24 @@ class ProcessUploadedFileTest(TestCase):
         process_uploaded_file(1, self.file)
         file = File.objects.get(pk=self.file.pk)
         self.assertEqual(file.status, FileStatus.FAILED) 
+
+class FilesPermsTest(TestCase):
+    """
+    Test user/file permissions
+    """
+    def setUp(self):
+        super(FilesPermsTest, self).setUp()
+        create_users(self)
+        create_files(self)
+        self.client.login(email=self.admin.email, password=self.admin.password)
+
+    def test_permissions(self):
+        self.assertTrue(can_upload_file(self.admin))
+        self.assertTrue(can_edit_file(self.admin, self.file))
+        self.assertTrue(can_list_file(self.admin, self.file))
+        self.assertTrue(can_list_all_files(self.admin))
+        self.assertTrue(can_view_file(self.admin, self.file))
+        self.assertTrue(can_download_file(self.admin, self.file))
+
 
 
