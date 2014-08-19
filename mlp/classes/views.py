@@ -6,6 +6,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from mlp.users.models import User
 from mlp.files.models import File
+from mlp.files.forms import FileSearchForm
+from mlp.files.perms import decorators
 from .perms import decorators
 from .enums import UserRole
 from .models import Class, Roster, ClassFile, SignedUp
@@ -75,9 +77,11 @@ def file_list(request, class_id):
     _class = get_object_or_404(Class, pk=class_id)
     class_files = ClassFile.objects.filter(_class=_class).values('file')
     class_files = File.objects.filter(file_id__in=class_files)
-    files = File.objects.exclude(file_id__in=class_files)
+    form = FileSearchForm(request.GET)
+    files = form.results(page=request.GET.get("page")).object_list
 
     return render(request, "classes/add_file.html", {
+        "form": form,
         "files": files,
         "class": _class,
         "class_files": class_files,

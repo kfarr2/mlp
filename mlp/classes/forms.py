@@ -47,6 +47,8 @@ class ClassSearchForm(SearchForm):
     Form for searching classes
     """
     def __init__(self, *args, **kwargs):
+        if kwargs:
+            self.user = kwargs.pop('user')
         super(ClassSearchForm, self).__init__(*args, **kwargs)
 
     def queryset(self):
