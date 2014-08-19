@@ -1,0 +1,2 @@
+{{ object.last_name }} {{ object.first_name }}
+{{ object.email }}
