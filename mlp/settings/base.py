@@ -25,6 +25,7 @@ LOGOUT_URL = reverse_lazy("home")
 
 ELASTIC_SEARCH_CONNECTION = {
     "urls": ["http://localhost:9200/"],
+    "index": "mlp_dev",
 }
 
 ELASTIC_SEARCH_URL = "http://127.0.0.1:9200/"
@@ -87,6 +88,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bootstrapform',
+    'elasticmodels',
     'arcutils',
     'permissions',
     'south',
