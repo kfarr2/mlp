@@ -1,24 +1,8 @@
 {% extends "base.html" %}
 {% load permissions %}
 {% block content %}
-<h3>{{ file.name }}</h3>
-<button class="btn btn-default pull-right" onclick="window.history.go(-1); return false" style="margin-top: -40px;">Back</button>
 <hr />
 <div class="col-md-7">
-    {% if file and perms.can_view_file %}
-        {% if file.status == FileStatus.READY %}
-        <div class="btn-group pull-right">
-            <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
-            <a class="btn btn-danger" href="{% url 'files-delete' file.pk %}"><span class="glyphicon glyphicon-trash"></span></a>
-        </div>
-        <br />
-        {% endif %}
-    {% endif %}
-    <p>Tags: 
-    {% for file_tag in file_tags %}
-        {{ file_tag.tag }}
-    {% endfor %}
-    </p>
 
     {% if file.type == FileType.VIDEO %}
         <video controls>
@@ -31,22 +15,44 @@
 
     {% if file.type == FileType.AUDIO %}
         {% if file.audio_urls %}
-        <audio controls>
-        {% for path, mime in file.audio_urls %}
-            <source src="{{ path }}" type="{{ mime }}">
-        {% endfor %}
-        Your browser failed to load the audio.
-        </audio>
+            <audio controls>
+                {% for path, mime in file.audio_urls %}
+                    <source src="{{ path }}" type="{{ mime }}">
+                {% endfor %}
+                Your browser failed to load the audio.
+            </audio>
         {% else%}
             No audio urls were specified.
         {% endif %}
     {% endif %}
     <div class="well">
-        <p><strong>Duration:</strong> {{ file.duration }} seconds</p>
+        <h3>Title: {{ file.name }}</h3>
+        {% if file.file and user.is_authenticated %}
+        <p><a class="btn btn-default pull-right" style="margin-top: -50px;" href="{% url 'files-download' file.pk %}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
+        {% endif %}
+        <table class="table table-striped">
+            <tr>
+                <td>
+                    <p><strong>Tags:</strong>
+                    {% for file_tag in file_tags %}
+                        {{ file_tag.tag }}
+                    {% endfor %}</p>
+                </td>
+                <td><p><strong>Duration:</strong> {{ file.duration }} seconds</p></td>
+                <td>
+                    {% if file and perms.can_edit_file %}
+                        {% if file.status == FileStatus.READY %}
+                        <div class="btn-group pull-right">
+                            <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
+                            <a class="btn btn-danger" href="{% url 'files-delete' file.pk %}"><span class="glyphicon glyphicon-trash"></span></a>
+                        </div>
+                        <br></br>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
         <p><strong>Description:</strong> {{ file.description }}</p>
     </div>
-    {% if file.file and user.is_authenticated %}
-    <p><a class="btn btn-default" href="{% url 'files-download' file.pk %}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
-    {% endif %}
 </div>
 {% endblock %}
