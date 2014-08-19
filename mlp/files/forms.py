@@ -19,7 +19,8 @@ class FileSearchForm(SearchForm):
     end_date = DateTimeField(required=False, label="", widget=DateTimePicker(options={"format": "YYYY-MM-DD", "pickTime": False}))
 
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop("user")
+        if kwargs:
+            self.user = kwargs.pop("user")
         super(FileSearchForm, self).__init__(*args, **kwargs)
         self.fields['tags'].choices = Tag.objects.all()
         self.fields['tags'].widget.attrs['placeholder'] = "Tags"
@@ -29,18 +30,10 @@ class FileSearchForm(SearchForm):
             status=FileStatus.READY
         ).select_related("uploaded_by").prefetch_related("filetag_set__tag")
 
-        # filter the querysets based on the role
-        if not can_list_all_files(self.user):
-            files = files.filter(uploaded_by=self.user)
-
         return files
 
     def search(self):
         files = FileIndex.objects.all()
-
-        # filter the querysets based on the role
-        if not can_list_all_files(self.user):
-            files = files.filter(uploaded_by_id=self.user.pk)
 
         if self.cleaned_data.get("tags"):
             files = files.query(tags__in=self.cleaned_data['tags'])
