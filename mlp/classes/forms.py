@@ -11,6 +11,8 @@ from elasticmodels.forms import BaseSearchForm, SearchForm
 from elasticmodels import make_searchable
 from mlp.users.models import User
 from .models import Class, Roster
+from .perms import can_list_all_classes
+from .search_indexes import ClassIndex
 
 class ClassForm(forms.ModelForm):
     """
@@ -38,6 +40,38 @@ class ClassForm(forms.ModelForm):
         roster = Roster.objects.filter(user=self.user, _class=self.instance, role=4)
         if not roster:
             Roster.objects.create(user=self.user, _class=self.instance, role=4)
+
+
+class ClassSearchForm(SearchForm):
+    """
+    Form for searching classes
+    """
+    def __init__(self, *args, **kwargs):
+        super(ClassSearchForm, self).__init__(*args, **kwargs)
+
+    def queryset(self):
+        classes = Class.objects.all().distinct()
+
+        if not can_list_all_classes:
+            roster = Roster.objects.filter(user=self.user).values('_class')
+            classes = classes.filter(class_id__in=roster)
+
+        return classes
+
+    def search(self):
+        classes = ClassIndex.objects.all()
+
+        if not can_list_all_classes:
+            roster = Roster.objects.filter(user=self.user).values('_class')
+            classes = classes.filter(class_id__in=roster)
+
+        return classes
+
+    def results(self, page):
+        classes = super(ClassSearchForm, self).results(page)
+        class_lookup = dict((_class.pk, _class) for _class in classes)
+
+        return classes
 
 class RosterForm(forms.ModelForm):
     """
