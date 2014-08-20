@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load permissions %}
+{% load unfriendly_tags %}
 {{ form.media }}
 {% block content %}
 {% if user|can_edit_class:class %}
@@ -82,7 +83,8 @@
                 </td>
                 <td>
                     <div class="btn-group">
-                        <a href="{% url 'users-detail' ros.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-zoom-in"></span></a>
+                        {% url 'users-detail' ros.pk as user_url %}
+                        <a href="{{ user_url|obfuscate }}" class="btn btn-default"><span class="glyphicon glyphicon-zoom-in"></span></a>
                     </div>
                 </td>
             </tr>
