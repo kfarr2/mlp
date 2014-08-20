@@ -316,24 +316,24 @@ label.no-match {
 
 .navbar {
     position:relative;
-    min-height:60px;
+    min-height:70px;
     margin-bottom:20px;
     border:1px solid transparent;
 }
 
 .navbar-brand img {
-    height:30px;
+    height:42px;
     margin-top:-5px;
 }
 
 .navbar-brand {
-    color:#000;
-    margin-top: 5px;
-    font-size: 24px;
+    color:#fff;
+    font-size: 17px;
+    line-height: 7px;
 }
 
 .navbar-header > .navbar-brand:hover {
-    color:#333;
+    color:#fff;
 }
 
 .navbar-default {
@@ -344,8 +344,8 @@ label.no-match {
 .navbar-nav > li > a {
     color:#000;
     background-color:transparent;
-    margin-top: 5px;
-    font-size: 14px;
+    margin-top: 12px;
+    font-size: 15px;
 } 
 
 .navbar-nav > li:hover {
