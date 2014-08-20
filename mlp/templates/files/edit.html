@@ -2,7 +2,7 @@
 
 {% block content %}
 <h3>Edit</h3>
-<a class="btn btn-default" href="{% url 'files-list' %}">Back</a>
+<a class="btn btn-default" href="{% url 'files-detail' file.pk %}">Back</a>
 <div class="col-md-4">
     <form method="post">
     {% if form %}
