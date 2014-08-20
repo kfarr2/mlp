@@ -27,7 +27,7 @@ def list_(request):
     List all the files
     """
     form = FileSearchForm(request.GET, user=request.user)
-    form.is_valid
+    form.is_valid()
     files = form.results(page=request.GET.get("page"))
 
     uploaded = File.objects.filter(
