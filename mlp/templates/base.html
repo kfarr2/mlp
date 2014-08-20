@@ -25,37 +25,39 @@
         {% endif %}
 
 
-        <div class="container {% if user.is_cloaked %}cloak-pushdown{% endif %}">
+        <div class="{% if user.is_cloaked %}cloak-pushdown{% endif %}">
             <nav class="navbar navbar-default">
-                <div class="container-fluid">
-                    <div class="navbar-header">
-                        <a class="navbar-brand" href="{% url 'home' %}">Mobile Learning Project</a>
+                <div class="container">
+                    <div class="container-fluid">
+                        <div class="navbar-header">
+                            <a class="navbar-brand" href="{% url 'home' %}">Mobile Learning Project</a>
+                        </div>
+
+                        <ul class="nav navbar-nav">
+                            <li><a href="{% url 'users-workflow' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+                            <li><a href="{% url 'classes-list' %}"><span class="glyphicon glyphicon-book"></span> Classes</a></li>
+                            {% if user|has_admin_access %}
+                                <li><a href="{% url 'files-list' %}"><span class="glyphicon glyphicon-folder-open"></span> Files</a></li>
+                                <li><a href="{% url 'users-list' %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>
+                            {% else %}    
+                                <li><a href="{% url 'files-upload' %}"><span class="glyphicon glyphicon-folder-open"></span> Files</a></li>
+                            {% endif %}
+                        </ul>
+
+                        <ul class="nav navbar-nav navbar-right">
+                            {% if user.is_authenticated %}
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-list"></span></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="{% url 'users-edit' user.pk %}"><span class="glyphicon glyphicon-user"></span> Account</a></li>
+                                        <li><a href="{% url 'logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                                    </ul>
+                                </li>
+                            {% else %}
+                                <li><a href="{% url 'login' %}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+                            {% endif %}
+                        </ul>
                     </div>
-
-                    <ul class="nav navbar-nav">
-                        <li><a href="{% url 'users-workflow' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
-                        <li><a href="{% url 'classes-list' %}"><span class="glyphicon glyphicon-book"></span> Classes</a></li>
-                        {% if user|has_admin_access %}
-                            <li><a href="{% url 'files-list' %}"><span class="glyphicon glyphicon-folder-open"></span> Files</a></li>
-                            <li><a href="{% url 'users-list' %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>
-                        {% else %}    
-                            <li><a href="{% url 'files-upload' %}"><span class="glyphicon glyphicon-folder-open"></span> Files</a></li>
-                        {% endif %}
-                    </ul>
-
-                    <ul class="nav navbar-nav navbar-right">
-                        {% if user.is_authenticated %}
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-list"></span></a>
-                                <ul class="dropdown-menu">
-                                    <li><a href="{% url 'users-edit' user.pk %}"><span class="glyphicon glyphicon-user"></span> Account</a></li>
-                                    <li><a href="{% url 'logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
-                                </ul>
-                            </li>
-                        {% else %}
-                            <li><a href="{% url 'login' %}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
-                        {% endif %}
-                    </ul>
                 </div>
             </nav>
 
@@ -64,8 +66,10 @@
                     <div {% if message.tags %} class="alert alert-{{ message.tags }}"{% endif %}>{{ message }}</div>
                 {% endfor %}
             {% endif %}
-
-            {% block content %}{% endblock %}
+            
+            <div class="container">
+                {% block content %}{% endblock %}
+            </div>    
         </div>
     {% endblock %}
 </body>
