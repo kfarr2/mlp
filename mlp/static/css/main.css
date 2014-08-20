@@ -314,6 +314,13 @@ label.no-match {
     display:none;
 }
 
+.navbar {
+    position:relative;
+    min-height:60px;
+    margin-bottom:20px;
+    border:1px solid transparent;
+}
+
 .navbar-brand img {
     height:30px;
     margin-top:-5px;
@@ -321,6 +328,8 @@ label.no-match {
 
 .navbar-brand {
     color:#000;
+    margin-top: 5px;
+    font-size: 24px;
 }
 
 .navbar-header > .navbar-brand:hover {
@@ -335,6 +344,8 @@ label.no-match {
 .navbar-nav > li > a {
     color:#000;
     background-color:transparent;
+    margin-top: 5px;
+    font-size: 14px;
 } 
 
 .navbar-nav > li:hover {
@@ -508,4 +519,8 @@ body {
     line-height:1.42857143;
     color:#111;
     background-color:#f1f1f1;
+}
+
+.glyphicon-th {
+    font-size: 18px;
 }
