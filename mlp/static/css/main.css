@@ -347,6 +347,21 @@ label.no-match {
     background-color:transparent;
 }
 
+.panel-body {
+    border-bottom:1px solid #ddd;
+}
+
+.panel-default {
+    border-color:#6a7f10; //#80CCFF;
+}
+
+.panel-default>.panel-heading {
+    color:#000;
+    background-color:#6a7f10; //#80CCFF;
+    border-color:#ddd;
+}
+
+
 #mask-alert {
     position:fixed;
     top:0;
