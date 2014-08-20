@@ -524,3 +524,9 @@ body {
 .glyphicon-th {
     font-size: 18px;
 }
+
+.alert-default {
+    background-color:#B4BF88;
+    border-color:#90996D;
+    color:#333;
+}
