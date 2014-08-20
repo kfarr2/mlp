@@ -13,6 +13,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.conf import settings
+from mlp.classes.models import Roster
+from mlp.classes.enums import UserRole
 from .perms import decorators, can_list_all_files
 from .models import File
 from .enums import FileType, FileStatus
@@ -53,7 +55,11 @@ def delete(request, file_id):
     file = get_object_or_404(File, pk=file_id)
     if request.method == "POST" or file.status == FileStatus.FAILED:
         file.delete()
-        return HttpResponseRedirect(reverse('files-list'))
+        admin = Roster.objects.filter(user=request.user, role=UserRole.ADMIN)
+        if request.user.is_staff or admin.exists():
+            return HttpResponseRedirect(reverse('files-list'))
+        else:
+            return HttpResponseRedirect(reverse('users-home'))
 
     return render(request, 'files/delete.html', {
         "file": file,        
@@ -97,14 +103,21 @@ def upload(request):
     """
     Basic upload view
     """
+    my_files = File.objects.filter(uploaded_by=request.user)
     if request.method == "POST":
         if request.POST.get("error_message"):
             messages.error(request, request.POST["error_message"])
         else:
             messages.success(request, "Files Uploaded!")
-        return HttpResponseRedirect(reverse('files-list'))
+
+        admin = Roster.objects.filter(user=request.user, role=UserRole.ADMIN)
+        if request.user.is_staff or admin.exists():
+            return HttpResponseRedirect(reverse('files-list'))
+        else:
+            return HttpResponseRedirect(reverse('users-home'))
 
     return render(request, 'files/upload.html', {
+        'my_files': my_files,
         'chunk_size': settings.CHUNK_SIZE    
     })
 
