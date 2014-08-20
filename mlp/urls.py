@@ -2,6 +2,7 @@ from django.conf.urls import patterns, include, url
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.conf import settings
+from django.core.urlresolvers import reverse_lazy
 
 from mlp.home import views as home
 from mlp.users import views as users
@@ -17,6 +18,7 @@ urlpatterns = patterns('',
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', home.home, name='home'),
+    url(r'^logout/?$', 'django.contrib.auth.views.logout', {"next_page": reverse_lazy("home")}, name="logout"),
 
     # users
     url(r'^users/home/$', users.home, name='users-home'),
@@ -51,12 +53,20 @@ urlpatterns = patterns('',
 
     # sign up
     url(r'^signed_up/add/(?P<class_id>\d+)/(?P<user_id>\d+)/?$', classes.signed_up_add, name='signed_up-add'),
+    url(r'^signed_up/remove/(?P<class_id>\d+)/(?P<user_id>\d+)/?$', classes.signed_up_remove, name='signed_up-remove'),
 
     # class files
     url(r'^classes/(?P<class_id>\d+)/files/?$', classes.file_list, name='classes-file_list'),
     url(r'^classes/(?P<class_id>\d+)/files/add/(?P<file_id>\d+)/?$', classes.file_add, name='classes-file_add'),
     url(r'^classes/(?P<class_id>\d+)/files/remove/(?P<file_id>\d+)/?$', classes.file_remove, name='classes-file_remove'),
 
+    # password reset stuff - handled by django auth
+    url(r'^registration/reset/?$', 'django.contrib.auth.views.password_reset', {"from_email": "django@pdx.edu"}, name="password_reset"),
+    url(r'^registration/reset/done/?$', 'django.contrib.auth.views.password_reset_done', name="password_reset_done"),
+    url(r'^registration/reset/confirm/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)$', 'django.contrib.auth.views.password_reset_confirm', name="password_reset_confirm"),
+    url(r'^registration/reset/complete/?$', 'django.contrib.auth.views.password_reset_complete', name="password_reset_complete"),
+
+    
     # standard
     url(r'', include('django.contrib.auth.urls')),
     url(r'^cloak/', include('cloak.urls')),
