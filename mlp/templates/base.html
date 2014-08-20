@@ -7,7 +7,9 @@
     <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
     <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/main.css" />
-    {% block head %}{% endblock %}
+    {% block head %}
+        {% load permissions %}
+    {% endblock %}
 </head>
 <body>
     {% block body %}
@@ -32,10 +34,12 @@
 
                     <ul class="nav navbar-nav">
                         <li><a href="{% url 'users-workflow' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
-                        <li><a href="{% url 'classes-list' %}"><span class="glyphicon glyphicon-book"></span> Classes</a></li>
-                        {% if perms.has_admin_access %}
+                        {% if user|has_admin_access %}
+                            <li><a href="{% url 'classes-list' %}"><span class="glyphicon glyphicon-book"></span> Classes</a></li>
                             <li><a href="{% url 'files-list' %}"><span class="glyphicon glyphicon-folder-open"></span> Files</a></li>
                             <li><a href="{% url 'users-list' %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>
+                        {% else %}    
+                            <li><a href="{% url 'files-upload' %}"><span class="glyphicon glyphicon-folder-open"></span> Files</a></li>
                         {% endif %}
                     </ul>
 
