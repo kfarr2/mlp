@@ -5,6 +5,7 @@ from mlp.tags.forms import TagField
 from elasticmodels.forms import SearchForm
 from elasticmodels import make_searchable
 from mlp.users.models import User
+from mlp.users.perms import has_admin_access
 from .search_indexes import FileIndex
 from .models import FileTag, File
 from .enums import FileStatus
@@ -20,16 +21,21 @@ class FileSearchForm(SearchForm):
     end_date = DateTimeField(required=False, label="", widget=DateTimePicker(options={"format": "YYYY-MM-DD", "pickTime": False}))
 
     def __init__(self, *args, **kwargs):
-        if kwargs:
-            self.user = kwargs.pop("user")
+        self.user = kwargs.pop("user")
         super(FileSearchForm, self).__init__(*args, **kwargs)
         self.fields['tags'].choices = Tag.objects.all()
         self.fields['tags'].widget.attrs['placeholder'] = "Tags"
 
     def queryset(self):
-        files = File.objects.filter(
-            status=FileStatus.READY
-        ).select_related("uploaded_by").prefetch_related("filetag_set__tag")
+        if has_admin_access(self.user):
+            files = File.objects.filter(
+                status=FileStatus.READY
+            ).select_related("uploaded_by_id").prefetch_related("filetag_set__tag")
+        else:
+            files = File.objects.filter(
+                status=FileStatus.READY,
+                uploaded_by=self.user.user_id,
+            ).select_related("uploaded_by_id").prefetch_related("filetag_set__tag")
 
         return files
 
@@ -42,6 +48,10 @@ class FileSearchForm(SearchForm):
         if self.cleaned_data.get("start_date"):
             if self.cleaned_data.get("end_date"):
                 files = files.filter(uploaded_on__range=(self.cleaned_data['start_date'], self.cleaned_data['end_date']))
+        
+        if not has_admin_access(self.user):
+            files = files.filter(uploaded_by=self.user)
+
 
         return files
 
