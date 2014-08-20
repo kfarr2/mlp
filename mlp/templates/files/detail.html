@@ -40,7 +40,7 @@
                 </td>
                 <td><p><strong>Duration:</strong> {{ file.duration }} seconds</p></td>
                 <td>
-                    {% if file and perms.can_edit_file %}
+                    {% if file and user|can_edit_file:file %}
                         {% if file.status == FileStatus.READY %}
                         <div class="btn-group pull-right">
                             <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>

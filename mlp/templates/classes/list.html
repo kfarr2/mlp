@@ -3,7 +3,7 @@
 {% block content %}
 <div class="col-md-6">
     <h3>All Classes</h3>
-    {% if user.is_staff %}
+    {% if user|can_create_class %}
     <a href="{% url 'classes-create' %}" class="btn btn-default pull-right" style="margin-top: -40px;">
         <span class="glyphicon glyphicon-plus"></span> Class
     </a>

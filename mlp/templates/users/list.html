@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-
+{% load permissions %}
+{% load unfriendly_tags %}
 {% block content %}
 <h3>User List</h3>
 <a href="{% url 'users-create' %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-plus"></span> User</a>
@@ -31,7 +32,10 @@
 </tr>
 {% for user in users %}
 <tr>
-    <td><a href="{% url 'users-detail' user.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-zoom-in"></span></a></td>
+    <td>
+        {% url 'users-detail' user.pk as user_url %}
+        <a href="{{ user_url|obfuscate }}" class="btn btn-default"><span class="glyphicon glyphicon-zoom-in"></span></a>
+    </td>
     <td>{{ user.user_id }}</td>
     <td>{{ user.first_name }}</td>
     <td>{{ user.last_name }}</td>

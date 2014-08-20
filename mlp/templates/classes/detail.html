@@ -9,8 +9,10 @@
 </div>
 {% endif %}
 <h3>{{ class.name }}</h3>
-{% if not user|can_edit_class:class and user not in roster %}
-    <a href="{% url 'signed_up-add' class.pk user.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;">Sign Up</a>
+{% if user.is_authenticated %}
+    {% if not user|can_edit_class:class and user not in roster %}
+        <a href="{% url 'signed_up-add' class.pk user.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;">Sign Up</a>
+    {% endif %}
 {% endif %}
 <hr />
 <div class="col-md-5">
@@ -22,64 +24,77 @@
     <p><strong>Number of students enrolled in this class:</strong> {{ enrolled }}</p>
     <br />
     {% if user|can_enroll_students:class %}
-        <h3>Students Waiting for Approval</h3>
-        <table class="table table-striped">
-            <tr>
-                <td>Last</td>
-                <td>First</td>
-                <td></td>
-            </tr>
-            {% for student in signed_up %}
+        <h3>Sign-up Requests</h3>
+        {% if signed_up %}
+            <table class="table table-striped">
                 <tr>
-                    <td>{{ student.last_name }}</td>
-                    <td>{{ student.first_name }}</td>
-                    <td><a href="{% url 'roster-add' class.pk student.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-check"></span></a></td>
+                    <td>Last</td>
+                    <td>First</td>
+                    <td></td>
                 </tr>
-            {% endfor %}
-        </table>
+                {% for student in signed_up %}
+                    <tr>
+                        <td>{{ student.last_name }}</td>
+                        <td>{{ student.first_name }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{% url 'roster-add' class.pk student.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></a>
+                                <a href="{% url 'signed_up-remove' class.pk student.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <div class="alert alert-info">No pending requests</div>
+        {% endif %}
         <br />
     {% endif %}
 
     <h3>Roster</h3>
     {% if user|can_edit_class:class %}
-        <a href="{% url 'classes-enroll' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-plus"></span></a>
+        <a href="{% url 'classes-enroll' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-pencil"></span></a>
     {% endif %}
-    <table class="table table-striped">
-        <tr>
-            <td>Last</td>
-            <td>First</td>
-            <td>Role</td>
-            <td></td>
-        </tr>
-        {% for ros in roster %}
-        <tr>
-            <td>{{ ros.last_name }}</td>
-            <td>{{ ros.first_name }}</td>
-            <td>
-                {% for rol in roles %}
-                    {% if rol.user == ros %}
-                        {% if rol.role == 1 %}
-                            Researcher 
-                        {% elif rol.role == 2 %}
-                            Student
-                        {% else %}
-                            Admin
+    {% if roster %}
+        <table class="table table-striped">
+            <tr>
+                <td>Last</td>
+                <td>First</td>
+                <td>Role</td>
+                <td></td>
+            </tr>
+            {% for ros in roster %}
+            <tr>
+                <td>{{ ros.last_name }}</td>
+                <td>{{ ros.first_name }}</td>
+                <td>
+                    {% for rol in roles %}
+                        {% if rol.user == ros %}
+                            {% if rol.role == 1 %}
+                                Researcher 
+                            {% elif rol.role == 2 %}
+                                Student
+                            {% else %}
+                                Admin
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                {% endfor %}
-            </td>
-            <td>
-                <div class="btn-group">
-                    <a href="{% url 'users-detail' ros.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-zoom-in"></span></a>
-                </div>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+                    {% endfor %}
+                </td>
+                <td>
+                    <div class="btn-group">
+                        <a href="{% url 'users-detail' ros.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-zoom-in"></span></a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div class="alert alert-info">Nobody is enrolled in this class</div>
+    {% endif %}
 </div>
 <div class="col-md-7">
     <h3>Files</h3>
-    {% if user|is_enrolled:class %}<a href="{% url 'classes-file_list' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-plus"></span></a>{% endif %}
+    {% if user|is_enrolled:class %}<a href="{% url 'classes-file_list' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-pencil"></span></a>{% endif %}
     <hr />
     {% for file in files %}
         {% include "files/_file.html" %} 
