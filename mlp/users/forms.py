@@ -23,9 +23,9 @@ class UserForm(forms.ModelForm):
     class Meta:
         model = User
         fields = (
-            'email',                
             'first_name',
             'last_name',
+            'email',
         )
 
     def __init__(self, *args, **kwargs):
@@ -33,7 +33,7 @@ class UserForm(forms.ModelForm):
         super(UserForm, self).__init__(*args, **kwargs)
 
         if self.instance.pk is None:
-            self.fields['password'] = forms.CharField()
+            self.fields['password'] = forms.CharField(widget=forms.PasswordInput)
 
     def clean(self):
         cleaned_data = super(UserForm, self).clean()
