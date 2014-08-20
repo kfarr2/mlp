@@ -86,6 +86,10 @@ def _edit(request, user_id):
     else:
         user = get_object_or_404(User, pk=user_id)
 
+    roster = Roster.objects.filter(user=user).values('_class')
+    classes = Class.objects.filter(class_id__in=roster)
+    files = File.objects.filter(uploaded_by=user)
+
     if request.POST:
         form = UserForm(request.POST, instance=user, user=request.user)
         if form.is_valid():
@@ -96,6 +100,9 @@ def _edit(request, user_id):
         form = UserForm(instance=user, user=request.user)
 
     return render(request, "users/edit.html", {
+        "other_user": user,
+        "files": files,
+        "classes": classes,
         "form": form,
     })
 
