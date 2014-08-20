@@ -1,10 +1,12 @@
 import shutil
+from permissions import login_required
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from mlp.users.models import User
+from mlp.users.perms import has_admin_access
 from mlp.files.models import File
 from mlp.files.forms import FileSearchForm
 from mlp.files.perms import decorators
@@ -13,7 +15,7 @@ from .enums import UserRole
 from .models import Class, Roster, ClassFile, SignedUp
 from .forms import ClassForm, RosterForm, ClassSearchForm
 
-@decorators.can_list_all_classes
+@login_required
 def list_(request):
     """
     List all classes
@@ -78,7 +80,7 @@ def file_list(request, class_id):
     _class = get_object_or_404(Class, pk=class_id)
     class_files = ClassFile.objects.filter(_class=_class).values('file')
     class_files = File.objects.filter(file_id__in=class_files)
-    form = FileSearchForm(request.GET)
+    form = FileSearchForm(request.GET, user=request.user)
     files = form.results(page=request.GET.get("page")).object_list
 
     return render(request, "classes/add_file.html", {
@@ -103,7 +105,7 @@ def file_add(request, class_id, file_id):
         messages.warning(request, "File already added to class.")
     return HttpResponseRedirect(reverse('classes-file_list', args=(class_id,)))
 
-@decorators.can_edit_class
+@decorators.can_list_class
 def file_remove(request, class_id, file_id):
     """
     Removes a file from the class
