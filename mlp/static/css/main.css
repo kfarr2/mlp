@@ -319,6 +319,34 @@ label.no-match {
     margin-top:-5px;
 }
 
+.navbar-brand {
+    color:#000;
+}
+
+.navbar-header > .navbar-brand:hover {
+    color:#333;
+}
+
+.navbar-default {
+    background-color: #6a7f10;//#80CCFF;
+    border-color:#e7e7e7;
+}
+
+.navbar-nav > li > a {
+    color:#000;
+    background-color:transparent;
+} 
+
+.navbar-nav > li:hover {
+    color:#000;
+    background-color:transparent;
+} 
+
+.navbar-default .navbar-nav>.active>a,.navbar-default .navbar-nav>.active>a:hover,.navbar-default .navbar-nav>.active>a:focus {
+    color:#777;
+    background-color:transparent;
+}
+
 #mask-alert {
     position:fixed;
     top:0;
@@ -457,4 +485,12 @@ a.hud-link:hover {
 
 .input-group{
     margin-top:3px;
+}
+
+body {
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size:14px;
+    line-height:1.42857143;
+    color:#111;
+    background-color:#f1f1f1;
 }
