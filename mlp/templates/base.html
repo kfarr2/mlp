@@ -34,8 +34,8 @@
 
                     <ul class="nav navbar-nav">
                         <li><a href="{% url 'users-workflow' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+                        <li><a href="{% url 'classes-list' %}"><span class="glyphicon glyphicon-book"></span> Classes</a></li>
                         {% if user|has_admin_access %}
-                            <li><a href="{% url 'classes-list' %}"><span class="glyphicon glyphicon-book"></span> Classes</a></li>
                             <li><a href="{% url 'files-list' %}"><span class="glyphicon glyphicon-folder-open"></span> Files</a></li>
                             <li><a href="{% url 'users-list' %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>
                         {% else %}    
