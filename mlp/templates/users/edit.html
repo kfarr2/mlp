@@ -1,18 +1,46 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h3>{% if user %}Edit User: {{ user.last_name }}, {{ user.first_name }}{% else %}Create User{% endif %}</h3>
-<button class="btn btn-default pull-right" onclick="window.history.go(-1); return false" style="margin-top: -40px;">Back</button>
-<hr />
 <div class="col-md-5">
-    <p><strong>User ID:</strong> {{ user.user_id }}</p>
-    <p><strong>Date Joined:</strong> {{ user.date_joined|date }}</p>
-    <p><strong>Staff:</strong> {% if user.is_staff %}True{% else %}False{% endif %}</p>
-        <form method="post">
+    <h3>{% if other_user %}Edit: {{ other_user.last_name }}, {{ other_user.first_name }}{% else %}Create User{% endif %}</h3>
+    <button class="btn btn-default pull-right" onclick="window.history.go(-1); return false" style="margin-top: -40px;">Back</button>
+    <hr />
+    <p><strong>User ID:</strong> {{ other_user.user_id }}</p>
+    <p><strong>Date Joined:</strong> {{ other_user.date_joined|date }}</p>
+    <p><strong>Staff:</strong> {% if other_user.is_staff %}True{% else %}False{% endif %}</p>
+    <form method="post">
         {{ form|bootstrap }}
         {% csrf_token %}
-        <input type="submit" name="submit" value="Submit" class="btn btn-default" />
-        <a class="btn btn-danger" href="#">Delete</a>
+        <div class="btn-group">    
+            <input type="submit" name="submit" value="Submit" class="btn btn-default" />
+            <button class="btn btn-default" onclick="window.history.go(-1); return false">Cancel</button>
+            {% if other_user %}
+                <a class="btn btn-danger" href="#">Delete</a>
+            {% endif %}
+        </div>
     </form>
+    {% if other_user %}
+        <br />
+        <a href="{% url 'password_reset' %}">change my password</a>
+    {% endif %}
+</div>
+<div class="col-md-7">
+    <h3>Files</h3>
+    <hr />
+    {% if files %}
+        {% for file in files %}
+            {% include 'files/_file.html' %}
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">You do not have ownership of any files</div>
+    {% endif %}
+    <br />
+    <h3>Classes</h3>
+    <hr />
+    {% if classes %}
+        {% include 'classes/_class.html' %}
+    {% else %}
+        <div class="alert alert-info">You are not involved in any classes</div>
+    {% endif %}
 </div>
 {% endblock %}
