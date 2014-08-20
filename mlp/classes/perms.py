@@ -7,6 +7,8 @@ from .models import Class, Roster
 
 @permission(model=Class)
 def is_enrolled(user, _class):
+    if user.is_anonymous():
+        return False
     roster = Roster.objects.filter(user=user, _class=_class)
     return user.is_staff or roster.exists()
 
@@ -16,10 +18,13 @@ def can_list_class(user, _class):
 
 @permission
 def can_list_all_classes(user):
-    return user.is_staff
+    roster = Roster.objects.filter(user=user, role=UserRole.ADMIN)
+    return user.is_staff or roster.exists()
 
 @permission(model=Class)
 def can_edit_class(user, _class):
+    if user.is_anonymous():
+        return False
     roster = Roster.objects.filter(user=user, _class=_class, role=UserRole.ADMIN).values('user')
     if user.is_staff or roster.exists():
         return True
