@@ -11,7 +11,7 @@ def can_view_users(user):
 
 @permission(model=User)
 def can_view_user_detail(user, other_user):
-    roster = Roster.objects.filter(user=user, role=UserRole.ADMIN).values('_class')
+    roster = Roster.objects.filter(user=user).values('_class')
     other_roster = Roster.objects.filter(user=other_user, _class=roster)
     return user.is_staff or user == other_user or other_roster.exists()
 
