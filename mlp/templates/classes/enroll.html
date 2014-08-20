@@ -29,7 +29,11 @@
                 <td>{{ ros.user }}</td>
                 <td>{{ ros.user.last_name }}</td>
                 <td>{{ ros.user.first_name }}</td>
-                <td><a class="btn btn-default btn-small pull-right" href="{% url 'roster-remove' class.pk ros.user.user_id %}">Drop</a></td>
+                <td>
+                    {% with ros.user as user %}
+                        <a class="btn btn-default btn-small pull-right" href="{% url 'roster-remove' class.pk user.pk %}">Drop</a>
+                    {% endwith %}
+                </td>
             </tr>
         {% endfor %}
         </table>
