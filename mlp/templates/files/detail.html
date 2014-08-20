@@ -30,7 +30,7 @@
         {% if file.file and user.is_authenticated %}
         <p><a class="btn btn-default pull-right" style="margin-top: -50px;" href="{% url 'files-download' file.pk %}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
         {% endif %}
-        <table class="table table-striped">
+        <table class="table">
             <tr>
                 <td>
                     <p><strong>Tags:</strong>

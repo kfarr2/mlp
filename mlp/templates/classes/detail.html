@@ -27,7 +27,7 @@
     {% if user|can_enroll_students:class %}
         <h3>Sign-up Requests</h3>
         {% if signed_up %}
-            <table class="table table-striped">
+            <table class="table">
                 <tr>
                     <td>Last</td>
                     <td>First</td>
@@ -57,7 +57,7 @@
         <a href="{% url 'classes-enroll' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-pencil"></span></a>
     {% endif %}
     {% if roster %}
-        <table class="table table-striped">
+        <table class="table">
             <tr>
                 <td>Last</td>
                 <td>First</td>
