@@ -42,7 +42,7 @@ class UserViewsTest(TestCase):
         self.client.logout()
         self.client.login(email=self.admin.email, password="foobar")
         response = self.client.get(reverse('users-home'))
-        self.assertRedirects(response, reverse('users-admin'))
+        self.assertRedirects(response, reverse('users-list'))
         self.client.logout()
         
         self.client.login(email=self.user.email, password="foobar")
