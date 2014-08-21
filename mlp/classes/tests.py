@@ -21,7 +21,7 @@ def create_classes(self):
     c.save()
     self.classes = c
 
-    r = Roster(user=self.user, _class=c, role=UserRole.ADMIN)
+    r = Roster(user=self.admin, _class=c, role=UserRole.ADMIN)
     r.save()
     self.roster = r
 
@@ -95,10 +95,13 @@ class ClassTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_file_add(self):
+        pre_count = ClassFile.objects.count()
         response = self.client.get(reverse('classes-file_add', args=(self.classes.pk, self.file.pk,)))
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(pre_count+1, ClassFile.objects.count())
         response = self.client.get(reverse('classes-file_add', args=(self.classes.pk, self.file.pk,)))
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(pre_count+1, ClassFile.objects.count())
 
     def test_file_remove(self):
         create_class_files(self)
@@ -123,6 +126,7 @@ class ClassTest(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_create(self):
+        pre_count = Class.objects.count()
         data = {
             "name": "class2",
             "crn": 12345,
@@ -130,14 +134,19 @@ class ClassTest(TestCase):
         }
         response = self.client.post(reverse('classes-create'), data)
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(pre_count+1, Class.objects.count())
 
     def test_delete(self):
+        pre_count = Class.objects.count()
         response = self.client.get(reverse('classes-delete', args=(self.classes.pk,)))
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(pre_count-1, Class.objects.count())
 
     def test_make_instructor(self):
         response = self.client.get(reverse('classes-make_instructor', args=(self.classes.pk, self.user.pk)))
         self.assertEqual(response.status_code, 302)
+        status = Roster.objects.get(user=self.user, _class=self.classes)
+        self.assertEqual(status.role, UserRole.ADMIN)
 
 class RosterTest(TestCase):
     """
@@ -151,8 +160,10 @@ class RosterTest(TestCase):
         self.client.login(email=self.user.email, password="foobar")
 
     def test_roster_add(self):
+        pre_count = Roster.objects.count()
         response = self.client.get(reverse('roster-add', args=(self.classes.pk, self.user.pk,)))
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(pre_count+1, Roster.objects.count())
         response = self.client.get(reverse('roster-add', args=(self.classes.pk, self.admin.pk,)))
         self.assertEqual(response.status_code, 302)
 
@@ -176,4 +187,16 @@ class SignedUpTest(TestCase):
         self.assertEqual(response.status_code, 302)
         response = self.client.get(reverse('signed_up-add', args=(self.classes.pk, self.user.pk,)))
         self.assertEqual(response.status_code, 302)
+
+class ClassSearchTest(TestCase):
+    def setUp(self):
+        super(ClassSearchTest, self).setUp()
+        create_users(self)
+        create_files(self)
+        create_classes(self)
+        self.client.login(email=self.admin.email, password=self.admin.password)
+
+    def test_search(self):
+        data = "class 101"
+        response = self.client.get(reverse('classes-list'), data)
 

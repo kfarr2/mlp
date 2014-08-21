@@ -172,25 +172,6 @@ def delete(request, class_id):
     messages.success(request, "Class deleted")
     return HttpResponseRedirect(reverse('classes-list'))
 
-def make_instructor(request, class_id, user_id):
-    """
-    Takes a user and makes them the instructor for a class
-    """
-    user = get_object_or_404(User, pk=user_id)
-    _class = get_object_or_404(Class, pk=class_id)
-    teacher = Roster.objects.get(_class=_class, role=UserRole.ADMIN)
-    if teacher:
-        Roster.objects.create(_class=_class, user=teacher.user, role=UserRole.STUDENT)
-        teacher = Roster.objects.get(user=teacher, _class=_class, role=UserRole.ADMIN)
-        teacher.delete()
-
-    old_user = Roster.objects.get(_class=_class, user=user)
-    old_user.delete()
-    new_teacher = Roster.objects.create(_class=_class, user=user, role=UserRole.ADMIN)
-    
-
-    return HttpResponseRedirect(reverse('classes-detail', args=(class_id,)))
-
 @decorators.can_enroll_students
 def roster_add(request, class_id, user_id):
     """
@@ -224,7 +205,6 @@ def roster_remove(request, class_id, user_id):
         messages.warning(request, "Error: User not found.")
 
     return HttpResponseRedirect(reverse('classes-enroll', args=(class_id,)))
-
 
 def signed_up_add(request, class_id, user_id):
     """
@@ -260,3 +240,21 @@ def signed_up_remove(request, class_id, user_id):
 
     return HttpResponseRedirect(reverse('classes-detail', args=(class_id,)))
 
+def make_instructor(request, class_id, user_id):
+    """
+    Takes a user and makes them the instructor for a class
+    """
+    user = get_object_or_404(User, pk=user_id)
+    _class = get_object_or_404(Class, pk=class_id)
+    teacher = Roster.objects.get(_class=_class, role=UserRole.ADMIN)
+    if teacher:
+        Roster.objects.create(_class=_class, user=teacher.user, role=UserRole.STUDENT)
+        teacher = Roster.objects.get(user=teacher, _class=_class, role=UserRole.ADMIN)
+        teacher.delete()
+
+    old_user = Roster.objects.get(_class=_class, user=user)
+    old_user.delete()
+    new_teacher = Roster.objects.create(_class=_class, user=user, role=UserRole.ADMIN)
+    
+
+    return HttpResponseRedirect(reverse('classes-detail', args=(class_id,)))
