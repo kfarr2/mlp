@@ -42,7 +42,7 @@
                 <div class="container">
                     <div class="container-fluid">
                         <div class="navbar-header">Mobile Learning Project</div>
-
+                        {% if user.is_authenticated %}
                         <ul class="nav navbar-nav">
                             <li><a href="{% url 'users-workflow' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
                             <li><a href="{% url 'classes-list' %}"><span class="glyphicon glyphicon-book"></span> Classes</a></li>
@@ -53,7 +53,7 @@
                                 <li><a href="{% url 'files-upload' %}"><span class="glyphicon glyphicon-folder-open"></span> Files</a></li>
                             {% endif %}
                         </ul>
-
+                        {% endif %}
                         <ul class="nav navbar-nav navbar-right">
                             {% if user.is_authenticated %}
                                 <li class="dropdown">
