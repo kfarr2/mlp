@@ -219,7 +219,6 @@ video {
     margin-bottom:10px;
 }
 
-
 .select2able {
     width:100%;
 }
@@ -316,43 +315,58 @@ label.no-match {
 
 .navbar {
     position:relative;
-    min-height:70px;
+    margin-top: -70px;
     margin-bottom:20px;
     border:1px solid transparent;
 }
 
-.navbar-brand img {
-    height:42px;
-    margin-top:-5px;
-}
-
-.navbar-brand {
+.navbar-header {
     color:#fff;
-    font-size: 17px;
-    line-height: 7px;
-}
-
-.navbar-header > .navbar-brand:hover {
-    color:#fff;
+    font-size: 18px;
+    margin-top: 12px;
+    padding-left: 30px;
 }
 
 .navbar-default {
     background-color: #6a7f10;//#80CCFF;
-    border-color:#e7e7e7;
+    border-color: #B4BF88;
+}
+
+#header_image {
+    padding-top: 135px;
+    background-image: url('http://www.pdx.edu/sites/all/themes/pdx_home/images/header/header-1.jpg');
+}
+
+#header_image > .container > img {
+    margin-top: -200px;
+}
+
+#logged_in_as > p {
+    float: right;
+    color: #fff;
+    font-size: 12px;
+}
+
+#logged_in_as > p > a {
+    color: #fff;
+    margin-right: 10px;
 }
 
 .navbar-nav > li > a {
     color:#000;
     background-color:transparent;
-    margin-top: 12px;
     margin-left: 5px;
-    font-size: 15px;
+    font-size: 14px;
 } 
 
 .navbar-nav > li:hover {
     color:#000;
     background-color:transparent;
-} 
+}
+
+.navbar-nav {
+    margin-left: 20px;
+}
 
 .navbar-default .navbar-nav>.active>a,.navbar-default .navbar-nav>.active>a:hover,.navbar-default .navbar-nav>.active>a:focus {
     color:#777;
@@ -523,7 +537,7 @@ body {
 }
 
 .glyphicon-th {
-    font-size: 18px;
+    font-size: 17px;
 }
 
 .alert-default {
@@ -531,3 +545,4 @@ body {
     border-color:#90996D;
     color:#333;
 }
+
