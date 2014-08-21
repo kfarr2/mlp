@@ -546,6 +546,7 @@ body > #cloak_div {
 }
 
 body > div > div#content_container {
+    border-radius: 7px;
     background-color:#f1f1f1;
     min-height: 80%;
 }
