@@ -8,11 +8,12 @@
     <link href="{{ STATIC_URL }}css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/main.css" />
     {% block head %}
-        {% load permissions %}
     {% endblock %}
 </head>
 <body>
     {% block body %}
+        {% load permissions %}
+
         {% if user.is_cloaked %}
             <div class="alert alert-danger" id="mask-alert">
                 <strong class="text-danger">You are masquerading as {{ user }}</strong>
@@ -24,17 +25,25 @@
             </div>
         {% endif %}
 
+        <div id="logged_in_as">
+            {% if user.is_authenticated %}
+                <p>logged in as <a href="{% url 'users-home' %}">{{ user }}</a></p>
+            {% else %}
+                <p><a href="{% url 'login' %}">login</a></p>
+            {% endif %}
+        </div>
+
 
         <div class="{% if user.is_cloaked %}cloak-pushdown{% endif %}">
+            <div id="header_image">
+                <div class="container">
+                    <img src="http://www.pdx.edu/sites/all/themes/pdx_home/logo.png" alt="Home">
+                </div>
+            </div>
             <nav class="navbar navbar-default">
                 <div class="container">
                     <div class="container-fluid">
-                        <div class="navbar-header">
-                            <a class="navbar-brand" href="{% url 'home' %}">
-                                <img title="Portland State University" src="http://www.pdx.edu/sites/all/themes/pdx_home/logo.png" width="215" height="35" style="margin-top: -5px; margin-right: 10px; float: left;" alt="PSU Logo" />
-                                <div style="float: right;">Mobile<p></p>Learning<p></p>Project</div>
-                            </a>
-                        </div>
+                        <div class="navbar-header">Mobile Learning Project</div>
 
                         <ul class="nav navbar-nav">
                             <li><a href="{% url 'users-workflow' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
@@ -63,13 +72,14 @@
                     </div>
                 </div>
             </nav>
+            
 
             {% if messages %}
                 {% for message in messages %}
                     <div {% if message.tags %} class="alert alert-{{ message.tags }}"{% endif %}>{{ message }}</div>
                 {% endfor %}
             {% endif %}
-            
+
             <div class="container">
                 {% block content %}{% endblock %}
             </div>    
