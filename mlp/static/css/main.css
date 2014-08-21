@@ -316,7 +316,7 @@ label.no-match {
 .navbar {
     position:relative;
     margin-top: -70px;
-    margin-bottom:20px;
+    margin-bottom:30px;
     border:1px solid transparent;
 }
 
@@ -330,26 +330,6 @@ label.no-match {
 .navbar-default {
     background-color: #6a7f10;//#80CCFF;
     border-color: #B4BF88;
-}
-
-#header_image {
-    padding-top: 135px;
-    background-image: url('http://www.pdx.edu/sites/all/themes/pdx_home/images/header/header-1.jpg');
-}
-
-#header_image > .container > a > img {
-    margin-top: -200px;
-}
-
-#logged_in_as > p {
-    float: right;
-    color: #fff;
-    font-size: 12px;
-}
-
-#logged_in_as > p > a {
-    color: #fff;
-    margin-right: 10px;
 }
 
 .navbar-nav > li > a {
@@ -371,6 +351,26 @@ label.no-match {
 .navbar-default .navbar-nav>.active>a,.navbar-default .navbar-nav>.active>a:hover,.navbar-default .navbar-nav>.active>a:focus {
     color:#777;
     background-color:transparent;
+}
+
+#header_image {
+    padding-top: 135px;
+    background-image: url('http://www.pdx.edu/sites/all/themes/pdx_home/images/header/header-1.jpg');
+}
+
+#header_image > .container > a > img {
+    margin-top: -200px;
+}
+
+#logged_in_as > p {
+    float: right;
+    color: #fff;
+    font-size: 12px;
+}
+
+#logged_in_as > p > a {
+    color: #fff;
+    margin-right: 10px;
 }
 
 .panel-body {
@@ -549,6 +549,7 @@ body > div > div#content_container {
     border-radius: 7px;
     background-color:#f1f1f1;
     min-height: 80%;
+    padding: 20px;
 }
 
 .glyphicon-th {
