@@ -337,7 +337,7 @@ label.no-match {
     background-image: url('http://www.pdx.edu/sites/all/themes/pdx_home/images/header/header-1.jpg');
 }
 
-#header_image > .container > img {
+#header_image > .container > a > img {
     margin-top: -200px;
 }
 
@@ -528,12 +528,26 @@ a.hud-link:hover {
     margin-top:3px;
 }
 
+html {
+    height: 100%;
+}
+
 body {
     font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
     font-size:14px;
     line-height:1.42857143;
     color:#111;
+    background-color:#90996d;
+    height: 100%
+}
+
+body > #cloak_div {
+    height: 100%;
+}
+
+body > div > div#content_container {
     background-color:#f1f1f1;
+    min-height: 80%;
 }
 
 .glyphicon-th {

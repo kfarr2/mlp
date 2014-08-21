@@ -28,16 +28,14 @@
         <div id="logged_in_as">
             {% if user.is_authenticated %}
                 <p>logged in as <a href="{% url 'users-home' %}">{{ user }}</a></p>
-            {% else %}
-                <p><a href="{% url 'login' %}">login</a></p>
             {% endif %}
         </div>
 
 
-        <div class="{% if user.is_cloaked %}cloak-pushdown{% endif %}">
+        <div class="{% if user.is_cloaked %}cloak-pushdown{% endif %}" id="cloak_div">
             <div id="header_image">
                 <div class="container">
-                    <img src="http://www.pdx.edu/sites/all/themes/pdx_home/logo.png" alt="Home">
+                    <a href="http://www.pdx.edu"><img src="http://www.pdx.edu/sites/all/themes/pdx_home/logo.png" alt="Home"></a>
                 </div>
             </div>
             <nav class="navbar navbar-default">
@@ -80,7 +78,7 @@
                 {% endfor %}
             {% endif %}
 
-            <div class="container">
+            <div class="container" id="content_container">
                 {% block content %}{% endblock %}
             </div>    
         </div>
