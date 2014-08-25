@@ -562,3 +562,11 @@ body > div > div#content_container {
     color:#333;
 }
 
+.footer, .footer > .container {
+    color: #666;
+    margin-top: 0%;
+}
+
+ .footer > .container > h6 > a {
+    color: #333; 
+ }
