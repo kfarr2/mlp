@@ -168,9 +168,14 @@ def delete(request, class_id):
     Delete a class
     """
     _class = get_object_or_404(Class, pk=class_id)
-    _class.delete()
-    messages.success(request, "Class deleted")
-    return HttpResponseRedirect(reverse('classes-list'))
+    if request.method == "POST":
+        _class.delete()
+        messages.success(request, "Class deleted")
+        return HttpResponseRedirect(reverse('classes-list'))
+    
+    return render(request, 'classes/delete.html', {
+        "class": _class,    
+    })
 
 @decorators.can_enroll_students
 def roster_add(request, class_id, user_id):
@@ -247,14 +252,20 @@ def make_instructor(request, class_id, user_id):
     user = get_object_or_404(User, pk=user_id)
     _class = get_object_or_404(Class, pk=class_id)
     teacher = Roster.objects.get(_class=_class, role=UserRole.ADMIN)
-    if teacher:
-        Roster.objects.create(_class=_class, user=teacher.user, role=UserRole.STUDENT)
-        teacher = Roster.objects.get(user=teacher, _class=_class, role=UserRole.ADMIN)
-        teacher.delete()
+    if request.method == "POST":
+        if teacher:
+            Roster.objects.create(_class=_class, user=teacher.user, role=UserRole.STUDENT)
+            teacher = Roster.objects.get(user=teacher, _class=_class, role=UserRole.ADMIN)
+            teacher.delete()
 
-    old_user = Roster.objects.get(_class=_class, user=user)
-    old_user.delete()
-    new_teacher = Roster.objects.create(_class=_class, user=user, role=UserRole.ADMIN)
-    
+        old_user = Roster.objects.get(_class=_class, user=user)
+        old_user.delete()
+        new_teacher = Roster.objects.create(_class=_class, user=user, role=UserRole.ADMIN)
 
-    return HttpResponseRedirect(reverse('classes-detail', args=(class_id,)))
+        return HttpResponseRedirect(reverse('classes-detail', args=(class_id,)))
+
+    return render(request, 'classes/make_teacher.html', {
+        "class": _class,
+        "teacher": teacher,
+        "user": user,
+    })

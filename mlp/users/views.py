@@ -109,9 +109,16 @@ def _edit(request, user_id):
 @decorators.can_edit_user
 def delete(request, user_id):
     user = get_object_or_404(User, pk=user_id)
-    if user:
-        messages.warning(request, "User is deleted.")
-        user.delete()
+    if request.method == "POST":
+        if user:
+            if user == request.user:
+                messages.warning(request, "You can't delete yourself.")
+            else:    
+                messages.warning(request, "User is deleted.")
+                user.delete()
 
-    return HttpResponseRedirect(reverse('users-list'))
+        return HttpResponseRedirect(reverse('users-list'))
 
+    return render(request, 'users/delete.html',{
+        "user": user,    
+    })
