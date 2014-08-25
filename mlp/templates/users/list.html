@@ -45,10 +45,7 @@
     <td>{{ user.is_active }}</td>
     {% if perms.can_edit_user %}
     <td>
-        <div class="btn-group">
-            <a href="{% url 'users-edit' user.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
-            <a href="{% url 'users-delete' user.pk %}" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></a>
-        </div>
+        <a href="{% url 'users-edit' user.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
     </td>
     {% endif %}
     {% if perms.has_admin_access %}

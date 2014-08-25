@@ -44,7 +44,6 @@
                         {% if file.status == FileStatus.READY %}
                         <div class="btn-group pull-right">
                             <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
-                            <a class="btn btn-danger" href="{% url 'files-delete' file.pk %}"><span class="glyphicon glyphicon-trash"></span></a>
                         </div>
                         <br></br>
                         {% endif %}
