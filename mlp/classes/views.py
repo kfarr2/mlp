@@ -7,6 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from mlp.users.models import User
 from mlp.users.perms import has_admin_access
+from mlp.users.forms import UserSearchForm
 from mlp.files.models import File
 from mlp.files.forms import FileSearchForm
 from mlp.files.perms import decorators
@@ -14,6 +15,7 @@ from .perms import decorators
 from .enums import UserRole
 from .models import Class, Roster, ClassFile, SignedUp
 from .forms import ClassForm, RosterForm, ClassSearchForm
+
 
 @login_required
 def list_(request):
@@ -60,13 +62,18 @@ def enroll(request, class_id):
     """
     View that allows admins to enroll students in a class
     """
+    
     _class = get_object_or_404(Class, pk=class_id)
     roster = Roster.objects.filter(_class=_class).exclude(role=UserRole.ADMIN)
     instructor = Roster.objects.filter(_class=_class, role=UserRole.ADMIN)
+    form = UserSearchForm(request.GET, user=request.user)
+    form.is_valid()
+    students = form.results(page=request.GET.get("page"))
     students = User.objects.exclude(user_id__in=roster.values('user'))
     students = students.exclude(user_id__in=instructor.values('user')) 
     
     return render(request, "classes/enroll.html", {
+        "form": form,
         "class": _class,
         "roster": roster, 
         "students": students,
