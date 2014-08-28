@@ -5,6 +5,24 @@
 <script>var CHUNK_SIZE = {{ chunk_size }};</script>
 <script src="{{ STATIC_URL }}js/upload.js"></script>
 
+{% if failed %}
+<div class="alert alert-danger">
+    <p>The following files failed to upload</p>
+    {% for fail in failed %}
+        <li>{{ fail.name }} - <a href="{% url 'files-delete' fail.pk %}">Remove</a></li>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if uploaded %}
+<div class="alert alert-info">
+    <p>The following files are being uploaded</p>
+    {% for upload in uploaded %}
+        <li>{{ upload.name }} - <a class="strong" href="{% url 'files-edit' upload.pk %}">Edit Meta Data</a></li>
+    {% endfor %}
+</div>
+{% endif %}
+
 <button class="btn btn-default pull-right" onclick="window.history.go(-1); return false">Back</button>
 <h3>Upload</h3>
 <input type="file" name="file" id="file" style="display:none" />
