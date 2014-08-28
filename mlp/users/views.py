@@ -1,5 +1,7 @@
+from collections import defaultdict
 import os
 import sys
+from arcutils import will_be_deleted_with
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
@@ -72,7 +74,6 @@ def edit(request, user_id):
     """
     return _edit(request, user_id)
 
-@decorators.can_create_users
 def create(request):
     """
     Create a user.
@@ -109,16 +110,22 @@ def _edit(request, user_id):
 @decorators.can_edit_user
 def delete(request, user_id):
     user = get_object_or_404(User, pk=user_id)
+    #will_be_deleted = user.objects_to_delete_with_user()
+
+    related_objects = will_be_deleted_with(user)
     if request.method == "POST":
         if user:
             if user == request.user:
                 messages.warning(request, "You can't delete yourself.")
             else:    
                 messages.warning(request, "User is deleted.")
+                for item in will_be_deleted:
+                    item.delete()
                 user.delete()
 
         return HttpResponseRedirect(reverse('users-list'))
 
     return render(request, 'users/delete.html',{
+        "related_objects": related_objects,#dict(items),
         "user": user,    
     })
