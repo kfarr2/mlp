@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.core.urlresolvers import reverse
+from arcutils import will_be_deleted_with
 from mlp.classes.enums import UserRole
 
 class User(AbstractBaseUser):
@@ -47,6 +48,14 @@ class User(AbstractBaseUser):
     def get_absolute_url(self):
         return reverse("users-detail", args=[self.pk])
 
+    def objects_to_delete_with_user(self):
+        related_objects = will_be_deleted_with(self)
+        user_set = set()
+        for cls, items in related_objects:
+            user_set.update(items)
+
+        will_be_deleted = user_set
+        return will_be_deleted
 
     def __str__(self):
         if self.last_name and self.first_name:
