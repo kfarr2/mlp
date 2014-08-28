@@ -2,7 +2,7 @@
 {% load permissions %}
 {% block content %}
 <a class="btn btn-default pull-right" href="{% url 'classes-detail' class.pk %}">Back</a>
-<h3>Add a File</h3>
+<h3>{{ class.name }}</h3>
 <form method='get' class='form-inline' id='search-form' action="{{ request.path }}">
     {% include "_field.html" with field=form.q %}
     {% include "_field.html" with field=form.tags %}
