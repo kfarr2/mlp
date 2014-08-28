@@ -108,15 +108,27 @@ def upload(request):
         if request.POST.get("error_message"):
             messages.error(request, request.POST["error_message"])
         else:
-            messages.success(request, "Files Uploaded!")
+            messages.success(request, "Files Uploaded! Processing...")
 
         admin = Roster.objects.filter(user=request.user, role=UserRole.ADMIN)
         if request.user.is_staff or admin.exists():
             return HttpResponseRedirect(reverse('files-list'))
         else:
-            return HttpResponseRedirect(reverse('users-home'))
+            return HttpResponseRedirect(reverse('files-upload'))
+    
+    uploaded = File.objects.filter(
+        status=FileStatus.UPLOADED,
+        uploaded_by=request.user,
+    )
+
+    failed = File.objects.filter(
+        status=FileStatus.FAILED,
+        uploaded_by=request.user,
+    )
 
     return render(request, 'files/upload.html', {
+        'failed': failed,
+        'uploaded': uploaded,
         'my_files': my_files,
         'chunk_size': settings.CHUNK_SIZE    
     })
