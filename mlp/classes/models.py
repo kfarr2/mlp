@@ -15,6 +15,7 @@ class Class(models.Model):
     class Meta:
         db_table = "class"
 
+
 class Roster(models.Model):
     """
     Used to map users to classes
@@ -27,6 +28,7 @@ class Roster(models.Model):
     class Meta:
         db_table = "roster"
 
+
 class SignedUp(models.Model):
     """
     Used to map users to classes they have signed up for but are not in yet
@@ -37,6 +39,7 @@ class SignedUp(models.Model):
     
     class Meta:
         db_table = "signed_up"
+
 
 class ClassFile(models.Model):
     """

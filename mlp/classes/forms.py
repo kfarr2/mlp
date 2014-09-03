@@ -40,6 +40,8 @@ class ClassForm(forms.ModelForm):
         roster = Roster.objects.filter(user=self.user, _class=self.instance, role=4)
         if not roster:
             Roster.objects.create(user=self.user, _class=self.instance, role=4)
+        
+        make_searchable(self.instance)
 
 
 class ClassSearchForm(SearchForm):
