@@ -3,10 +3,11 @@
 {% load unfriendly_tags %}
 {{ form.media }}
 {% block content %}
-<h3>{{ class.name }}</h3>
+<div class="container text-center"><h1>{{ class.name }}</h1>
 {% if user|can_edit_class:class %}
-    <a href="{% url 'classes-edit' class.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-pencil"> Edit</span></a>
+    <a href="{% url 'classes-edit' class.pk %}" class="btn btn-default pull-left" style="margin-top: -50px;"><span class="glyphicon glyphicon-pencil"></span> Edit Class</a>
 {% endif %}
+</div>
 {% if user.is_authenticated %}
     {% if not user|can_edit_class:class and user not in roster %}
         <a href="{% url 'signed_up-add' class.pk user.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;">Sign Up</a>
@@ -51,7 +52,7 @@
 
     <h3>Roster</h3>
     {% if user|can_edit_class:class %}
-        <a href="{% url 'classes-enroll' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-pencil"> Edit</span></a>
+        <a href="{% url 'classes-enroll' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
     {% endif %}
     {% if roster %}
         <table class="table">
@@ -82,7 +83,7 @@
 					{% if user|can_edit_user:ros %}
                     <div class="btn-group">
                         {% url 'users-detail' ros.pk as user_url %}
-                        <a href="{{ user_url|obfuscate }}" class="btn btn-default"><span class="glyphicon glyphicon-zoom-in"></span></a>
+                        <a href="{{ user_url|obfuscate }}" class="btn btn-default">View</a>
                     </div>
 					{% endif %}
                 </td>
@@ -95,7 +96,7 @@
 </div>
 <div class="col-md-7">
     <h3>Files</h3>
-    {% if user|is_enrolled:class %}<a href="{% url 'classes-file_list' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-pencil"> Edit</span></a>{% endif %}
+    {% if user|is_enrolled:class %}<a href="{% url 'classes-file_list' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-pencil"></span> Edit</a>{% endif %}
     <hr />
     {% for file in files %}
         {% include "files/_file.html" %} 
