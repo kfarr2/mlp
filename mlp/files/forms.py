@@ -50,8 +50,7 @@ class FileSearchForm(SearchForm):
                 files = files.filter(uploaded_on__range=(self.cleaned_data['start_date'], self.cleaned_data['end_date']))
         
         if not has_admin_access(self.user):
-            files = files.filter(uploaded_by=self.user)
-
+            files = files.filter(uploaded_by_id=self.user.user_id)
 
         return files
 

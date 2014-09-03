@@ -119,6 +119,11 @@ class File(models.Model):
     def __unicode__(self):
         return "%s (%s)" % (self.name, FileType._choices[self.type][1])
 
+    def save(self, *args, **kwargs):
+        to_return = super(File, self).save(*args, **kwargs)
+        make_searchable(self)
+        return to_return
+
 class FileTag(models.Model):
     """
     Used to map files to tags

@@ -3,6 +3,7 @@ import mimetypes
 import shutil
 import os
 import math
+import datetime
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect, StreamingHttpResponse
 from django.db import transaction, DatabaseError
 from django.db.models import F
@@ -91,7 +92,10 @@ def detail(request, file_id):
     """
     file = get_object_or_404(File, pk=file_id)
     file_tags = file.filetag_set.all().select_related("tag")
+    duration = str(datetime.timedelta(seconds=math.floor(file.duration)))
+    
     return render(request, 'files/detail.html', {
+        'duration': duration,
         'file': file,
         'file_tags': file_tags,
         'FileType': FileType,
@@ -107,6 +111,7 @@ def upload(request):
     if request.method == "POST":
         if request.POST.get("error_message"):
             messages.error(request, request.POST["error_message"])
+            return HttpResponse(request.POST["error_message"])
         else:
             messages.success(request, "Files Uploaded! Processing...")
 
