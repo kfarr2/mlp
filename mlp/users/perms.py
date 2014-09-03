@@ -17,11 +17,8 @@ def can_view_user_detail(user, other_user):
 
 @permission
 def has_admin_access(user):
-    if user.is_anonymous():
-        return False
-    else:
-        roster = Roster.objects.filter(user=user, role=UserRole.ADMIN)
-        return roster.exists() or user.is_staff
+    roster = Roster.objects.filter(user=user, role=UserRole.ADMIN)
+    return roster.exists() or user.is_staff
 
 @permission
 def can_create_users(user):

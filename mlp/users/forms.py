@@ -31,7 +31,7 @@ class UserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
         super(UserForm, self).__init__(*args, **kwargs)
-
+        
         if self.instance.pk is None:
             self.fields['password'] = forms.CharField(widget=forms.PasswordInput)
 
@@ -54,11 +54,11 @@ class UserForm(forms.ModelForm):
         in_create_mode = self.in_create_mode()
         if in_create_mode:
             self.instance.set_password(self.cleaned_data.pop("password"))
-        
-        user = super(UserForm, self).save(*args, **kwargs)
 
+        user = super(UserForm, self).save(*args, **kwargs)
         make_searchable(self.instance)
         return user
+
 
 class LoginForm(forms.Form):
     """
