@@ -9,22 +9,22 @@
             {% csrf_token %}
             <input type="submit" name="submit" value="Submit" class="btn btn-default" />
             <button class="btn btn-default" onclick="window.history.go(-1); return false">Cancel</button>    
-            <a href="{% url 'classes-delete' class.pk %}" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></a>
+            {% if class.pk %}<a href="{% url 'classes-delete' class.pk %}" class="btn btn-danger">Delete</a>{% endif %}
         {% endif%}
     </form>
 </div>
 <div class="col-md-5">
     {% if class.pk %}
     <form method="post">
-        <h3>Teacher: </h3>
+        <h3>Teacher: {{ instructor }}</h3>
         {% csrf_token %}
         <table class="table">
-            {% for instruct in instructor %}
+            {% for student in enrolled %}
             <tr>
-                <td>{{ instruct.last_name }}</td>
-                <td>{{ instruct.first_name }}</td>
-                <td>{{ instruct.email }}</td> 
-                <td><a class="btn btn-default btn-small pull-right" href="{% url 'classes-make_instructor' class.pk instruct.pk %}">Make Teacher</a></td>
+                <td>{{ student.last_name }}</td>
+                <td>{{ student.first_name }}</td>
+                <td>{{ student.email }}</td> 
+                <td><a class="btn btn-default btn-small pull-right" href="{% url 'classes-make_instructor' class.pk student.pk %}">Make Teacher</a></td>
             </tr>
             {% endfor %}
         </table>
