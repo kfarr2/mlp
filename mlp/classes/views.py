@@ -147,8 +147,14 @@ def _edit(request, class_id):
     """
     if class_id is None:
         class_ = None
+        instructor = None
+        enrolled = None
     else:
         class_ = get_object_or_404(Class, pk=class_id)
+        instructor = Roster.objects.filter(_class=class_, role=UserRole.ADMIN).values('user')
+        instructor = User.objects.get(user_id__in=instructor)
+        enrolled = Roster.objects.filter(_class=class_).values('user')
+        enrolled = User.objects.filter(user_id__in=enrolled).exclude(user_id=instructor.user_id)
 
     if request.POST:
         form = ClassForm(request.POST, instance=class_, user=request.user)
@@ -160,10 +166,9 @@ def _edit(request, class_id):
 
     else:
         form = ClassForm(instance=class_, user=request.user)
-        instructor = Roster.objects.filter(_class=class_).values('user')
-        instructor = User.objects.filter(user_id__in=instructor)
-    
+
     return render(request, 'classes/edit.html', {
+        "enrolled": enrolled,
         "instructor": instructor,
         "form": form,    
         "class": class_,
