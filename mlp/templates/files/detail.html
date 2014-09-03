@@ -26,7 +26,7 @@
         {% endif %}
     {% endif %}
     <div class="well">
-        <h3>Title: {{ file.name }}</h3>
+        <h3>{{ file.name|truncatechars:40 }}</h3>
         {% if file.file and user.is_authenticated %}
         <p><a class="btn btn-default pull-right" style="margin-top: -50px;" href="{% url 'files-download' file.pk %}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
         {% endif %}
@@ -38,16 +38,21 @@
                         {{ file_tag.tag }}
                     {% endfor %}</p>
                 </td>
-                <td><p><strong>Duration:</strong> {{ file.duration }} seconds</p></td>
+                <td><p><strong>Duration:</strong> {{ duration }}</p></td>
                 <td>
                     {% if file and user|can_edit_file:file %}
                         {% if file.status == FileStatus.READY %}
                         <div class="btn-group pull-right">
-                            <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"> Edit</span></a>
+                            <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
                         </div>
                         <br></br>
                         {% endif %}
                     {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p><strong>Uploaded By:</strong> {{ file.uploaded_by }}</p>
                 </td>
             </tr>
         </table>
