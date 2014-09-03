@@ -47,8 +47,12 @@ def workflow(request):
     roster = Roster.objects.filter(user=request.user).values('_class')
     classes = Class.objects.filter(class_id__in=roster)
     files = File.objects.filter(uploaded_by=request.user)
+    num_classes = classes.count()
+    num_files = files.count()
 
     return render(request, "users/workflow.html", {
+        "num_classes": num_classes,
+        "num_files": num_files,
         "classes": classes,
         "files": files,
     })
