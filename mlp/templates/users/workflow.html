@@ -5,7 +5,7 @@
     <h2>Welcome, {{ user.first_name }}!</h2>
     <hr />
     <div class="col-md-5">
-        <h3>Your Info</h3>
+        <h3>Your User Profile</h3>
         <a href="{% url 'users-edit' user.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;">
             <span class="glyphicon glyphicon-pencil"></span> Edit
         </a>
@@ -13,18 +13,19 @@
         <table class="table">
             <tr>
                 <td>
-                    <img src="http://www.fashionally.com/images/default_profile_pic.jpg" height="180" width="180" alt="Default profile picture placeholder"/> 
+                    <p><strong>Name:</strong> {{ user.last_name }}, {{ user.first_name }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    {% if user.is_staff %}<p><strong>Staff:</strong> True</p>{% endif %}
                 </td>
                 <td>
-                    <p><strong>{{ user.last_name }}, {{ user.first_name }}</strong></p>
-                    <p>Email: {{ user.email }}</p>
-                    {% if user.is_staff %}<p>Staff: True</p>{% endif %}
+                    <p><strong>Last Login:</strong> {{ user.last_login|date }}</p>
+                    <p><strong>Date Joined:</strong> {{ user.date_joined|date }}</p> 
                 </td>
             </tr>
             <tr>
                 <td>
-                    <p><strong>Date Joined:</strong> {{ user.date_joined|date }}</p> 
-                    <p><strong>Last Login:</strong> {{ user.last_login|date }}</p>
+                    <p><strong>Files Uploaded:</strong> {{ num_files }}</p>
+                    <p><strong>Number of Classes:</strong> {{ num_classes }}</p>
                 </td>
             </tr>
         </table>
