@@ -43,7 +43,7 @@
                     {% if file and user|can_edit_file:file %}
                         {% if file.status == FileStatus.READY %}
                         <div class="btn-group pull-right">
-                            <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
+                            <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"> Edit</span></a>
                         </div>
                         <br></br>
                         {% endif %}
