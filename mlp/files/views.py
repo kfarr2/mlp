@@ -14,10 +14,11 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.conf import settings
-from mlp.classes.models import Roster
+from mlp.classes.models import Roster, ClassFile, Class
 from mlp.classes.enums import UserRole
+from mlp.classes.views import file_add
 from .perms import decorators, can_list_all_files
-from .models import File
+from .models import File, FileTag
 from .enums import FileType, FileStatus
 from .forms import FileForm, FileSearchForm
 from .tasks import process_uploaded_file
@@ -54,7 +55,18 @@ def delete(request, file_id):
     Delete a file
     """
     file = get_object_or_404(File, pk=file_id)
+    related_objects = []
+    file_tags = FileTag.objects.filter(file=file)
+    class_files = ClassFile.objects.filter(file=file)
+
+    for f in file_tags:
+        related_objects.append(f)
+    for c in class_files:
+        related_objects.append(c)
+    
     if request.method == "POST" or file.status == FileStatus.FAILED:
+        for item in related_objects:
+            item.delete()
         file.delete()
         admin = Roster.objects.filter(user=request.user, role=UserRole.ADMIN)
         if request.user.is_staff or admin.exists():
@@ -63,6 +75,7 @@ def delete(request, file_id):
             return HttpResponseRedirect(reverse('users-home'))
 
     return render(request, 'files/delete.html', {
+        "related_objects": related_objects,
         "file": file,        
     })
 
@@ -93,8 +106,11 @@ def detail(request, file_id):
     file = get_object_or_404(File, pk=file_id)
     file_tags = file.filetag_set.all().select_related("tag")
     duration = str(datetime.timedelta(seconds=math.floor(file.duration)))
-    
+    used_in = ClassFile.objects.filter(file=file)
+    used_in = Class.objects.filter(class_id__in=used_in)
+
     return render(request, 'files/detail.html', {
+        'used_in': used_in,
         'duration': duration,
         'file': file,
         'file_tags': file_tags,
@@ -105,18 +121,41 @@ def detail(request, file_id):
 @decorators.can_upload_file
 def upload(request):
     """
+    Uploads a file to the server
+    """
+    return _upload(request, class_id=None)
+
+@decorators.can_upload_to_class
+def upload_to_class(request, class_id):
+    """
+    Uploads a file directly to a class
+    """
+    return _upload(request, class_id)
+
+def _upload(request, class_id):
+    """
     Basic upload view
     """
+    if class_id is None:
+        _class = None
+    else:
+        _class = get_object_or_404(Class, pk=class_id)
+        _class = Roster.objects.filter(_class=_class, user=request.user)
+
     my_files = File.objects.filter(uploaded_by=request.user)
     if request.method == "POST":
         if request.POST.get("error_message"):
             messages.error(request, request.POST["error_message"])
-            return HttpResponse(request.POST["error_message"])
         else:
             messages.success(request, "Files Uploaded! Processing...")
 
         admin = Roster.objects.filter(user=request.user, role=UserRole.ADMIN)
-        if request.user.is_staff or admin.exists():
+        if _class:
+            for file in my_files:
+                file_add(request, class_id, file.pk) 
+                #HttpResponseRedirect(reverse('classes-file_add', args=(class_id, my_files.pk))) 
+            
+        elif request.user.is_staff or admin.exists():
             return HttpResponseRedirect(reverse('files-list'))
         else:
             return HttpResponseRedirect(reverse('files-upload'))
@@ -135,7 +174,8 @@ def upload(request):
         'failed': failed,
         'uploaded': uploaded,
         'my_files': my_files,
-        'chunk_size': settings.CHUNK_SIZE    
+        'chunk_size': settings.CHUNK_SIZE,    
+        'class': _class,
     })
 
 @decorators.can_download_file
@@ -150,6 +190,7 @@ def download(request, file_id):
     response = HttpResponse()
     response['Content-Type'] = mimetypes.guess_type(file.file.path)[0]
     response['X-Sendfile'] = file.file.path
+    response['Content-Disposition'] = 'attachment; filename=%s' % (file.name)
     # Django doesn't support x-sendfile, so write the file in debug mode
     if settings.DEBUG:
         shutil.copyfileobj(open(file.file.path), response)

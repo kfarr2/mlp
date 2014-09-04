@@ -23,7 +23,8 @@ def list_(request):
     List all classes
     """
     user_classes_list = Roster.objects.filter(user=request.user).values('_class')
-    user_classes = Class.objects.filter(class_id__in=user_classes_list)
+    user_form = ClassSearchForm(request.GET, user=request.user, classes=user_classes_list)
+    user_classes = user_form.results(page=request.GET.get("page"))
     form = ClassSearchForm(request.GET, user=request.user)
     classes = form.results(page=request.GET.get("page"))
 
@@ -112,7 +113,7 @@ def file_add(request, class_id, file_id):
         messages.warning(request, "File already added to class.")
     return HttpResponseRedirect(reverse('classes-file_list', args=(class_id,)))
 
-@decorators.can_list_class
+@decorators.can_edit_class
 def file_remove(request, class_id, file_id):
     """
     Removes a file from the class
@@ -180,12 +181,27 @@ def delete(request, class_id):
     Delete a class
     """
     _class = get_object_or_404(Class, pk=class_id)
+    related_objects = []
+    sign_up = SignedUp.objects.filter(_class=_class)
+    class_roster = Roster.objects.filter(_class=_class)
+    class_files = ClassFile.objects.filter(_class=_class)
+
+    for s in sign_up:
+        related_objects.append(s)
+    for c in class_roster:
+        related_objects.append(c)
+    for c in class_files:
+        related_objects.append(c)
+    
     if request.method == "POST":
+        for item in related_objects:
+            item.delete()
         _class.delete()
         messages.success(request, "Class deleted")
         return HttpResponseRedirect(reverse('classes-list'))
     
     return render(request, 'classes/delete.html', {
+        "related_objects": related_objects,
         "class": _class,    
     })
 
