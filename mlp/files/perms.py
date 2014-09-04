@@ -11,6 +11,10 @@ from .models import File
 def can_upload_file(user):
     return user.is_authenticated 
 
+@permission(model=Class)
+def can_upload_to_class(user, _class):
+    return has_admin_access(user)
+
 @permission(model=File)
 def can_edit_file(user, file):
     return has_admin_access(user) or file.uploaded_by == user
