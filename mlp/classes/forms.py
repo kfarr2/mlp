@@ -50,6 +50,10 @@ class ClassSearchForm(SearchForm):
     """
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
+        if kwargs:
+            self.user_classes = kwargs.pop('classes')
+        else:
+            self.user_classes = None
         super(ClassSearchForm, self).__init__(*args, **kwargs)
 
     def queryset(self):
@@ -58,6 +62,8 @@ class ClassSearchForm(SearchForm):
 
         if can_list_all_classes:
             classes = Class.objects.all()
+        if self.user_classes:
+            classes = Class.objects.filter(class_id__in=self.user_classes)
 
         return classes
 

@@ -22,6 +22,10 @@ class FileSearchForm(SearchForm):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
+        if kwargs:
+            self.user_files = kwargs.pop('files')
+        else:
+            self.user_files = None
         super(FileSearchForm, self).__init__(*args, **kwargs)
         self.fields['tags'].choices = Tag.objects.all()
         self.fields['tags'].widget.attrs['placeholder'] = "Tags"
@@ -36,6 +40,9 @@ class FileSearchForm(SearchForm):
                 status=FileStatus.READY,
                 uploaded_by=self.user.user_id,
             ).select_related("uploaded_by_id").prefetch_related("filetag_set__tag")
+        
+        if self.user_files:
+            files = File.objects.filter(file_id__in=self.user_files)
 
         return files
 
