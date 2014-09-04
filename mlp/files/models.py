@@ -124,6 +124,10 @@ class File(models.Model):
         make_searchable(self)
         return to_return
 
+    def delete(self):
+        FileTag.objects.filter(file=self).delete()
+        super(File, self).delete()
+
 class FileTag(models.Model):
     """
     Used to map files to tags
@@ -131,8 +135,8 @@ class FileTag(models.Model):
     file_tag_id = models.AutoField(primary_key=True)
     tagged_by = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     created_on = models.DateTimeField(auto_now_add=True)
-    file = models.ForeignKey(File)
-    tag = models.ForeignKey(Tag, related_name="filetag_set")
+    file = models.ForeignKey(File, null=True, on_delete=models.SET_NULL)
+    tag = models.ForeignKey(Tag, related_name="filetag_set", null=True, on_delete=models.SET_NULL)
 
     objects = TaggableManager()
     
