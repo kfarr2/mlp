@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% load permissions %}
 {% block content %}
-<hr />
+<button class="btn btn-default pull-right" onclick="window.history.go(-1); return false">Back</button>
 <div class="col-md-7">
+    <h3>{{ file.name|truncatechars:75 }}</h3>
+    <hr />
 
     {% if file.type == FileType.VIDEO %}
         <video controls>
@@ -26,37 +28,54 @@
         {% endif %}
     {% endif %}
     <div class="well">
-        <h3>{{ file.name|truncatechars:40 }}</h3>
-        {% if file.file and user.is_authenticated %}
-        <p><a class="btn btn-default pull-right" style="margin-top: -50px;" href="{% url 'files-download' file.pk %}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
-        {% endif %}
         <table class="table">
             <tr>
                 <td>
-                    <p><strong>Tags:</strong>
-                    {% for file_tag in file_tags %}
-                        {{ file_tag.tag }}
-                    {% endfor %}</p>
+                    <p><strong>Uploader:</strong> {{ file.uploaded_by }}</p>
                 </td>
                 <td><p><strong>Duration:</strong> {{ duration }}</p></td>
                 <td>
-                    {% if file and user|can_edit_file:file %}
-                        {% if file.status == FileStatus.READY %}
-                        <div class="btn-group pull-right">
-                            <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
-                        </div>
-                        <br></br>
-                        {% endif %}
+                    {% if file.file and user.is_authenticated %}
+                    <p><a class="btn btn-default" href="{% url 'files-download' file.pk %}" download="{{ file.file }}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
                     {% endif %}
                 </td>
             </tr>
             <tr>
                 <td>
-                    <p><strong>Uploaded By:</strong> {{ file.uploaded_by }}</p>
+                    <p><strong>Tags:</strong>
+                    {% for file_tag in file_tags %}
+                        {{ file_tag.tag }}, 
+                    {% endfor %}</p>
+                </td>
+                <td>
+                    <p><strong>Uploaded:</strong> {{ file.uploaded_on|date }}</p>
+                </td>
+                <td>
+                    {% if file and user|can_edit_file:file %}
+                        {% if file.status == FileStatus.READY %}
+                        <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
+                        <br></br>
+                        {% endif %}
+                    {% endif %}
                 </td>
             </tr>
         </table>
-        <p><strong>Description:</strong> {{ file.description }}</p>
+    </div>
+</div>
+<div class="col-md-5">
+    <hr />
+    <div class="well">
+        <p><strong>Description:</strong></p>
+        <p>{{ file.description }}</p>
+    </div>
+    <div>
+        {% if used_in %}
+            {% with used_in as classes %} 
+            {% include "classes/_class.html" %}
+            {% endwith %}
+        {% else %}
+            <div class="alert alert-info">This file is not used in any classes.</div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

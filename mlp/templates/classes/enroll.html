@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% load permissions %}
 {% block content %}
-<a href="{% url 'classes-detail' class.pk %}" class="btn btn-default pull-right">Back</a>
+{% load unfriendly_tags %}
+{% url 'classes-detail' class.pk as class_url %}
+<a href="{{ class_url|obfuscate }}" class="btn btn-default pull-right">Back</a>
 <h3>{{ class.name }}</h3>
 <hr />
 <div class="col-md-6">

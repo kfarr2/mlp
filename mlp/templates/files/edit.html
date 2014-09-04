@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-
+{% load unfriendly_tags %}
 {% block content %}
 <h3>Edit</h3>
-<a class="btn btn-default" href="{% url 'files-detail' file.pk %}">Back</a>
+{% url 'files-detail' file.pk as file_url %}
+<a class="btn btn-default" href="{{ file_url|obfuscate }}">Back</a>
 <div class="col-md-4">
     <form method="post">
     {% if form %}
