@@ -51,7 +51,7 @@ CELERY_RESULT_BACKEND = 'amqp'
 # CAS_SERVER_URL = 'https://sso.pdx.edu/cas/'
 # AUTHENTICATION_BACKENDS += ('djangocas.backends.CASBackend',)
 
-ITEMS_PER_PAGE = 50
+ITEMS_PER_PAGE = 25
 
 # file upload stuff
 MAX_UPLOAD_SIZE = 50 * 2**20
