@@ -8,8 +8,11 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
-from mlp.files.models import File
-from mlp.classes.models import Class, Roster
+from mlp.files.models import File, FileTag
+from mlp.files.forms import FileSearchForm
+from mlp.classes.models import Class, Roster, ClassFile, SignedUp
+from mlp.classes.enums import UserRole
+from mlp.classes.forms import ClassSearchForm
 from .perms import decorators
 from .models import User
 from .forms import UserForm, UserSearchForm
@@ -44,11 +47,17 @@ def workflow(request):
     Workflow page. Basically a home/profile page for users
     that do not have admin access.
     """
-    roster = Roster.objects.filter(user=request.user).values('_class')
-    classes = Class.objects.filter(class_id__in=roster)
-    files = File.objects.filter(uploaded_by=request.user)
-    num_classes = classes.count()
-    num_files = files.count()
+    classes_list = Roster.objects.filter(user=request.user).values('_class')
+    class_form = ClassSearchForm(request.GET, user=request.user, classes=classes_list)
+    class_form.is_valid()
+    classes = class_form.results(page=request.GET.get("page"))
+    num_classes = classes_list.count()
+  
+    files_list = File.objects.filter(uploaded_by=request.user)
+    file_form = FileSearchForm(request.GET, user=request.user, files=files_list)
+    file_form.is_valid()
+    files = file_form.results(page=request.GET.get("page"))
+    num_files = files_list.count()
 
     return render(request, "users/workflow.html", {
         "num_classes": num_classes,
@@ -114,9 +123,26 @@ def _edit(request, user_id):
 @decorators.can_edit_user
 def delete(request, user_id):
     user = get_object_or_404(User, pk=user_id)
-    #will_be_deleted = user.objects_to_delete_with_user()
+    will_be_deleted = []
 
-    related_objects = will_be_deleted_with(user)
+    # Make a list of everything that will be deleted
+    roster = Roster.objects.filter(user=user)
+    is_teacher = roster.filter(role=UserRole.ADMIN)
+    if is_teacher:
+        classes = Class.objects.filter(class_id__in=is_teacher.values('_class'))
+    else:
+        classes = None
+
+    files = File.objects.filter(uploaded_by=user)
+
+    for r in roster:
+        will_be_deleted.append(r)
+    for c in classes:
+        will_be_deleted.append(c)
+    for f in files:
+        will_be_deleted.append(f)
+
+    #related_objects = will_be_deleted_with(user)
     if request.method == "POST":
         if user:
             if user == request.user:
@@ -130,6 +156,6 @@ def delete(request, user_id):
         return HttpResponseRedirect(reverse('users-list'))
 
     return render(request, 'users/delete.html',{
-        "related_objects": related_objects,#dict(items),
+        "related_objects": will_be_deleted,
         "user": user,    
     })

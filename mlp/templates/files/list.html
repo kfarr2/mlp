@@ -3,8 +3,7 @@
 {{ form.media }}
 {% endblock %}
 {% block content %}
-<a href="{% url 'files-upload' %}" class="btn btn-default pull-right">Upload</a>
-<h3>Files</h3>
+<h2>Files <a href="{% url 'files-upload' %}" class="btn btn-default">Upload</a></h2>
 <hr />
 
 {% if failed %}
@@ -50,4 +49,5 @@
     {% endfor %}
     </table>
 </div>
+{% include '_pagination.html' with items=files %}
 {% endblock %}

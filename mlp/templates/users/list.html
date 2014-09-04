@@ -2,8 +2,7 @@
 {% load permissions %}
 {% load unfriendly_tags %}
 {% block content %}
-<h3>User List</h3>
-<a href="{% url 'users-create' %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-plus"></span> User</a>
+<h3>User List<a href="{% url 'users-create' %}" class="btn btn-default pull-right">New User</a></h3>
 <hr />
 <form method='get' class='form-inline' id='search-form' action="{{ request.path }}">
     {% include "_field.html" with field=form.q %}
@@ -59,4 +58,5 @@
 </tr>
 {% endfor %}
 </table>
+{% include '_pagination.html' with items=users %}
 {% endblock %}

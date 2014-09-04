@@ -1,8 +1,14 @@
 {% extends "base.html" %}
 {% load permissions %}
 {% block content %}
-<a class="btn btn-default pull-right" href="{% url 'classes-detail' class.pk %}">Back</a>
-<h2>{{ class.name }}</h2>
+{% load unfriendly_tags %}
+{% url 'classes-detail' class.pk as class_url %}
+<a class="btn btn-default pull-right" href="{{ class_url|obfuscate }}">Back</a>
+<h2>{{ class.name }}
+{% if user|can_upload_to_class:class %}
+    <a href="{% url 'files-upload-to-class' class.pk %}" class="btn btn-default">Upload To Class</a>
+{% endif %}
+</h2>
 <form method='get' class='form-inline' id='search-form' action="{{ request.path }}">
     {% if form %}
     {% include "_field.html" with field=form.q %}
@@ -16,7 +22,6 @@
 
 <div class="col-md-6">
     <h3>Files</h3>
-    <a href="{% url 'files-upload' %}" class="btn btn-default">Upload</a>
     <hr />
     {% if files %}
         <table class="table">

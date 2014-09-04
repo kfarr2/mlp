@@ -12,7 +12,7 @@
             <td>{{ class.class_id }}</td>
             <td>{{ class.name }}</td>
             <td>{{ class.crn }}</td>
-            <td>{{ class.description|truncatewords:10 }}</td>
+            <td>{{ class.description|truncatechars:75 }}</td>
             <td>
                 {% url 'classes-detail' class.pk as class_url %}
                 <a href="{{ class_url|obfuscate }}" class="btn btn-default">View</a>
@@ -20,3 +20,4 @@
         </tr>
     {% endfor %}
 </table>
+{% include '_pagination.html' with items=classes %}

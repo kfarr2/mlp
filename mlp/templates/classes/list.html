@@ -4,11 +4,6 @@
 {% if user|can_list_all_classes %}
 <div class="col-md-6">
     <h3>All Classes</h3>
-    {% if user|can_create_class %}
-    <a href="{% url 'classes-create' %}" class="btn btn-default pull-right" style="margin-top: -40px;">
-        <span class="glyphicon glyphicon-plus"></span> Class
-    </a>
-    {% endif %}
     <hr />
     <form method='get' class='form-inline' id='search-form' action="{{ request.path }}">
         {% include "_field.html" with field=form.q %}
@@ -26,6 +21,9 @@
 {% endif %}
 <div class="col-md-6">
     <h3>Your Classes</h3>
+    {% if user|can_create_class %}
+    <a href="{% url 'classes-create' %}" class="btn btn-default pull-right" style="margin-top: -40px;">New Class</a>
+    {% endif %}
     <hr />
     {% if user_classes %}
         {% with user_classes as classes %} 
