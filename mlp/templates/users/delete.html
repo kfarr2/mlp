@@ -9,8 +9,8 @@
     <hr />
     <p>Related objects that will be deleted:</p>
     <ul>
-        {% for cls, items in related_objects %}
-            <li>{{ items|length }} <strong>{{ cls|model_name }}</strong> object{{ items|length|pluralize}}</li>
+        {% for item in related_objects %}
+        <li><strong>{{ item }}</strong> object{{ item|length|pluralize}}</li>
         {% endfor %}
     </ul> 
 
