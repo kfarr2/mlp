@@ -3,7 +3,7 @@
 {{ form.media }}
 {% endblock %}
 {% block content %}
-<h2>Files <a href="{% url 'files-upload' %}" class="btn btn-default">Upload</a></h2>
+<h2>Files <a href="{% url 'files-upload' %}" class="btn btn-default pull-right"><span class="glyphicon glyphicon-upload"></span> Upload</a></h2>
 <hr />
 
 {% if failed %}
@@ -16,7 +16,7 @@
 {% endif %}
 
 {% if uploaded %}
-<div class="alert alert-info">
+<div class="alert alert-default">
     <p>The following files are being uploaded</p>
     {% for upload in uploaded %}
         <li>{{ upload.name }} - <a class="strong" href="{% url 'files-edit' upload.pk %}">Edit Meta Data</a></li>

@@ -15,7 +15,7 @@
 {% endif %}
 
 {% if uploaded %}
-<div class="alert alert-info">
+<div class="alert alert-default">
     <p>The following files are being uploaded</p>
     {% for upload in uploaded %}
         <li>{{ upload.name }} - <a class="strong" href="{% url 'files-edit' upload.pk %}">Edit Meta Data</a></li>
@@ -50,6 +50,6 @@
         {% include 'files/_file.html' %}
     {% endfor %}
 {% else %}    
-    <div class="alert alert-info">You have not uploaded any files</div>
+    <div class="alert alert-default">You have not uploaded any files</div>
 {% endif %}
 {% endblock %}
