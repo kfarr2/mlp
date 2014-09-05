@@ -35,8 +35,16 @@ def list_(request):
     form = UserSearchForm(request.GET, user=request.user)
     form.is_valid()
     users = form.results(page=request.GET.get("page"))
+    roles = Roster.objects.all().values('user')
+    teachers = Roster.objects.filter(role=UserRole.ADMIN).values('user')
+    teachers = User.objects.filter(user_id__in=teachers)
+    students = Roster.objects.filter(role=UserRole.STUDENT).values('user')
+    students = User.objects.filter(user_id__in=students)
 
     return render(request, "users/list.html", {
+        "teachers": teachers,
+        "students": students,
+        "roles": roles,
         "form": form,
         "users": users,
     })
@@ -48,16 +56,11 @@ def workflow(request):
     that do not have admin access.
     """
     classes_list = Roster.objects.filter(user=request.user).values('_class')
-    class_form = ClassSearchForm(request.GET, user=request.user, classes=classes_list)
-    class_form.is_valid()
-    classes = class_form.results(page=request.GET.get("page"))
+    classes = Class.objects.filter(class_id__in=classes_list)
     num_classes = classes_list.count()
   
-    files_list = File.objects.filter(uploaded_by=request.user)
-    file_form = FileSearchForm(request.GET, user=request.user, files=files_list)
-    file_form.is_valid()
-    files = file_form.results(page=request.GET.get("page"))
-    num_files = files_list.count()
+    files = File.objects.filter(uploaded_by=request.user)
+    num_files = files.count()
 
     return render(request, "users/workflow.html", {
         "num_classes": num_classes,
