@@ -10,6 +10,8 @@ from django.conf import settings
 from elasticmodels.forms import BaseSearchForm, SearchForm
 from elasticmodels import make_searchable
 from mlp.users.models import User
+from mlp.users.perms import can_view_users
+from mlp.users.search_indexes import UserIndex
 from .models import Class, Roster
 from .perms import can_list_all_classes
 from .search_indexes import ClassIndex
@@ -50,20 +52,17 @@ class ClassSearchForm(SearchForm):
     """
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
-        if kwargs:
-            self.user_classes = kwargs.pop('classes')
-        else:
-            self.user_classes = None
         super(ClassSearchForm, self).__init__(*args, **kwargs)
 
     def queryset(self):
         roster = Roster.objects.filter(user=self.user).values('_class')
-        classes = Class.objects.filter(class_id__in=roster)
 
-        if can_list_all_classes:
+        if can_list_all_classes(self.user):
             classes = Class.objects.all()
-        if self.user_classes:
-            classes = Class.objects.filter(class_id__in=self.user_classes)
+        elif roster.exists():
+            classes = Class.objects.filter(class_id__in=roster)
+        else:
+            classes = None
 
         return classes
 
@@ -81,17 +80,4 @@ class ClassSearchForm(SearchForm):
         class_lookup = dict((_class.pk, _class) for _class in classes)
 
         return classes
-
-class RosterForm(forms.ModelForm):
-    """
-    Standard roster form
-    """
-
-    class Meta:
-        model = Roster
-        fields = (
-            'user',
-            '_class',
-            'role',
-        )
 

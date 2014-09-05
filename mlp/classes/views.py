@@ -11,10 +11,10 @@ from mlp.users.forms import UserSearchForm
 from mlp.files.models import File
 from mlp.files.forms import FileSearchForm
 from mlp.files.perms import decorators
-from .perms import decorators
+from .perms import decorators, can_list_all_classes
 from .enums import UserRole
 from .models import Class, Roster, ClassFile, SignedUp
-from .forms import ClassForm, RosterForm, ClassSearchForm
+from .forms import ClassForm, ClassSearchForm
 
 
 @login_required
@@ -23,10 +23,13 @@ def list_(request):
     List all classes
     """
     user_classes_list = Roster.objects.filter(user=request.user).values('_class')
-    user_form = ClassSearchForm(request.GET, user=request.user, classes=user_classes_list)
-    user_classes = user_form.results(page=request.GET.get("page"))
-    form = ClassSearchForm(request.GET, user=request.user)
-    classes = form.results(page=request.GET.get("page"))
+    user_classes = Class.objects.filter(class_id__in=user_classes_list) 
+    if can_list_all_classes(request.user):
+        form = ClassSearchForm(request.GET, user=request.user)
+        classes = form.results(page=request.GET.get("page"))
+    else:
+        form = ClassSearchForm(user=request.user)
+        classes = None
 
     return render(request, "classes/list.html", {
         "form": form,
@@ -65,13 +68,12 @@ def enroll(request, class_id):
     """
     
     _class = get_object_or_404(Class, pk=class_id)
-    roster = Roster.objects.filter(_class=_class).exclude(role=UserRole.ADMIN)
+    roster = Roster.objects.filter(_class=_class).values('user')
+    roster = User.objects.filter(user_id__in=roster)
     instructor = Roster.objects.filter(_class=_class, role=UserRole.ADMIN)
     form = UserSearchForm(request.GET, user=request.user)
     form.is_valid()
     students = form.results(page=request.GET.get("page"))
-    students = User.objects.exclude(user_id__in=roster.values('user'))
-    students = students.exclude(user_id__in=instructor.values('user')) 
     
     return render(request, "classes/enroll.html", {
         "form": form,
