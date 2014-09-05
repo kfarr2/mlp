@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 {% load unfriendly_tags %}
 {% block content %}
-<h3>Edit</h3>
-{% url 'files-detail' file.pk as file_url %}
-<a class="btn btn-default" href="{{ file_url|obfuscate }}">Back</a>
 <div class="col-md-4">
+    <h3>Edit
+    {% url 'files-detail' file.pk as file_url %}
+    <a class="btn btn-default pull-right" href="{{ file_url|obfuscate }}">Back</a>
+    </h3>
     <form method="post">
     {% if form %}
         {{ form|bootstrap }}
@@ -13,5 +14,42 @@
     <input type="submit" name="submit" value="Submit" class="btn btn-default" />
     <a class="btn btn-danger" href="{% url 'files-delete' file.pk %}">Delete</a>
     </form>
+</div>
+<div class="col-md-7">
+    <h3>{{ file.name|truncatechars:75 }}</h3>
+    <hr />
+
+    {% if file.type == FileType.VIDEO %}
+        <video controls>
+            {% for path, mime in file.video_urls %}
+                <source src="{{ path }}" type="{{ mime }}">
+            {% endfor %}
+            Your browser failed to load the video.
+        </video>
+    {% endif %}
+
+    {% if file.type == FileType.AUDIO %}
+        {% if file.audio_urls %}
+            <audio controls>
+                {% for path, mime in file.audio_urls %}
+                    <source src="{{ path }}" type="{{ mime }}">
+                {% endfor %}
+                Your browser failed to load the audio.
+            </audio>
+        {% else%}
+            No audio urls were specified.
+        {% endif %}
+    {% endif %}
+
+    <table class="table">
+        <tr>
+            <td>
+                <p><strong>Uploader:</strong> {{ file.uploaded_by }}</p>
+            </td>
+            <td>
+                <p><strong>Uploaded:</strong> {{ file.uploaded_on|date }}</p>
+            </td>
+        </tr>
+    </table>
 </div>
 {% endblock %}
