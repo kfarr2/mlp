@@ -6,10 +6,12 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.utils.unittest import skipIf
 from mlp.users.models import User
+from mlp.classes.models import Class, Roster
+from mlp.classes.enums import UserRole
 from mlp.tags.models import Tag
 from .models import File, FileTag
 from .enums import FileType, FileStatus
-from .forms import FileForm
+from .forms import FileForm, FileSearchForm
 from .perms import can_upload_file, can_edit_file, can_list_file, can_list_all_files, can_view_file, can_download_file
 from .tasks import process_uploaded_file, generate_thumbnail, convert_video, get_duration
 
@@ -58,6 +60,18 @@ def create_users(self):
     a.set_password('foobar')
     a.save()
     self.admin = a
+
+def create_classes(self):
+    """
+    Create new classes
+    """
+    c = Class(crn=12345, name="class 101", description="this is a description")
+    c.save()
+    self.classes = c
+
+    r = Roster(user=self.admin, _class=c, role=UserRole.ADMIN)
+    r.save()
+    self.roster = r
 
 class ListViewTest(TestCase):
     def setUp(self):
@@ -161,6 +175,7 @@ class UploadViewTest(TestCase):
         super(UploadViewTest, self).setUp()
         create_users(self)
         create_files(self)
+        create_classes(self)
     
     def test_not_logged_in(self):
         response = self.client.get(reverse('files-upload'))
@@ -181,6 +196,11 @@ class UploadViewTest(TestCase):
         response = self.client.post(reverse('files-upload'), {'error_message': "ERROR"}, follow=True)
         self.assertRedirects(response, reverse('files-list'))
         self.assertIn("ERROR", [str(m) for m in response.context['messages']])
+
+    def test_upload_to_class(self):
+        self.client.login(email=self.admin.email, password='foobar')
+        response = self.client.post(reverse('files-upload-to-class', args=(self.classes.pk,)))
+        self.assertEqual(response.status_code, 200)
 
 class DownloadViewTest(TestCase):
     def setUp(self):
@@ -506,5 +526,17 @@ class FilesPermsTest(TestCase):
         self.assertTrue(can_view_file(self.admin, self.file))
         self.assertTrue(can_download_file(self.admin, self.file))
 
+
+class FileFormTest(TestCase):
+    """
+    Test a file search form
+    """
+    def setUp(self):
+        super(FileFormTest, self).setUp()
+        create_users(self)
+        create_files(self)
+        create_classes(self)
+        self.client.login(email=self.admin.email, password=self.admin.password)
+    
 
 

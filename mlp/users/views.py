@@ -140,8 +140,9 @@ def delete(request, user_id):
 
     for r in roster:
         will_be_deleted.append(r)
-    for c in classes:
-        will_be_deleted.append(c)
+    if classes:
+        for c in classes:
+            will_be_deleted.append(c)
     for f in files:
         will_be_deleted.append(f)
 

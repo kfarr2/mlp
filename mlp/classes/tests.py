@@ -13,6 +13,20 @@ from .models import Class, Roster, ClassFile, SignedUp
 from .perms import decorators
 from .enums import UserRole
 
+def create_users(self):
+    """
+    Create users
+    """
+    u = User(first_name="user", last_name="jones", email="user@pdx.edu")
+    u.set_password("foobar")
+    u.save()
+    self.user = u
+
+    a = User(first_name="admin", last_name="jones", email="admin@pdx.edu", is_staff=True)
+    a.set_password("foobar")
+    a.save()
+    self.admin = a
+
 def create_classes(self):
     """
     Create new classes
@@ -24,20 +38,6 @@ def create_classes(self):
     r = Roster(user=self.admin, _class=c, role=UserRole.ADMIN)
     r.save()
     self.roster = r
-
-def create_users(self):
-    """
-    Create users
-    """
-    u = User(first_name="user", last_name="jones", email="user@pdx.edu", is_staff=True)
-    u.set_password("foobar")
-    u.save()
-    self.user = u
-
-    a = User(first_name="admin", last_name="jones", email="admin@pdx.edu", is_staff=True)
-    a.set_password("foobar")
-    a.save()
-    self.admin = a
 
 def create_class_files(self):
     """
@@ -76,11 +76,17 @@ class ClassTest(TestCase):
         create_users(self)
         create_classes(self)
         create_files(self)
-        self.client.login(email=self.user.email, password="foobar")
+        create_class_files(self)
+        self.client.login(email=self.admin.email, password="foobar")
 
     def test_list_view(self):
         response = self.client.get(reverse('classes-list'))
         self.assertEqual(response.status_code, 200)
+        self.client.logout()
+        self.client.login(email=self.user.email, password=self.user.password)
+        response = self.client.get(reverse('classes-list'), follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.client.logout()
 
     def test_detail_view(self):
         response = self.client.get(reverse('classes-detail', args=(self.classes.pk,)))
@@ -95,6 +101,7 @@ class ClassTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_file_add(self):
+        ClassFile.objects.all().delete()
         pre_count = ClassFile.objects.count()
         response = self.client.get(reverse('classes-file_add', args=(self.classes.pk, self.file.pk,)))
         self.assertEqual(response.status_code, 302)
@@ -104,7 +111,6 @@ class ClassTest(TestCase):
         self.assertEqual(pre_count+1, ClassFile.objects.count())
 
     def test_file_remove(self):
-        create_class_files(self)
         pre_count = ClassFile.objects.count()
         response = self.client.get(reverse('classes-file_remove', args=(self.classes.pk, self.file.pk,)))
         self.assertEqual(response.status_code, 302)
@@ -139,14 +145,21 @@ class ClassTest(TestCase):
     def test_delete(self):
         pre_count = Class.objects.count()
         response = self.client.get(reverse('classes-delete', args=(self.classes.pk,)))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(pre_count, Class.objects.count())
+        response = self.client.post(reverse('classes-delete', args=(self.classes.pk,)))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(pre_count-1, Class.objects.count())
 
     def test_make_instructor(self):
-        response = self.client.get(reverse('classes-make_instructor', args=(self.classes.pk, self.user.pk)))
+        self.client.post(reverse('roster-add', args=(self.classes.pk, self.user.pk)))
+        response = self.client.post(reverse('classes-make_instructor', args=(self.classes.pk, self.user.pk)))
         self.assertEqual(response.status_code, 302)
         status = Roster.objects.get(user=self.user, _class=self.classes)
         self.assertEqual(status.role, UserRole.ADMIN)
+        response = self.client.get(reverse('classes-make_instructor', args=(self.classes.pk, self.user.pk)))
+        self.assertEqual(response.status_code, 200)
+
 
 class RosterTest(TestCase):
     """
@@ -157,21 +170,25 @@ class RosterTest(TestCase):
         create_users(self)
         create_classes(self)
         create_files(self)
-        self.client.login(email=self.user.email, password="foobar")
+        self.client.login(email=self.admin.email, password="foobar")
 
     def test_roster_add(self):
         pre_count = Roster.objects.count()
-        response = self.client.get(reverse('roster-add', args=(self.classes.pk, self.user.pk,)))
-        self.assertEqual(response.status_code, 302)
+        response = self.client.get(reverse('roster-add', args=(self.classes.pk, self.user.pk,)), follow=True)
+        self.assertIn("User successfully enrolled in class.", [str(m) for m in response.context['messages']])
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(pre_count+1, Roster.objects.count())
-        response = self.client.get(reverse('roster-add', args=(self.classes.pk, self.admin.pk,)))
-        self.assertEqual(response.status_code, 302)
+        response = self.client.get(reverse('roster-add', args=(self.classes.pk, self.admin.pk,)), follow=True)
+        self.assertIn("User already enrolled.", [str(m) for m in response.context['messages']])
+        self.assertEqual(response.status_code, 200)
 
     def test_roster_remove(self):
+        self.client.get(reverse('roster-add', args=(self.classes.pk, self.user.pk)), follow=True)
         response = self.client.get(reverse('roster-remove', args=(self.classes.pk, self.user.pk,)))
         self.assertEqual(response.status_code, 302)
         response = self.client.get(reverse('roster-remove', args=(self.classes.pk, self.user.pk,)))
         self.assertEqual(response.status_code, 302)
+
 
 class SignedUpTest(TestCase):
     def setUp(self):
@@ -180,23 +197,27 @@ class SignedUpTest(TestCase):
         create_classes(self)
         create_files(self)
         create_class_files(self)
-        self.client.login(email=self.user.email, password="foobar")
+        self.client.login(email=self.admin.email, password="foobar")
 
     def test_signed_up_add(self):
-        response = self.client.get(reverse('signed_up-add', args=(self.classes.pk, self.user.pk,)))
-        self.assertEqual(response.status_code, 302)
-        response = self.client.get(reverse('signed_up-add', args=(self.classes.pk, self.user.pk,)))
-        self.assertEqual(response.status_code, 302)
+        response = self.client.get(reverse('signed_up-add', args=(self.classes.pk, self.user.pk,)), follow=True)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('signed_up-add', args=(self.classes.pk, self.user.pk,)), follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Sign up pending approval.", [str(m) for m in response.context['messages']])
+        self.client.get(reverse('roster-add', args=(self.classes.pk, self.user.pk)), follow=True)
+        self.client.get(reverse('signed_up-remove', args=(self.classes.pk, self.user.pk)), follow=True)
+        response = self.client.get(reverse('signed_up-add', args=(self.classes.pk, self.user.pk,)), follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Already Enrolled.", [str(m) for m in response.context['messages']])
 
-class ClassSearchTest(TestCase):
-    def setUp(self):
-        super(ClassSearchTest, self).setUp()
-        create_users(self)
-        create_files(self)
-        create_classes(self)
-        self.client.login(email=self.admin.email, password=self.admin.password)
-
-    def test_search(self):
-        data = "class 101"
-        response = self.client.get(reverse('classes-list'), data)
+    def test_signed_up_remove(self):
+        response = self.client.get(reverse('signed_up-add', args=(self.classes.pk, self.user.pk,)), follow=True)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('signed_up-remove', args=(self.classes.pk, self.user.pk)), follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Sign up request denied.", [str(m) for m in response.context['messages']])
+        response = self.client.get(reverse('signed_up-remove', args=(self.classes.pk, self.user.pk)), follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Error: User not found.", [str(m) for m in response.context['messages']])
 

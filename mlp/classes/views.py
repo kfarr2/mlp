@@ -24,11 +24,10 @@ def list_(request):
     """
     user_classes_list = Roster.objects.filter(user=request.user).values('_class')
     user_classes = Class.objects.filter(class_id__in=user_classes_list) 
+    form = ClassSearchForm(request.GET, user=request.user)
     if can_list_all_classes(request.user):
-        form = ClassSearchForm(request.GET, user=request.user)
         classes = form.results(page=request.GET.get("page"))
     else:
-        form = ClassSearchForm(user=request.user)
         classes = None
 
     return render(request, "classes/list.html", {

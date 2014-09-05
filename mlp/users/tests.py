@@ -5,9 +5,15 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.unittest import skipIf
+from mlp.classes.models import Class, Roster
+from mlp.classes.enums import UserRole
+from mlp.files.models import File, FileTag
+from mlp.files.enums import FileType, FileStatus
+from mlp.files.forms import FileForm
+from mlp.files.perms import can_upload_file, can_edit_file, can_list_file, can_list_all_files, can_view_file, can_download_file
 from .forms import LoginForm, UserForm, UserSearchForm
 from .models import User
-
+from .perms import can_create_users, can_edit_user
 
 def create_users(self):
     """
@@ -28,6 +34,50 @@ def create_users(self):
     i.save()
     self.inactive = i
 
+def create_classes(self):
+    """
+    Create new classes
+    """
+    c = Class(crn=12345, name="class 101", description="this is a description")
+    c.save()
+    self.classes = c
+
+    r = Roster(user=self.admin, _class=c, role=UserRole.ADMIN)
+    r.save()
+    self.roster = r
+
+def create_files(self):
+    """
+    Create a few files to be uploaded
+    """
+    f = open(os.path.join(settings.MEDIA_ROOT, "test.txt"), "w")
+    f.write("this is a test file")
+    f.close()
+
+    f = File(
+        name="Mango",
+        description="Hardcore deliciousity",
+        file="test.txt",
+        type=FileType.VIDEO,
+        status=FileStatus.READY,
+        uploaded_by=self.user,
+        tmp_path="mango",
+    )
+    f.save()
+    self.file = f
+
+    a = File(
+        name="Peach",
+        description="Hardcore deliciousity",
+        file="test.txt",
+        type=FileType.VIDEO,
+        status=FileStatus.READY,
+        uploaded_by=self.admin,
+        tmp_path="peach",
+    )
+    a.save()
+    self.adminfile = a
+
 
 class UserViewsTest(TestCase):
     """
@@ -36,6 +86,8 @@ class UserViewsTest(TestCase):
     def setUp(self):
         super(UserViewsTest, self).setUp()
         create_users(self)
+        create_classes(self)
+        create_files(self)
         self.client.login(email=self.admin.email, password="foobar")
 
     def test_home_view(self):
@@ -70,6 +122,7 @@ class UserViewsTest(TestCase):
             "password":"foobar",
         }
         response = self.client.post(reverse('users-create'), data)
+        self.assertTrue(can_create_users(self.admin))
         self.assertRedirects(response, reverse('users-list'))
 
     def test_edit_view(self):
@@ -80,24 +133,26 @@ class UserViewsTest(TestCase):
             "password": self.admin.password,
         }
         response = self.client.post(reverse('users-edit', args=(self.admin.pk,)), data)
+        self.assertTrue(can_edit_user(self.admin, self.user))
         self.assertRedirects(response, reverse('users-list'))
         self.assertTrue(self.admin.first_name,"jimmy")
+        
 
     def test_delete_view(self):
         pre_count = User.objects.count()
         response = self.client.get(reverse('users-delete', args=(self.user.pk,)))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(reverse('users-delete', args=(self.user.pk,)))
         self.assertRedirects(response, reverse('users-list'))
         self.assertEqual(pre_count-1, User.objects.count())
 
         response = self.client.get(reverse('users-delete', args=(self.user.pk,)))
         self.assertEqual(response.status_code, 404)
 
+        response = self.client.post(reverse('users-delete', args=(self.admin.pk,)), follow=True)
+        self.assertRedirects(response, reverse('users-list'))
+        self.assertIn("You can't delete yourself.", [str(m) for m in response.context['messages']])
 
-class LoginFormTest(TestCase):
-    """
-    Test user forms
-    """
-    def setUp(self):
-        super(LoginFormTest, self).setUp()
-        create_users(self)
-
+    def test_cloak_as(self):
+        self.assertTrue(self.admin.can_cloak_as(self.user))
+    

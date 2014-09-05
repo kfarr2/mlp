@@ -2,6 +2,7 @@ import os
 from permissions import permission
 from django.db.models import Q
 from mlp.users.models import User
+from mlp.users.perms import has_admin_access
 from .enums import UserRole
 from .models import Class, Roster
 
@@ -18,8 +19,7 @@ def can_list_class(user, _class):
 
 @permission
 def can_list_all_classes(user):
-    roster = Roster.objects.filter(user=user, role=UserRole.ADMIN)
-    return user.is_staff or roster.exists()
+    return has_admin_access(user) 
 
 @permission(model=Class)
 def can_edit_class(user, _class):
