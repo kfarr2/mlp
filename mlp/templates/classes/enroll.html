@@ -7,6 +7,7 @@
 <h3>{{ class.name }}</h3>
 <hr />
 <div class="col-md-6">
+    <h4>Students</h4>
     <form method='get' class='form-inline' id='search-form' action="{{ request.path }}">
         {% include "_field.html" with field=form.q %}
         <div class="btn-group btn-group-sm">
@@ -15,7 +16,6 @@
         </div>
     </form>
     <form method="post">
-        <h4>Students</h4>
         {% csrf_token %}
         <table class="table">
             {% for student in students %}
@@ -27,19 +27,21 @@
             </tr>
             {% endfor %}
         </table>
+        {% include '_pagination.html' with items=students %}
     </form>
 </div>
 <div class="col-md-6">
     <h4>Enrolled</h4>
     {% if roster %}
+        {% csrf_token %}
         <table class="table">
         {% for ros in roster %}
             <tr>
-                <td>{{ ros.user }}</td>
-                <td>{{ ros.user.last_name }}</td>
-                <td>{{ ros.user.first_name }}</td>
+                <td>{{ ros.last_name }}</td>
+                <td>{{ ros.first_name }}</td>
+                <td>{{ ros.email }}</td>
                 <td>
-                    {% with ros.user as user %}
+                    {% with ros as user %}
                         <a class="btn btn-default btn-small pull-right" href="{% url 'roster-remove' class.pk user.pk %}">Drop</a>
                     {% endwith %}
                 </td>

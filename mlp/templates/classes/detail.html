@@ -3,11 +3,9 @@
 {% load unfriendly_tags %}
 {{ form.media }}
 {% block content %}
-<div class="container text-center"><h1>{{ class.name }}</h1>
-{% if user|can_edit_class:class %}
-    <a href="{% url 'classes-edit' class.pk %}" class="btn btn-default pull-left" style="margin-top: -50px;"><span class="glyphicon glyphicon-pencil"></span> Edit Class</a>
-{% endif %}
-</div>
+<h1>
+    <div class="text-center">{{ class.name }}</div>
+</h1>
 {% if user.is_authenticated %}
     {% if not user|can_edit_class:class and user not in roster %}
         <a href="{% url 'signed_up-add' class.pk user.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;">Sign Up</a>
@@ -15,7 +13,11 @@
 {% endif %}
 <hr />
 <div class="col-md-5">
-    <h3>Info</h3>
+    <h3>Info
+    {% if user|can_edit_class:class %}
+        <a href="{% url 'classes-edit' class.pk %}" class="btn btn-default pull-right"><span class="glyphicon glyphicon-book"></span> Edit</a>
+    {% endif %}
+    </h3>
     <hr />
     <p><strong>Instructor:</strong> {{ instructor.last_name }}, {{ instructor.first_name }}</p>
     <p><strong>Course Reference Number:</strong> {{ class.crn }}</p>
@@ -45,14 +47,14 @@
                 {% endfor %}
             </table>
         {% else %}
-            <div class="alert alert-info">No pending requests</div>
+            <div class="alert alert-default">No pending requests</div>
         {% endif %}
         <br />
     {% endif %}
 
     <h3>Roster</h3>
     {% if user|can_edit_class:class %}
-        <a href="{% url 'classes-enroll' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
+        <a href="{% url 'classes-enroll' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-user"></span> Edit</a>
     {% endif %}
     {% if roster %}
         <table class="table">
@@ -91,17 +93,17 @@
             {% endfor %}
         </table>
     {% else %}
-        <div class="alert alert-info">Nobody is enrolled in this class</div>
+        <div class="alert alert-default">Nobody is enrolled in this class</div>
     {% endif %}
 </div>
 <div class="col-md-7">
     <h3>Files</h3>
-    {% if user|is_enrolled:class %}<a href="{% url 'classes-file_list' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-pencil"></span> Edit</a>{% endif %}
+    {% if user|is_enrolled:class %}<a href="{% url 'classes-file_list' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-folder-open"></span> Edit</a>{% endif %}
     <hr />
     {% for file in files %}
         {% include "files/_file.html" %} 
     {% empty %}
-        <div class="alert alert-info">No files have been added yet.</div>
+        <div class="alert alert-default">No files have been added yet.</div>
     {% endfor %}
 </div>
 {% endblock %}
