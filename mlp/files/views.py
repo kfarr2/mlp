@@ -97,6 +97,8 @@ def edit(request, file_id):
     return render(request, 'files/edit.html', {
         'form': form,
         'file': file,
+        'FileType': FileType,
+        'FileStatus': FileStatus,
     })
 
 def detail(request, file_id):
@@ -106,7 +108,7 @@ def detail(request, file_id):
     file = get_object_or_404(File, pk=file_id)
     file_tags = file.filetag_set.all().select_related("tag")
     duration = str(datetime.timedelta(seconds=math.floor(file.duration)))
-    used_in = ClassFile.objects.filter(file=file)
+    used_in = ClassFile.objects.filter(file=file).values('_class')
     used_in = Class.objects.filter(class_id__in=used_in)
 
     return render(request, 'files/detail.html', {
