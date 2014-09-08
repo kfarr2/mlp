@@ -59,8 +59,10 @@ def workflow(request):
     classes = Class.objects.filter(class_id__in=classes_list)
     num_classes = classes_list.count()
   
-    files = File.objects.filter(uploaded_by=request.user)
-    num_files = files.count()
+    form = FileSearchForm(request.GET, user=request.user)
+    form.is_valid()
+    files = form.results(page=request.GET.get("page"))
+    num_files = len(files)
 
     return render(request, "users/workflow.html", {
         "num_classes": num_classes,
