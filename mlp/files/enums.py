@@ -45,3 +45,18 @@ class FileStatus(ChoiceEnum):
         (READY, "Ready"),
         (IMPORTED, "Imported"),        
     )
+
+class FileOrderChoices(ChoiceEnum):
+    TITLE = 1
+    UPLOADER = 2
+    DATE = 4
+    COURSE = 8
+
+    _choices = (
+        ('','Order By'),
+        (TITLE, "Title"),
+        (UPLOADER, "Uploader"),
+        (DATE, "Date"),
+        (COURSE, "Course"),
+    )
+
