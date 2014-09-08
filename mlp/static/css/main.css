@@ -585,3 +585,19 @@ body > div > div#content_container {
     border: 0;
     border-bottom: 1px dashed #999;
 }
+
+#id_order {
+    display: table-cell;
+    color: #555;
+    height: 34px;
+    width: 150px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    margin-left: 3px;
+    margin-bottom: 0px;
+    margin-top: 3px;
+    padding: 6px 12px;
+    position: relative;
+    vertical-align: middle;
+    z-index: 2;
+}
