@@ -23,7 +23,7 @@ from .enums import FileType, FileStatus
 from .forms import FileForm, FileSearchForm
 from .tasks import process_uploaded_file
 
-@decorators.can_list_all_files
+@login_required
 def list_(request):
     """
     List all the files
