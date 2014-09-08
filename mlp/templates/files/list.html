@@ -3,7 +3,7 @@
 {{ form.media }}
 {% endblock %}
 {% block content %}
-<h2>Files <a href="{% url 'files-upload' %}" class="btn btn-default pull-right"><span class="glyphicon glyphicon-upload"></span> Upload</a></h2>
+<h2>Files {% if perms.can_upload_files %}<a href="{% url 'files-upload' %}" class="btn btn-default pull-right"><span class="glyphicon glyphicon-upload"></span> Upload</a>{% endif %}</h2>
 <hr />
 
 {% if failed %}
@@ -31,6 +31,16 @@
         <button type="submit" name="search" class="btn btn-default btn-sm">Search</button>
         <a href="{% url 'files-list' %}" class="btn btn-default btn-sm">Clear</a>
     </div>
+    <a href="#" class='expander'>Advanced</a>
+        <div class="tab-content" style="display:none">
+            <div class="tab-pane active">
+                <div class="input-group date">
+                    {% include '_field.html' with field=form.start_date %} 
+                    {% include "_field.html" with field=form.end_date %}
+                    {% include "_field.html" with field=form.order %}
+                </div>
+            </div>
+        </div>
 </form>
 <br />
 
@@ -50,4 +60,26 @@
     </table>
 </div>
 {% include '_pagination.html' with items=files %}
+<script>
+    $(document).ready(function(){
+        $(".expander").click(function(e){
+            e.preventDefault()
+            var closed = $(".tab-content").is(":hidden");
+            if(closed == true)
+                $(this).parent().find(".tab-content").show();
+            else
+                $(this).parent().find(".tab-content").hide();
+
+                $.cookie('open',closed,{ path: '/'});
+        });
+
+        var openToggle = $.cookie('open');
+        if( openToggle == 'true' ){
+            $('.expander').parent().find(".tab-content").show();
+        }    
+        else{
+            $('.expander').parent().find(".tab-content").hide();
+        }
+    });
+</script>
 {% endblock %}
