@@ -61,7 +61,7 @@ def workflow(request):
     form = FileSearchForm(request.GET, user=request.user)
     form.is_valid()
     files = form.results(page=request.GET.get("page"))
-    num_files = len(files)
+    num_files = File.objects.filter(uploaded_by=request.user).count()
 
     return render(request, "users/workflow.html", {
         "num_classes": num_classes,
