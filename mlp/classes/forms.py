@@ -18,7 +18,7 @@ from .search_indexes import ClassIndex
 
 class ClassForm(forms.ModelForm):
     """
-    Standard form for classes
+    Standard form for creating classes
     """
 
     class Meta:
@@ -58,8 +58,10 @@ class ClassSearchForm(SearchForm):
         roster = Roster.objects.filter(user=self.user).values('_class')
 
         if can_list_all_classes(self.user):
+            # user is a teacher or staff - view all classes
             classes = Class.objects.all()
         elif roster.exists():
+            # user is a student - view students classes
             classes = Class.objects.filter(class_id__in=roster)
         else:
             classes = None

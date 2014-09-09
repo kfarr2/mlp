@@ -90,8 +90,6 @@ class TagForm(forms.ModelForm):
             kwargs['instance'].color = kwargs['instance'].color or Tag.DEFAULT_COLOR
             kwargs['instance'].background_color = kwargs['instance'].background_color or Tag.DEFAULT_BACKGROUND_COLOR
 
-
-
         super(TagForm, self).__init__(*args, **kwargs)
 
         # remove the blank choices
