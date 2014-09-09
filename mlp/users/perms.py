@@ -26,10 +26,10 @@ def can_create_users(user):
 
 @permission(model=User)
 def can_edit_user(user, other_user):
-    roster = Roster.objects.filter(user=user, role=UserRole.ADMIN)
-    for ros in roster:
-	    other_roster = Roster.objects.filter(user=other_user, _class=ros._class)
-	    if other_roster.exists():
+    teachers = Roster.objects.filter(user=user, role=UserRole.ADMIN)
+    for teacher in teachers:
+	    is_a_student = Roster.objects.filter(user=other_user, _class=teacher._class)
+	    if is_a_student.exists():
 		    return True
     return can_edit_all_users(user) or user == other_user
 
