@@ -12,6 +12,7 @@ from mlp.files.enums import FileType, FileStatus
 from .models import Class, Roster, ClassFile, SignedUp
 from .perms import decorators
 from .enums import UserRole
+from .forms import ClassSearchForm
 
 def create_users(self):
     """
@@ -224,3 +225,47 @@ class SignedUpTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Error: User not found.", [str(m) for m in response.context['messages']])
 
+class ClassFormTest(TestCase):
+    """
+    Test class forms
+    """
+    def setUp(self):
+        super(ClassFormTest, self).setUp()
+        create_users(self)
+        create_classes(self)
+        
+        self.client.login(email=self.admin.email, password=self.admin.password)
+
+    def test_class_search_form_queryset(self):
+        all_classes = Class.objects.all()
+        form = ClassSearchForm(self.client.get(reverse('classes-list')), user=self.admin) 
+        classes = form.results(page=self.client.get(reverse('classes-list')).get("page")).object_list
+        self.assertEqual(len(all_classes), len(classes))
+
+        Roster.objects.create(_class=self.classes, user=self.user, role=UserRole.STUDENT)
+        student_classes = Roster.objects.filter(user=self.user).values('_class')
+        student_classes = Class.objects.filter(class_id__in=student_classes)
+        form = ClassSearchForm(self.client.get(reverse('classes-list')), user=self.user) 
+        classes = form.results(page=self.client.get(reverse('classes-list')).get("page")).object_list
+        self.assertEqual(student_classes.count(), len(classes))
+
+    def test_class_search_form_search(self):
+        form = ClassSearchForm(self.client.get(reverse('classes-list')), {
+            'q': self.classes.name,
+        }, user=self.admin)
+        form.is_valid()
+        form.search()
+        results = form.results(page=self.client.get(reverse('classes-list')).get("page")).object_list
+        self.assertIn(self.classes, results)
+        self.client.logout()
+    
+        self.client.login(email=self.user.email, password=self.user.password)
+        Roster.objects.create(_class=self.classes, user=self.user, role=UserRole.STUDENT)
+        form = ClassSearchForm(self.client.get(reverse('classes-list')), {
+            'q': self.classes.name,
+        }, user=self.user)
+        form.is_valid()
+        form.search()
+        results = form.results(page=self.client.get(reverse('classes-list')).get("page")).object_list
+        classes = Roster.objects.filter(user=self.user).values('_class')
+        self.assertEqual(len(classes), len(results))
