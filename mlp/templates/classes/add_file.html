@@ -1,19 +1,30 @@
 {% extends "base.html" %}
 {% load permissions %}
+{% block head %}
+{{ form.media }} 
+{% endblock %}
 {% block content %}
 {% load unfriendly_tags %}
 {% url 'classes-detail' class.pk as class_url %}
 <a class="btn btn-default pull-right" href="{{ class_url|obfuscate }}">Back</a>
 <h2>{{ class.name }}</h2>
 <form method='get' class='form-inline' id='search-form' action="{{ request.path }}">
-    {% if form %}
     {% include "_field.html" with field=form.q %}
     {% include "_field.html" with field=form.tags %}
     <div class="btn-group btn-group-sm">
         <button type="submit" name="search" class="btn btn-default btn-sm">Search</button>
         <a href="{% url 'classes-file_list' class.pk %}" class="btn btn-default btn-sm">Clear</a>
     </div>
-    {% endif %}
+    <a href="#" id='expander'>Advanced</a>
+    <div class="tab-content" style="display:none">
+        <div class="tab-pane active">
+            <div class="input-group date">
+                {% include '_field.html' with field=form.start_date %} 
+                {% include "_field.html" with field=form.end_date %}
+                {% include "_field.html" with field=form.order %}
+            </div>
+        </div>
+    </div>
 </form>
 
 <div class="col-md-6">
@@ -24,7 +35,7 @@
         {% for file in files %}
         <tr>
             <td>
-                <a href="{% url 'classes-file_add' class.pk file.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-plus" /></a>
+                <a href="{% url 'classes-file_add' class.pk file.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span></a>
             </td>
             <td>{% include "files/_file.html" %}</td>
         </tr>
@@ -37,7 +48,7 @@
 <div class="col-md-6">
     <h3>Class Files 
     {% if user|can_upload_to_class:class %}
-    <a href="{% url 'files-upload-to-class' class.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-upload"></span> Upload To Class</a>
+    <a href="{% url 'files-upload-to-class' class.pk %}" class="btn btn-default pull-right"><span class="glyphicon glyphicon-upload"></span> Upload To Class</a>
     {% endif %}
     </h3>
     <hr />
@@ -47,7 +58,7 @@
         <tr>
             <td>
                 {% if user|can_edit_file:file %}
-                    <a href="{% url 'classes-file_remove' class.pk file.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-minus" /></a>
+                <a href="{% url 'classes-file_remove' class.pk file.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-minus"></span></a>
                 {% endif %}        
             </td>
             <td>{% include "files/_file.html" %}</td>
@@ -58,4 +69,27 @@
         <div class="alert alert-default">No files have been added to this class yet.</div>
     {% endif %}
 </div>
+
+<script>
+    $(document).ready(function(){
+        $("#expander").click(function(e){
+            e.preventDefault()
+            var closed = $(".tab-content").is(":hidden");
+            if(closed == true)
+                $(this).parent().find(".tab-content").show();
+            else
+                $(this).parent().find(".tab-content").hide();
+
+                $.cookie('open',closed,{ path: '/'});
+        });
+
+        var openToggle = $.cookie('open');
+        if( openToggle == 'true' ){
+            $('.expander').parent().find(".tab-content").show();
+        }    
+        else{
+            $('.expander').parent().find(".tab-content").hide();
+        }
+    });
+</script>
 {% endblock %}

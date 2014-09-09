@@ -3,7 +3,7 @@
 {% block content %}
 <div class="col-md-5">
     <h3>{% if other_user %}Edit: {{ other_user.last_name }}, {{ other_user.first_name }}{% else %}Create User{% endif %}</h3>
-    <button class="btn btn-default pull-right" onclick="window.history.go(-1); return false" style="margin-top: -40px;">Back</button>
+    <a class="btn btn-default pull-right" href="{% url 'users-workflow' %}" style="margin-top: -40px;">Back</a>
     <hr />
     <p><strong>User ID:</strong> {{ other_user.user_id }}</p>
     <p><strong>Date Joined:</strong> {{ other_user.date_joined|date }}</p>

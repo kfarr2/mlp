@@ -3,9 +3,7 @@
 {% load unfriendly_tags %}
 {{ form.media }}
 {% block content %}
-<h1>
-    <div class="text-center">{{ class.name }}</div>
-</h1>
+<div class="text-center"><h1>{{ class.name }}</h1></div>
 {% if user.is_authenticated %}
     {% if not user|can_edit_class:class and user not in roster %}
         <a href="{% url 'signed_up-add' class.pk user.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;">Sign Up</a>

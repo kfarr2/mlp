@@ -1,9 +1,8 @@
 {% extends "base.html" %}
 {% load permissions %}
 {% block content %}
-<button class="btn btn-default pull-right" onclick="window.history.go(-1); return false">Back</button>
+<h3>{{ file.name|truncatechars:75 }}</h3>
 <div class="col-md-7">
-    <h3>{{ file.name|truncatechars:75 }}</h3>
     <hr />
 
     {% if file.type == FileType.VIDEO %}
@@ -54,7 +53,7 @@
                     {% if file and user|can_edit_file:file %}
                         {% if file.status == FileStatus.READY %}
                         <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
-                        <br></br>
+                        <br />
                         {% endif %}
                     {% endif %}
                 </td>

@@ -27,21 +27,20 @@
                     <p><strong>Uploaded</strong> {{ num_files }} <strong>files.</strong></p>
                     <p><strong>Enrolled in</strong> {{ num_classes }} <strong>classes.</strong></p>
                 </td>
+                <td></td>
             </tr>
         </table>
         <br />
         <h3>Your Files</h3>
         <hr />
         <div class="file-list">
-            <table class="table">
             {% for file in files %}
-                <tr>{% include "files/_file.html" %}</tr>
+                <p>{% include "files/_file.html" %}
             {% empty %}
                 <div class="alert alert-default">
                     You have not uploaded any files!
                 </div>
             {% endfor %}
-            </table>
             {% include '_pagination.html' with items=files %}
         </div>
     </div>

@@ -5,7 +5,7 @@
                 Page {{ items.number }} of {{ items.paginator.num_pages }}.
             </span>
         {% endif %}
-        <div class='pull-right btn-group'>
+        <span class='pull-right btn-group'>
             {% if items.has_previous %}
                 <a class='btn btn-default btn-xs prev' href='{% add_get page=items.previous_page_number %}'>previous</a>
             {% else %}
@@ -16,7 +16,7 @@
             {% else %}
                 <a class='btn btn-default btn-xs disabled next' href='#'>next</a>
             {% endif %}
-        </div>
+        </span>
     </span>
     <div style='clear:both'></div>
 </div>
