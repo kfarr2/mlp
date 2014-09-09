@@ -261,10 +261,10 @@ def signed_up_add(request, class_id, user_id):
     if roster.exists():
         messages.warning(request, "Already Enrolled.")
     elif signed_up.exists():
-        messages.warning(request, "Sign up pending approval.")
+        messages.success(request, "Sign up pending approval. Please check back later.")
     else:
         SignedUp.objects.create(user=user, _class=_class)
-        messages.success(request, "User successfully signed up for class.")
+        messages.success(request, "User signed up for class. Pending teacher approval.")
     
     return HttpResponseRedirect(reverse('classes-detail', args=(class_id,)))
 
