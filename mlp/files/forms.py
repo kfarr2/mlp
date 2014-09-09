@@ -21,7 +21,6 @@ class FileSearchForm(SearchForm):
     order = ChoiceField(required=False, label="")
     start_date = DateTimeField(required=False, label="", widget=DateTimePicker(options={"format": "YYYY-MM-DD", "pickTime": False}))
     end_date = DateTimeField(required=False, label="", widget=DateTimePicker(options={"format": "YYYY-MM-DD", "pickTime": False}))
-
     
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
@@ -58,8 +57,11 @@ class FileSearchForm(SearchForm):
         if self.cleaned_data.get("start_date"):
             if self.cleaned_data.get("end_date"):
                 files = files.filter(uploaded_on__range=(self.cleaned_data['start_date'], self.cleaned_data['end_date']))
-        
+       
+        # reorder results if necessary
         if self.cleaned_data.get("order"):
+            if self.cleaned_data['order'] == str(FileOrderChoices.TYPE):
+                files = files.order_by('type')
             if self.cleaned_data['order'] == str(FileOrderChoices.COURSE):
                 files = files.order_by('-course')
             elif self.cleaned_data['order'] == str(FileOrderChoices.UPLOADER):
