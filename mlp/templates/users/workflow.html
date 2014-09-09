@@ -47,11 +47,11 @@
     <div class="col-md-6" id="classes">
         <h3>Your Classes</h3>
         <hr />
-            {% if classes %}
-                {% include "classes/_class.html" %}
-            {% else %}
-                <div class="alert alert-default">You are not enrolled in any classes.</div>
-            {% endif %}
+        {% if classes %}
+            {% include "classes/_class.html" %}
+        {% else %}
+            <div class="alert alert-default">You are not enrolled in any classes.</div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
