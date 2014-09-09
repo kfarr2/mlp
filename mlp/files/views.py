@@ -59,6 +59,7 @@ def delete(request, file_id):
     file_tags = FileTag.objects.filter(file=file)
     class_files = ClassFile.objects.filter(file=file)
 
+    # add related objects to list
     for f in file_tags:
         related_objects.append(f)
     for c in class_files:
@@ -66,6 +67,7 @@ def delete(request, file_id):
     
     if request.method == "POST" or file.status == FileStatus.FAILED:
         for item in related_objects:
+            # delete related objects
             item.delete()
         file.delete()
         admin = Roster.objects.filter(user=request.user, role=UserRole.ADMIN)
@@ -103,7 +105,7 @@ def edit(request, file_id):
 
 def detail(request, file_id):
     """
-    Detail views
+    Detail view
     """
     file = get_object_or_404(File, pk=file_id)
     file_tags = file.filetag_set.all().select_related("tag")
@@ -153,9 +155,9 @@ def _upload(request, class_id):
 
         admin = Roster.objects.filter(user=request.user, role=UserRole.ADMIN)
         if _class:
+            # add files to a class if one was specified
             for file in my_files:
                 file_add(request, class_id, file.pk) 
-                #HttpResponseRedirect(reverse('classes-file_add', args=(class_id, my_files.pk))) 
             
         elif request.user.is_staff or admin.exists():
             return HttpResponseRedirect(reverse('files-list'))
