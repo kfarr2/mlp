@@ -1,3 +1,7 @@
 from django.contrib import admin
+from .models import Class, Roster, SignedUp, ClassFile
 
-# Register your models here.
+admin.site.register(Class)
+admin.site.register(Roster)
+admin.site.register(SignedUp)
+admin.site.register(ClassFile)
