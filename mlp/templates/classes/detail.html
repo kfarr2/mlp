@@ -69,11 +69,11 @@
                 <td>{{ ros.last_name }}</td>
                 <td>{{ ros.first_name }}</td>
                 <td>
-                    {% for rol in roles %}
-                        {% if rol.user == ros %}
-                            {% if rol.role == 1 %}
+                    {% for student in students %}
+                        {% if student.user == ros %}
+                            {% if student.role == 1 %}
                                 Researcher 
-                            {% elif rol.role == 2 %}
+                            {% elif student.role == 2 %}
                                 Student
                             {% else %}
                                 Admin

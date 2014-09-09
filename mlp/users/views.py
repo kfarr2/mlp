@@ -58,7 +58,6 @@ def workflow(request):
     classes_list = Roster.objects.filter(user=request.user).values('_class')
     classes = Class.objects.filter(class_id__in=classes_list)
     num_classes = classes_list.count()
-  
     form = FileSearchForm(request.GET, user=request.user)
     form.is_valid()
     files = form.results(page=request.GET.get("page"))
@@ -127,6 +126,9 @@ def _edit(request, user_id):
 
 @decorators.can_edit_user
 def delete(request, user_id):
+    """
+    delete a user and all related objects.
+    """
     user = get_object_or_404(User, pk=user_id)
     will_be_deleted = []
 
@@ -140,6 +142,7 @@ def delete(request, user_id):
 
     files = File.objects.filter(uploaded_by=user)
 
+    # add related objects to the list
     for r in roster:
         will_be_deleted.append(r)
     if classes:
@@ -148,7 +151,6 @@ def delete(request, user_id):
     for f in files:
         will_be_deleted.append(f)
 
-    #related_objects = will_be_deleted_with(user)
     if request.method == "POST":
         if user:
             if user == request.user:
@@ -156,6 +158,7 @@ def delete(request, user_id):
             else:    
                 messages.warning(request, "User is deleted.")
                 for item in will_be_deleted:
+                    # delete related objects
                     item.delete()
                 user.delete()
 
