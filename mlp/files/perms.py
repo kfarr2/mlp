@@ -9,6 +9,7 @@ from .models import File
 
 @permission
 def can_upload_file(user):
+    # only teachers and staff can upload files
     return has_admin_access(user)
 
 @permission(model=Class)
