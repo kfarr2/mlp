@@ -16,7 +16,7 @@
 <div class="col-md-5">
     {% if class.pk %}
     <form method="post">
-        <h3>Teacher: {{ instructor }}</h3>
+        <h3>Current Teacher: {{ instructor }}</h3>
         {% csrf_token %}
         <table class="table">
             {% for student in enrolled %}

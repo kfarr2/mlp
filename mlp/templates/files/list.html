@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block head %}
 {{ form.media }}
+{% load permissions %}
 {% endblock %}
 {% block content %}
-<h2>Files {% if perms.can_upload_files %}<a href="{% url 'files-upload' %}" class="btn btn-default pull-right"><span class="glyphicon glyphicon-upload"></span> Upload</a>{% endif %}</h2>
+<h2>Files {% if user|can_upload_file %}<a href="{% url 'files-upload' %}" class="btn btn-default pull-right"><span class="glyphicon glyphicon-upload"></span> Upload</a>{% endif %}</h2>
 <hr />
 
 {% if failed %}
@@ -49,7 +50,7 @@
     {% for file in files %}
         <tr>{% include "files/_file.html" %}</tr>
     {% empty %}
-        <div class="alert alert-warning">
+        <div class="alert alert-default">
             {% if form.in_search_mode %}
                 No files match your search!
             {% else %}
