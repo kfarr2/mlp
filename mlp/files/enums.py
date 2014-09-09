@@ -51,6 +51,7 @@ class FileOrderChoices(ChoiceEnum):
     UPLOADER = 2
     DATE = 4
     COURSE = 8
+    TYPE = 16
 
     _choices = (
         ('','Order By'),
@@ -58,5 +59,6 @@ class FileOrderChoices(ChoiceEnum):
         (UPLOADER, "Uploader"),
         (DATE, "Date"),
         (COURSE, "Course"),
+        (TYPE, "Type"),
     )
 
