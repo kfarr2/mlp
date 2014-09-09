@@ -124,6 +124,25 @@ def _edit(request, user_id):
         "form": form,
     })
 
+def hire(request, user_id):
+    """
+    Elevate another users priviledges. (make staff)
+    """
+    user = get_object_or_404(User, pk=user_id)
+    user.is_staff = True
+    user.save()
+    return HttpResponseRedirect(reverse("users-edit", args=(user_id,)))
+
+
+def fire(request, user_id):
+    """
+    Elevate another users priviledges. (make staff)
+    """
+    user = get_object_or_404(User, pk=user_id)
+    user.is_staff = False
+    user.save()
+    return HttpResponseRedirect(reverse("users-edit", args=(user_id,)))
+
 @decorators.can_edit_user
 def delete(request, user_id):
     """
