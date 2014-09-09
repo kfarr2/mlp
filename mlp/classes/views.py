@@ -20,7 +20,8 @@ from .forms import ClassForm, ClassSearchForm
 @login_required
 def list_(request):
     """
-    List all classes
+    List classes. Only Staff and Teachers can see all classes. 
+    Students and Researchers only see their classes.
     """
     user_classes_list = Roster.objects.filter(user=request.user).values('_class')
     user_classes = Class.objects.filter(class_id__in=user_classes_list) 
@@ -38,53 +39,52 @@ def list_(request):
 
 def detail(request, class_id):
     """
-    Detail view for classes
+    Detail view for classes. Anyone can see the detail view.
     """
     class_ = get_object_or_404(Class, pk=class_id)
-    roles = Roster.objects.filter(_class=class_).exclude(role=UserRole.ADMIN) 
-    roster = User.objects.filter(user_id__in=roles.values('user'))
+    students = Roster.objects.filter(_class=class_).exclude(role=UserRole.ADMIN) 
+    roster = User.objects.filter(user_id__in=students.values('user'))
     instructor = Roster.objects.filter(_class=class_, role=UserRole.ADMIN).values('user')
     instructor = User.objects.get(user_id__in=instructor)
     class_files = ClassFile.objects.filter(_class=class_).values('file') 
     files = File.objects.filter(file_id__in=class_files)
     signed_up = SignedUp.objects.filter(_class=class_).values('user')
     signed_up = User.objects.filter(user_id__in=signed_up)
-    enrolled = len(roles)
+    enrolled = len(students)
+
     return render(request, "classes/detail.html", {
-        "instructor": instructor,
-        "enrolled": enrolled,
-        "signed_up": signed_up,
-        "roles": roles,
-        "roster": roster,
-        "files": files,
         "class": class_,    
+        "students": students,
+        "roster": roster,
+        "instructor": instructor,
+        "files": files,
+        "signed_up": signed_up,
+        "enrolled": enrolled,
     })
 
 @decorators.can_enroll_students
 def enroll(request, class_id):
     """
-    View that allows admins to enroll students in a class
+    View that allows admins to enroll students in a class.
     """
-    
     _class = get_object_or_404(Class, pk=class_id)
-    roster = Roster.objects.filter(_class=_class).values('user')
+    roster = Roster.objects.filter(_class=_class).exclude(role=UserRole.ADMIN).values('user')
     roster = User.objects.filter(user_id__in=roster)
-    instructor = Roster.objects.filter(_class=_class, role=UserRole.ADMIN)
     form = UserSearchForm(request.GET, user=request.user)
     form.is_valid()
     students = form.results(page=request.GET.get("page"))
     
     return render(request, "classes/enroll.html", {
-        "form": form,
         "class": _class,
         "roster": roster, 
+        "form": form,
         "students": students,
     })
 
 @decorators.can_list_class
 def file_list(request, class_id):
     """
-    View that allows an admin to view the files in their class
+    View that allows an admin to view the files in their class.
     """
     _class = get_object_or_404(Class, pk=class_id)
     class_files = ClassFile.objects.filter(_class=_class).values('file')
@@ -99,7 +99,7 @@ def file_list(request, class_id):
         "class_files": class_files,
     })
 
-@decorators.can_list_class
+@decorators.can_edit_class
 def file_add(request, class_id, file_id):
     """
     Adds a file to a class
@@ -148,10 +148,12 @@ def _edit(request, class_id):
     Create or edit a class
     """
     if class_id is None:
+        # create new class
         class_ = None
         instructor = None
         enrolled = None
     else:
+        # edit existing class
         class_ = get_object_or_404(Class, pk=class_id)
         instructor = Roster.objects.filter(_class=class_, role=UserRole.ADMIN).values('user')
         instructor = User.objects.get(user_id__in=instructor)
@@ -179,7 +181,7 @@ def _edit(request, class_id):
 @decorators.can_edit_class
 def delete(request, class_id):
     """
-    Delete a class
+    Delete a class and its related objects.
     """
     _class = get_object_or_404(Class, pk=class_id)
     related_objects = []
@@ -187,6 +189,7 @@ def delete(request, class_id):
     class_roster = Roster.objects.filter(_class=_class)
     class_files = ClassFile.objects.filter(_class=_class)
 
+    # add related objects to a list
     for s in sign_up:
         related_objects.append(s)
     for c in class_roster:
@@ -196,7 +199,9 @@ def delete(request, class_id):
     
     if request.method == "POST":
         for item in related_objects:
+            # delete related objects
             item.delete()
+        # delete class
         _class.delete()
         messages.success(request, "Class deleted")
         return HttpResponseRedirect(reverse('classes-list'))
@@ -215,9 +220,12 @@ def roster_add(request, class_id, user_id):
     _class = get_object_or_404(Class, pk=class_id)
     roster = Roster.objects.filter(_class=_class, user=user)
     if roster.exists():
+        # user already enrolled
         messages.warning(request, "User already enrolled.")
     else:
+        # user not enrolled. Create an entry for this user and this class in the roster.
         Roster.objects.create(user=user, _class=_class, role=UserRole.STUDENT)
+        # delete the sign up request if there is one.
         delete = SignedUp.objects.filter(user=user, _class=_class)
         delete.delete()
         messages.success(request, "User successfully enrolled in class.")
@@ -227,7 +235,8 @@ def roster_add(request, class_id, user_id):
 @decorators.can_enroll_students
 def roster_remove(request, class_id, user_id):
     """
-    Takes a class id and user id and removes the matching entry from the roster
+    Takes a class id and user id and 
+    removes the matching entry from the roster.
     """
     user = get_object_or_404(User, pk=user_id)
     _class = get_object_or_404(Class, pk=class_id)
@@ -242,7 +251,8 @@ def roster_remove(request, class_id, user_id):
 
 def signed_up_add(request, class_id, user_id):
     """
-    Takes a class id and a student id and adds them to the roster
+    Takes a class id and a student id and 
+    adds them to the sign up request sheet.
     """
     user = get_object_or_404(User, pk=user_id)
     _class = get_object_or_404(Class, pk=class_id)
