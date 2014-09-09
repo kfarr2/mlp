@@ -15,6 +15,7 @@ from .forms import LoginForm, UserForm, UserSearchForm
 from .models import User
 from .perms import can_create_users, can_edit_user
 
+
 def create_users(self):
     """
     Create some users
@@ -137,7 +138,6 @@ class UserViewsTest(TestCase):
         self.assertRedirects(response, reverse('users-list'))
         self.assertTrue(self.admin.first_name,"jimmy")
         
-
     def test_delete_view(self):
         pre_count = User.objects.count()
         response = self.client.get(reverse('users-delete', args=(self.user.pk,)))

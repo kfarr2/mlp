@@ -74,6 +74,9 @@ def create_classes(self):
     self.roster = r
 
 class ListViewTest(TestCase):
+    """
+    Test the list view
+    """
     def setUp(self):
         super(ListViewTest, self).setUp()
         create_users(self)
@@ -95,6 +98,9 @@ class ListViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
 
 class DeleteViewTest(TestCase):
+    """
+    Test the delete view
+    """
     def setUp(self):
         super(DeleteViewTest, self).setUp()
         create_users(self)
@@ -112,6 +118,9 @@ class DeleteViewTest(TestCase):
         self.assertEqual(pre_count-1, File.objects.count())
 
 class EditViewTest(TestCase):
+    """
+    Test the edit view
+    """
     def setUp(self):
         super(EditViewTest, self).setUp()
         create_users(self)
@@ -156,6 +165,9 @@ class EditViewTest(TestCase):
         
 
 class DetailViewTest(TestCase):
+    """
+    Test the detail view
+    """
     def setUp(self):
         super(DetailViewTest, self).setUp()
         create_users(self)
@@ -171,6 +183,9 @@ class DetailViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
 class UploadViewTest(TestCase):
+    """
+    Test the upload view
+    """
     def setUp(self):
         super(UploadViewTest, self).setUp()
         create_users(self)
@@ -203,6 +218,9 @@ class UploadViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
 class DownloadViewTest(TestCase):
+    """
+    Test the download view
+    """
     def setUp(self):
         super(DownloadViewTest, self).setUp()
         create_users(self)
@@ -218,11 +236,13 @@ class DownloadViewTest(TestCase):
         self.assertEqual(response['X-Sendfile'], os.path.join(settings.MEDIA_ROOT, "test.txt"))
 
 class StoreViewTest(TestCase):
+    """
+    Test the store view
+    """
     def setUp(self):
         super(StoreViewTest, self).setUp()
         create_users(self)
         self.client.login(email=self.admin.email, password='foobar')
-        
         self.file_content = "THIS IS A TEST"
         self.f = open(os.path.join(settings.MEDIA_ROOT, "test.txt"), "w")
         self.f.write(self.file_content)
@@ -351,6 +371,9 @@ class StoreViewTest(TestCase):
 
 
 class FileTest(TestCase):
+    """
+    Test files
+    """
     def test_sanitize_filename(self):
         self.assertEqual(File.sanitize_filename("../../%^&*("), "")
         self.assertEqual(File.sanitize_filename("../foo..^&*"), "..foo..")
@@ -399,6 +422,9 @@ class FileTest(TestCase):
 
 
 class FileFormTest(TestCase):
+    """
+    Test file forms
+    """
     def setUp(self):
         super(FileFormTest, self).setUp()
         create_users(self)
@@ -434,6 +460,9 @@ class FileFormTest(TestCase):
 
 
 class ProcessUploadedFileTest(TestCase):
+    """
+    Test the process uploaded file task
+    """
     def setUp(self):
         create_users(self)
         super(ProcessUploadedFileTest, self).setUp()
@@ -525,18 +554,3 @@ class FilesPermsTest(TestCase):
         self.assertTrue(can_list_all_files(self.admin))
         self.assertTrue(can_view_file(self.admin, self.file))
         self.assertTrue(can_download_file(self.admin, self.file))
-
-
-class FileFormTest(TestCase):
-    """
-    Test a file search form
-    """
-    def setUp(self):
-        super(FileFormTest, self).setUp()
-        create_users(self)
-        create_files(self)
-        create_classes(self)
-        self.client.login(email=self.admin.email, password=self.admin.password)
-    
-
-

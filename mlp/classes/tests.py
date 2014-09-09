@@ -191,6 +191,9 @@ class RosterTest(TestCase):
 
 
 class SignedUpTest(TestCase):
+    """
+    Test the SignedUp model
+    """
     def setUp(self):
         super(SignedUpTest, self).setUp()
         create_users(self)
