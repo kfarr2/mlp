@@ -78,7 +78,6 @@ def process_uploaded_file(total_number_of_chunks, file):
 
     return file.status
 
-
 def get_matching_file(path):
     '''
     returns a File object with a md5_sum that matches that of path,
@@ -96,7 +95,6 @@ def get_matching_file(path):
     else:
         return None
     
-
 def conditional_copy(src_path, dest_path):
     '''
     only copies the file if the destination doesn't match the source,
@@ -117,11 +115,9 @@ def are_duplicate_files(src_path, dest_path):
             return True        
     return False
 
-
 def get_media_file_duration(filepath):
     '''
     gets the duration of a media file, using ffmpeg.
-    
     '''
     # we need to determine what to do with filepath, which MAY or MAY NOT contain a file extension
     # this code is almost identical to code in process_imported_video. might want to make a separate function.    
@@ -155,7 +151,6 @@ def get_media_file_duration(filepath):
     
     return duration                  
 
-
 def get_md5_sum(filename):
     '''
     returns an md5_sum as a 32-character string
@@ -166,126 +161,8 @@ def get_md5_sum(filename):
             md5.update(buffer)
     return md5.hexdigest()
 
-
 def path_has_extension(path):
     return True if len(os.path.splitext(path)[1]) > 0 else False
-
-'''
-def get_or_import_video(path, name, description, created_date, changed_date):
-    """
-    Returns a File object (if possible)
-    and starts importing it using Celery.
-    
-    Returns None on error.
-    
-    """
-    
-    # check if our path has an extension. if it does, exit out.
-    if path_has_extension(path):
-        return None
-    
-    # see if there's an mp4 or ogv version
-    if os.path.isfile(path + '.mp4'):
-        path = path + '.mp4'
-    elif os.path.isfile(path + '.ogv'):
-        path = path + '.ogv'
-    else:
-        print("Couldn't find mp4 or ogv of %s" % path)
-        # if neither, exit out
-        return None
-
-    md5_sum = get_md5_sum(path)     # do an md5_sum on the original.
-    
-    # check our db to see if another file has this md5_sum
-    files = File.objects.filter(md5_sum=md5_sum)        
-    if len(files) > 0:
-        print("Found file with identical md5_sum for %s" % path)
-        return files[0]    # if so, return that file
-    
-    # if not, we need to import this file
-    # create the file model, and send the import task to Celery
-
-    duration = get_media_file_duration(path)
-    
-    file = File(name=name,
-                description=description or "",
-                type=FileType.VIDEO,
-                status=FileStatus.IMPORTED,
-                tmp_path=path,
-                duration=duration,
-                md5_sum=md5_sum,
-                )
-    file.save()
-    
-    file.uploaded_on=created_date
-    file.edited_on=changed_date
-    file.save()
-    
-    process_imported_file.delay(file)           # remove .delay if you want to test this without Celery
-    
-    return file
-
-
-@shared_task
-def process_imported_file(file):
-    """
-    Expects a FULL path including extension.
-    
-    Used by the import_org manage command for processing imported files from the old Drupal site.    
-    
-    """
-    try:
-        os.makedirs(file.directory)
-    except OSError as e: # pragma no cover
-        #return False
-        pass
-
-    path, ext = os.path.splitext(file.tmp_path)
-
-    mp4_file_path = os.path.join(file.directory, 'file.mp4')
-    ogv_file_path = os.path.join(file.directory, 'file.ogv')
-
-    file.status = FileStatus.READY    
-    if ext == '.mp4':
-        original_file_path = os.path.join(file.directory, 'original.mp4')        
-
-        print("Copying %s to %s" % (file.tmp_path, original_file_path))
-        conditional_copy(file.tmp_path, original_file_path)        # copy the mp4 as original.mp4
-        conditional_copy(original_file_path, mp4_file_path)        # copy the mp4 as original.mp4
-
-        if os.path.isfile(path + '.ogv'):                       # copy the ogv as file.ogv if it exists
-            print("Copying %s to %s" % (path + '.ogv', ogv_file_path))
-            conditional_copy(path + '.ogv', ogv_file_path)
-        else:                  
-            print("Converting %s to ogv" % file.tmp_path)                                 # convert it if it doesn't
-            if convert_video_to_ogv(file) != 0:
-                file.status = FileStatus.FAILED
-        
-    elif ext == '.ogv':
-        original_file_path = os.path.join(file.directory, 'original.ogv')
-
-        # don't check for mp4. we only get ogv originals if the mp4 doesn't exist
-        print("Copying %s to %s" % (file.tmp_path, original_file_path))
-        conditional_copy(file.tmp_path, original_file_path)         # copy the ogv as original
-        print("Copying %s to %s" % (file.tmp_path, ogv_file_path))
-        conditional_copy(original_file_path, ogv_file_path)
-
-        print("Converting %s to mp4" % file.tmp_path)        
-        if convert_video_to_mp4(file) != 0:
-            file.status = FileStatus.FAILED            
-    else:
-        file.status = FileStatus.FAILED
-        
-    if file.status == FileStatus.READY:
-        file.file = os.path.relpath(original_file_path, settings.MEDIA_ROOT)
-        print("Generating thumbnail...")
-        generate_thumbnail(file, datetime.time(second=1))
-        
-        print("Success!")
-        
-    file.save()
-    return file.status
-'''
 
 def get_duration(video_path):
     """Returns the duration of the file in seconds"""
@@ -411,7 +288,6 @@ def convert_video_to_mp4(file):
     ], stderr=stderr, stdout=stdout)
 
     return mp4_code
-
 
 def convert_video_to_ogv(file):
     """

@@ -36,7 +36,8 @@ class Roster(models.Model):
 
 class SignedUp(models.Model):
     """
-    Used to map users to classes they have signed up for but are not in yet
+    Used to map users to classes 
+    they have signed up for but are not in yet.
     """
     signed_up_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
@@ -48,7 +49,7 @@ class SignedUp(models.Model):
 
 class ClassFile(models.Model):
     """
-    Used to map files to classes
+    Used to map files to classes.
     """
     class_file_id = models.AutoField(primary_key=True)
     _class = models.ForeignKey(Class, null=True, on_delete=models.SET_NULL)

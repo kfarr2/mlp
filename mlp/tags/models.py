@@ -117,7 +117,6 @@ class Tag(models.Model):
         '''
         returns a random (good) COLOR and a BACKGROUND COLOR, in that order
         '''
-
         COLOR_COMBINATIONS = (
             (Tag.WHITE, Tag.BLUE),
             (Tag.WHITE, Tag.GREEN),

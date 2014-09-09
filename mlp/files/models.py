@@ -120,11 +120,13 @@ class File(models.Model):
         return "%s (%s)" % (self.name, FileType._choices[self.type][1])
 
     def save(self, *args, **kwargs):
+        # make the file searchable
         to_return = super(File, self).save(*args, **kwargs)
         make_searchable(self)
         return to_return
 
     def delete(self):
+        # delete related objects
         FileTag.objects.filter(file=self).delete()
         super(File, self).delete()
 

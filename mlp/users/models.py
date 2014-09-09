@@ -28,9 +28,7 @@ class User(AbstractBaseUser):
         db_table = "user"
         ordering = ['last_name', 'first_name']
 
-    #
     # These methods are required to work with Django's admin
-    #
     def get_full_name(self): return self.last_name + ", " + self.first_name
     def get_short_name(self): return self.first_name + " " + self.last_name
 
