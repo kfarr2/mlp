@@ -1,5 +1,5 @@
 from django import forms
-from django.forms import DateTimeField, ChoiceField
+from django.forms import DateTimeField, ChoiceField, CharField
 from mlp.tags.models import Tag
 from mlp.tags.forms import TagField
 from elasticmodels.forms import SearchForm
@@ -78,7 +78,8 @@ class FileForm(forms.ModelForm):
     """
     This form is for editing an already existing File model.
     """
-    tags = TagField()
+    tags = TagField(required=False, label="")
+    description = CharField(required=False, label="", widget=forms.Textarea)
 
     class Meta:
         model = File
