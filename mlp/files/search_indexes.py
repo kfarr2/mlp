@@ -16,7 +16,7 @@ class FileIndex(Indexable):
             "_source": {"enabled": False},
             "properties": {
                 "pk": {"type": "integer", "index": "not_analyzed", "store": True},
-                "name": {"type": "string", "analyzer": "snowball", "store": False},
+                "name": {"type": "string", "analyzer": "keyword", "store": False},
                 "content": {"type": "string", "analyzer": "snowball", "store": False},
                 "tags": {"type": "string", "analyzer": "keyword", "store": False},
                 "type": {"type": "integer", "analyzer": "keyword", "store": False},
@@ -36,8 +36,8 @@ class FileIndex(Indexable):
 
         return {
             "pk": obj.pk,
+            "name": File.objects.get(name=obj.name).name,
             "content": render_to_string("files/search.txt", {"object": obj}),
-            "name": obj.name,
             "tags": [ft.tag.name for ft in FileTag.objects.filter(file=obj).select_related("tag")],
             "type": obj.type,
             "uploaded_by_id": obj.uploaded_by_id,
