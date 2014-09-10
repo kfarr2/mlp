@@ -5,6 +5,7 @@ from mlp.users.models import User
 from mlp.users.perms import has_admin_access
 from .enums import UserRole
 from .models import Class, Roster
+from .enums import UserRole
 
 @permission(model=Class)
 def is_enrolled(user, _class):
@@ -31,7 +32,7 @@ def can_edit_class(user, _class):
     """
     if user.is_anonymous():
         return False
-    roster = Roster.objects.filter(user=user, _class=_class, role=UserRole.ADMIN).values('user')
+    roster = Roster.objects.filter(user=user, _class=_class, role=UserRole.ADMIN)
     if user.is_staff or roster.exists():
         return True
     return False
