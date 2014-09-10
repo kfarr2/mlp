@@ -208,7 +208,7 @@ class SignedUpTest(TestCase):
         self.assertEqual(response.status_code, 200)
         response = self.client.get(reverse('signed_up-add', args=(self.classes.pk, self.user.pk,)), follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertIn("Sign up pending approval.", [str(m) for m in response.context['messages']])
+        self.assertIn("Sign up pending approval. Please check back later.", [str(m) for m in response.context['messages']])
         self.client.get(reverse('roster-add', args=(self.classes.pk, self.user.pk)), follow=True)
         self.client.get(reverse('signed_up-remove', args=(self.classes.pk, self.user.pk)), follow=True)
         response = self.client.get(reverse('signed_up-add', args=(self.classes.pk, self.user.pk,)), follow=True)

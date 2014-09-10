@@ -161,7 +161,7 @@ class EditViewTest(TestCase):
             "name": self.file.name,        
         }
         response = self.client.post(reverse('files-edit', args=(self.file.pk,)), data)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
         
 
 class DetailViewTest(TestCase):
