@@ -1,5 +1,5 @@
 import re
-import os, sys
+import os, sys, shutil
 from elasticmodels import make_searchable
 from django.db import models
 from django.conf import settings
@@ -128,7 +128,12 @@ class File(models.Model):
     def delete(self):
         # delete related objects
         FileTag.objects.filter(file=self).delete()
+        try:
+            shutil.rmtree(str(self.directory))
+        except OSError as e:
+            pass
         super(File, self).delete()
+    
 
 class FileTag(models.Model):
     """
