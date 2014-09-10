@@ -28,9 +28,9 @@ class FileIndex(Indexable):
         }
 
     def prepare(self, obj):
-        courses = ClassFile.objects.filter(file=obj).values('_class')
+        courses = ClassFile.objects.filter(file=obj).first()
         if courses:
-            course = Class.objects.get(class_id__in=courses).name
+            course = Class.objects.get(class_id__in=courses._class.class_id).name
         else:
             course = None
 
