@@ -29,7 +29,7 @@ e.g. if the link says "ffmpeg-2.3.1-64bit-static.tar.bz2", the version is 2.3.1.
 
 Configure the settings files
 
-    mv mlp/settings/local.py.template mlp/settings/local.py
+    cp mlp/settings/local.py.template mlp/settings/local.py
     vi mlp/settings/local.py
 
 Install RabbitMQ if you need it
