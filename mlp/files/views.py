@@ -156,7 +156,7 @@ def _upload(request, class_id):
         admin = Roster.objects.filter(user=request.user, role=UserRole.ADMIN)
         if _class:
             # add files to a class if one was specified
-            for file in my_files:
+            for file in File.objects.filter(status=FileStatus.UPLOADED, uploaded_by=request.user):
                 file_add(request, class_id, file.pk) 
             
         elif request.user.is_staff or admin.exists():

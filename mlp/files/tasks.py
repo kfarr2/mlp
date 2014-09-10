@@ -60,6 +60,8 @@ def process_uploaded_file(total_number_of_chunks, file):
  
         if was_successful:
             file.status = FileStatus.READY
+    else:
+        file.status = FileStatus.FAILED
 
     # since we were passed in serialized File object, some of the fields (like the
     # name or description may have changed, so we only want to update the
