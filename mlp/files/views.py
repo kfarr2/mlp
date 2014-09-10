@@ -146,7 +146,7 @@ def _upload(request, class_id):
         _class = get_object_or_404(Class, pk=class_id)
         _class = Roster.objects.filter(_class=_class, user=request.user)
 
-    my_files = File.objects.filter(uploaded_by=request.user)
+    my_files = File.objects.filter(uploaded_by=request.user, status=FileStatus.READY)
     if request.method == "POST":
         if request.POST.get("error_message"):
             messages.error(request, request.POST["error_message"])
