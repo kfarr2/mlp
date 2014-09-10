@@ -36,7 +36,7 @@ class FileIndex(Indexable):
 
         return {
             "pk": obj.pk,
-            "name": File.objects.get(name=obj.name).name,
+            "name": obj.name, 
             "content": render_to_string("files/search.txt", {"object": obj}),
             "tags": [ft.tag.name for ft in FileTag.objects.filter(file=obj).select_related("tag")],
             "type": obj.type,
