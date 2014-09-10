@@ -8,6 +8,8 @@
         {{ form|bootstrap }}
         <input class="btn btn-default" type="submit" name="submit" value="Submit" />
         <a class="btn btn-default" href="{% url 'users-create' %}">New User</a>
+        <br />
+        <a href="{% url 'password_reset' %}">I forgot my password</a>
     </form>
 </div>
 <div class="col-md-8">
