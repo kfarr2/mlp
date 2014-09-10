@@ -113,7 +113,10 @@ def _edit(request, user_id):
         if form.is_valid():
             user = form.save()
             messages.success(request, "Updated")
-            return HttpResponseRedirect(reverse("users-list"))
+            if request.user.is_staff:
+                return HttpResponseRedirect(reverse("users-list"))
+            else:
+                return HttpResponseRedirect(reverse("users-home"))
     else:
         form = UserForm(instance=user, user=request.user)
 
