@@ -28,14 +28,14 @@ label {
 }
 
 video {
-    min-height:343px; /* this streches out the videos, but that's what they wanted */
-    max-width:610px; /* at 1024 resolution, anything larger than this causes the video to hit the segment list UI element */
-	box-shadow: 0px 0px 15px #000;
+    min-height:343px; 
+    max-width:100%;
+    box-shadow: 0px 0px 15px #000;
     border-radius: 5px;
 }
 
 audio {
-    min-width: 610px;
+    min-width: 100%;
 	box-shadow: 0px 0px 10px #fff;
 }
 
@@ -419,30 +419,6 @@ label.no-match {
     margin-top:60px;
 }
 
-#report-table {
-    position:absolute;
-    left:0;
-    text-align:center;
-    background-color:#fff;
-    margin:auto;
-    width:100%;
-}
-
-#report-table table {
-    width:auto;
-    margin:auto;
-}
-
-#report-table-table th {
-    border:none;
-}
-
-#report-table-table td {
-    border-left:1px solid #ddd;
-    border-right:1px solid #ddd;
-    border-bottom:1px solid #ddd;
-}
-
 .modal-dialog {
     width:850px;
     height:800px;
@@ -578,6 +554,7 @@ body > div > div#content_container {
 .alert-default {
     background-color:#B4BF88;
     border-color:#90996D;
+    padding-left: 25px;
     color:#333;
 }
 
@@ -610,4 +587,8 @@ body > div > div#content_container {
     position: relative;
     vertical-align: middle;
     z-index: 2;
+}
+
+.table {
+    max-width: 100%
 }
