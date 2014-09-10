@@ -11,7 +11,6 @@ billiard==3.3.0.18
 celery==3.1.13
 coverage==3.7.1
 -e git://github.com/PSU-OIT-ARC/django-arcutils.git@e09700b961940da6646a3cd5c1371f0f3de53439#egg=django_arcutils-master
--e git://github.com/PSU-OIT-ARC/django-bootstrap-form.git@5dce9701797eac9560457c9936c78a41c9a96c01#egg=django_bootstrap_form-master
 django-bootstrap3-datetimepicker==2.2.3
 django-cloak==0.1.3
 django-perms==0.0.7
