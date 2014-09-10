@@ -5,26 +5,28 @@
     <h3>{% if other_user %}Edit: {{ other_user.last_name }}, {{ other_user.first_name }}{% else %}Create User{% endif %}</h3>
     <a class="btn btn-default pull-right" href="{% url 'users-workflow' %}" style="margin-top: -40px;">Back</a>
     <hr />
-    <p><strong>User ID:</strong> {{ other_user.user_id }}</p>
-    <p><strong>Date Joined:</strong> {{ other_user.date_joined|date }}</p>
-    <p><strong>Staff:</strong> 
-    {% if other_user.is_staff %}True
-        {% if not user == other_user and user.is_staff %}
-            <a class="btn btn-default btn-xs pull-right" href="{% url 'users-fire' other_user.pk %}">Revoke Privileges</a>
+    {% if other_user %}
+        <p><strong>User ID:</strong> {{ other_user.user_id }}</p>
+        <p><strong>Date Joined:</strong> {{ other_user.date_joined|date }}</p>
+        <p><strong>Staff:</strong> 
+        {% if other_user.is_staff %}True
+            {% if not request.user == other_user and request.user.is_staff %}
+                <a class="btn btn-default btn-xs pull-right" href="{% url 'users-fire' other_user.pk %}">Revoke Privileges</a>
+            {% endif %}
+        {% elif other_user and not request.user == other_user %}False
+            {% if request.user.is_staff %}
+                <a class="btn btn-default btn-xs pull-right" href="{% url 'users-hire' other_user.pk %}">Elevate Privileges</a>
+            {% endif %}
         {% endif %}
-    {% elif other_user and not user == other_user %}False
-        {% if user.is_staff %}
-            <a class="btn btn-default btn-xs pull-right" href="{% url 'users-hire' other_user.pk %}">Elevate Privileges</a>
-        {% endif %}
+        </p>
     {% endif %}
-    </p>
     <form method="post">
         {{ form|bootstrap }}
         {% csrf_token %}
         <div class="btn-group">    
             <input type="submit" name="submit" value="Submit" class="btn btn-default" />
             <button class="btn btn-default" onclick="window.history.go(-1); return false">Cancel</button>
-            {% if other_user and not other_user == user %}
+            {% if other_user and not other_user == request.user %}
                 <a class="btn btn-danger" href="{% url 'users-delete' other_user.pk %}">Delete</a>
             {% endif %}
         </div>
@@ -35,22 +37,24 @@
     {% endif %}
 </div>
 <div class="col-md-7">
-    <h3>Files</h3>
-    <hr />
-    {% if files %}
-        {% for file in files %}
-            {% include 'files/_file.html' %}
-        {% endfor %}
-    {% else %}
-        <div class="alert alert-default">You do not have ownership of any files</div>
-    {% endif %}
-    <br />
-    <h3>Classes</h3>
-    <hr />
-    {% if classes %}
-        {% include 'classes/_class.html' %}
-    {% else %}
-        <div class="alert alert-default">You are not involved in any classes</div>
+    {% if other_user %}
+        <h3>Files</h3>
+        <hr />
+        {% if files %}
+            {% for file in files %}
+                {% include 'files/_file.html' %}
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-default">You do not have ownership of any files</div>
+        {% endif %}
+        <br />
+        <h3>Classes</h3>
+        <hr />
+        {% if classes %}
+            {% include 'classes/_class.html' %}
+        {% else %}
+            <div class="alert alert-default">You are not involved in any classes</div>
+        {% endif %}
     {% endif %}
 </div>
 {% endblock %}
