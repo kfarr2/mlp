@@ -7,9 +7,11 @@
         {% if form %}
             {{ form|bootstrap }}
             {% csrf_token %}
-            <input type="submit" name="submit" value="Submit" class="btn btn-default" />
-            <button class="btn btn-default" onclick="window.history.go(-1); return false">Cancel</button>    
-            {% if class.pk %}<a href="{% url 'classes-delete' class.pk %}" class="btn btn-danger">Delete</a>{% endif %}
+            <div class="btn-group">
+                <input type="submit" name="submit" value="Submit" class="btn btn-default" />
+                <button class="btn btn-default" onclick="window.history.go(-1); return false">Cancel</button>    
+            </div>
+            {% if class.pk %}<a href="{% url 'classes-delete' class.pk %}" class="btn btn-default btn-xs pull-right">Delete Class</a>{% endif %}
         {% endif%}
     </form>
 </div>

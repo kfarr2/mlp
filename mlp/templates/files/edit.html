@@ -7,12 +7,15 @@
     <a class="btn btn-default pull-right" href="{{ file_url|obfuscate }}">Back</a>
     </h3>
     <form method="post">
-    {% if form %}
-        {{ form|bootstrap }}
-    {% endif %}
-    {% csrf_token %}
-    <input type="submit" name="submit" value="Submit" class="btn btn-default" />
-    <a class="btn btn-danger" href="{% url 'files-delete' file.pk %}">Delete</a>
+        {% if form %}
+            {{ form|bootstrap }}
+        {% endif %}
+        {% csrf_token %}
+        <div class="btn-group">
+            <input type="submit" name="submit" value="Submit" class="btn btn-default" />
+            <button class="btn btn-default" onclick="window.history.go(-1); return false">Cancel</button>    
+        </div>
+        <a href="{% url 'files-delete' file.pk %}" class="btn btn-default pull-right btn-xs">Delete File</a>
     </form>
 </div>
 <div class="col-md-7">

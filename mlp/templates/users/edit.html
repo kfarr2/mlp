@@ -26,10 +26,10 @@
         <div class="btn-group">    
             <input type="submit" name="submit" value="Submit" class="btn btn-default" />
             <button class="btn btn-default" onclick="window.history.go(-1); return false">Cancel</button>
-            {% if other_user and not other_user == request.user %}
-                <a class="btn btn-danger" href="{% url 'users-delete' other_user.pk %}">Delete</a>
-            {% endif %}
         </div>
+            {% if other_user and not other_user == request.user %}
+                <a class="btn btn-default btn-xs pull-right" href="{% url 'users-delete' other_user.pk %}">Delete User</a>
+            {% endif %}
     </form>
     {% if other_user %}
         <br />
