@@ -41,6 +41,8 @@
         </tr>
         {% endfor %}
         </table>
+    {% elif all_files %}    
+        <div class="alert alert-default">No files match your search.</div>
     {% else %}
         <div class="alert alert-default">No files have been uploaded yet.</div>
     {% endif %}

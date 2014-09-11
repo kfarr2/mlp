@@ -93,9 +93,11 @@ def file_list(request, class_id):
     class_files = File.objects.filter(file_id__in=class_files)
     form = FileSearchForm(request.GET, user=request.user)
     files = form.results(page=request.GET.get("page")).object_list
+    all_files = File.objects.all()
 
     return render(request, "classes/add_file.html", {
         "form": form,
+        "all_files": all_files,
         "files": files,
         "class": _class,
         "class_files": class_files,
