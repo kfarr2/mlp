@@ -63,7 +63,7 @@ class FileSearchForm(SearchForm):
             if self.cleaned_data['order'] == str(FileOrderChoices.TYPE):
                 files = files.order_by('type')
             if self.cleaned_data['order'] == str(FileOrderChoices.COURSE):
-                files = files.order_by('-course')
+                files = files.order_by('course')
             elif self.cleaned_data['order'] == str(FileOrderChoices.UPLOADER):
                 files = files.order_by('uploaded_by')
             elif self.cleaned_data['order'] == str(FileOrderChoices.DATE):
