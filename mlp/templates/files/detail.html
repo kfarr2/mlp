@@ -42,9 +42,11 @@
             <tr>
                 <td>
                     <p><strong>Tags:</strong>
-                    {% for file_tag in file_tags %}
-                        {{ file_tag.tag }}, 
-                    {% endfor %}</p>
+                    <span class="filetag">
+                        {% for file_tag in file_tags %}
+                            <span>{{ file_tag.tag }}</span> 
+                        {% endfor %}
+                    </span>
                 </td>
                 <td>
                     <p><strong>Uploaded:</strong> {{ file.uploaded_on|date }}</p>

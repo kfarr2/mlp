@@ -592,3 +592,11 @@ body > div > div#content_container {
 .table {
     max-width: 100%
 }
+
+.filetag span:after {
+    content: ', ';
+}
+
+.filetag span:last-child:after {
+    content: '';
+}
