@@ -23,6 +23,7 @@ def list_(request):
     List classes. Only Staff and Teachers can see all classes. 
     Students and Researchers only see their classes.
     """
+    all_classes = Class.objects.all()
     user_classes_list = Roster.objects.filter(user=request.user).values('_class')
     user_classes = Class.objects.filter(class_id__in=user_classes_list) 
     form = ClassSearchForm(request.GET, user=request.user)
@@ -33,6 +34,7 @@ def list_(request):
 
     return render(request, "classes/list.html", {
         "form": form,
+        "all_classes": all_classes,
         "classes": classes,
         "user_classes": user_classes,
     })

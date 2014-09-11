@@ -14,6 +14,8 @@
     </form>
     {% if classes %}
         {% include "classes/_class.html" %}
+    {% elif all_classes %}
+        <div class="alert alert-default">No classes match your search.</div>
     {% else %}
         <div class="alert alert-default">No classes have been created yet.</div>
     {% endif %}
