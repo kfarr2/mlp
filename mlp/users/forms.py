@@ -11,7 +11,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.auth import get_user_model, authenticate
 from django.core.validators import validate_email
-from mlp.classes.models import Roster
+from mlp.groups.models import Roster
 from .models import User
 from .search_indexes import UserIndex
 from .perms import can_view_users

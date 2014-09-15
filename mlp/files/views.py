@@ -14,9 +14,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.conf import settings
-from mlp.classes.models import Roster, ClassFile, Class
-from mlp.classes.enums import UserRole
-from mlp.classes.views import file_add
+from mlp.groups.models import Roster, GroupFile, Group
+from mlp.groups.enums import UserRole
+from mlp.groups.views import file_add
 from .perms import decorators, can_list_all_files
 from .models import File, FileTag
 from .enums import FileType, FileStatus
@@ -57,12 +57,12 @@ def delete(request, file_id):
     file = get_object_or_404(File, pk=file_id)
     related_objects = []
     file_tags = FileTag.objects.filter(file=file)
-    class_files = ClassFile.objects.filter(file=file)
+    group_files = GroupFile.objects.filter(file=file)
 
     # add related objects to list
     for f in file_tags:
         related_objects.append(f)
-    for c in class_files:
+    for c in group_files:
         related_objects.append(c)
     
     if request.method == "POST" or file.status == FileStatus.FAILED:
@@ -110,8 +110,8 @@ def detail(request, file_id):
     file = get_object_or_404(File, pk=file_id)
     file_tags = file.filetag_set.all().select_related("tag")
     duration = str(datetime.timedelta(seconds=math.floor(file.duration)))
-    used_in = ClassFile.objects.filter(file=file).values('_class')
-    used_in = Class.objects.filter(class_id__in=used_in)
+    used_in = GroupFile.objects.filter(file=file).values('group')
+    used_in = Group.objects.filter(group_id__in=used_in)
 
     return render(request, 'files/detail.html', {
         'used_in': used_in,
@@ -127,24 +127,24 @@ def upload(request):
     """
     Uploads a file to the server
     """
-    return _upload(request, class_id=None)
+    return _upload(request, group_id=None)
 
-@decorators.can_upload_to_class
-def upload_to_class(request, class_id):
+@decorators.can_upload_to_group
+def upload_to_group(request, group_id):
     """
     Uploads a file directly to a class
     """
-    return _upload(request, class_id)
+    return _upload(request, group_id)
 
-def _upload(request, class_id):
+def _upload(request, group_id):
     """
     Basic upload view
     """
-    if class_id is None:
-        _class = None
+    if group_id is None:
+        group = None
     else:
-        _class = get_object_or_404(Class, pk=class_id)
-        _class = Roster.objects.filter(_class=_class, user=request.user)
+        group = get_object_or_404(Group, pk=group_id)
+        group = Roster.objects.filter(group=group, user=request.user)
 
     my_files = File.objects.filter(uploaded_by=request.user, status=FileStatus.READY)
     if request.method == "POST":
@@ -154,10 +154,10 @@ def _upload(request, class_id):
             messages.success(request, "Files Uploaded! Processing...")
 
         admin = Roster.objects.filter(user=request.user, role=UserRole.ADMIN)
-        if _class:
+        if group:
             # add files to a class if one was specified
             for file in File.objects.filter(status=FileStatus.UPLOADED, uploaded_by=request.user):
-                file_add(request, class_id, file.pk) 
+                file_add(request, group_id, file.pk) 
             
         elif request.user.is_staff or admin.exists():
             return HttpResponseRedirect(reverse('files-list'))
@@ -179,7 +179,7 @@ def _upload(request, class_id):
         'uploaded': uploaded,
         'my_files': my_files,
         'chunk_size': settings.CHUNK_SIZE,    
-        'class': _class,
+        'group': group,
     })
 
 @decorators.can_download_file

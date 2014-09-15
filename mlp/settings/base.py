@@ -99,7 +99,7 @@ INSTALLED_APPS = (
     'mlp.users',
     'mlp.files',
     'mlp.tags',
-    'mlp.classes',
+    'mlp.groups',
 )
 
 MIDDLEWARE_CLASSES = (

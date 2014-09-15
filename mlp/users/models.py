@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.core.urlresolvers import reverse
 from arcutils import will_be_deleted_with
-from mlp.classes.enums import UserRole
+from mlp.groups.enums import UserRole
 
 class User(AbstractBaseUser):
     """

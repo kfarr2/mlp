@@ -6,7 +6,7 @@ from elasticmodels.forms import SearchForm
 from elasticmodels import make_searchable
 from mlp.users.models import User
 from mlp.users.perms import has_admin_access
-from mlp.classes.models import Class, ClassFile, Roster
+from mlp.groups.models import Group, GroupFile, Roster
 from .search_indexes import FileIndex
 from .models import FileTag, File
 from .enums import FileStatus, FileOrderChoices
@@ -37,13 +37,13 @@ class FileSearchForm(SearchForm):
                 status=FileStatus.READY
             ).select_related("uploaded_by_id").prefetch_related("filetag_set__tag")
         else:
-            roster = Roster.objects.filter(user=self.user).values('_class')
-            classes = Class.objects.filter(class_id__in=roster)
-            class_files = ClassFile.objects.filter(_class__in=classes).values('file')
+            roster = Roster.objects.filter(user=self.user).values('group')
+            groups = Group.objects.filter(group_id__in=roster)
+            group_files = GroupFile.objects.filter(group__in=groups).values('file')
             
             files = File.objects.filter(
                 status=FileStatus.READY,
-                file_id__in=class_files,
+                file_id__in=group_files,
             ).select_related("uploaded_by_id").prefetch_related("filetag_set__tag")
         
         return files

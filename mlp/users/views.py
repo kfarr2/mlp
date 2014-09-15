@@ -11,9 +11,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from mlp.files.models import File, FileTag
 from mlp.files.forms import FileSearchForm
 from mlp.files.enums import FileStatus
-from mlp.classes.models import Class, Roster, ClassFile, SignedUp
-from mlp.classes.enums import UserRole
-from mlp.classes.forms import ClassSearchForm
+from mlp.groups.models import Group, Roster, GroupFile, SignedUp
+from mlp.groups.enums import UserRole
+from mlp.groups.forms import GroupSearchForm
 from .perms import decorators
 from .models import User
 from .forms import UserForm, UserSearchForm
@@ -56,33 +56,33 @@ def workflow(request):
     Workflow page. Basically a home/profile page for users
     that do not have admin access.
     """
-    classes_list = Roster.objects.filter(user=request.user).values('_class')
-    classes = Class.objects.filter(class_id__in=classes_list)
-    num_classes = classes_list.count()
+    groups_list = Roster.objects.filter(user=request.user).values('group')
+    groups = Group.objects.filter(group_id__in=groups_list)
+    num_groups = groups_list.count()
     form = FileSearchForm(request.GET, user=request.user)
     form.is_valid()
     files = form.results(page=request.GET.get("page"))
     num_files = File.objects.filter(uploaded_by=request.user).count()
 
     return render(request, "users/workflow.html", {
-        "num_classes": num_classes,
+        "num_groups": num_groups,
         "num_files": num_files,
-        "classes": classes,
+        "groups": groups,
         "files": files,
     })
 
 @decorators.can_view_user_detail
 def detail(request, user_id):
     """
-    User detail page. Admins and admins of classes can view user details.
+    User detail page. Admins and admins of groups can view user details.
     """
     user = get_object_or_404(User, pk=user_id)
-    class_list = Roster.objects.filter(user=user).values('_class')
-    classes = Class.objects.filter(class_id__in=class_list)
+    group_list = Roster.objects.filter(user=user).values('group')
+    groups = Group.objects.filter(group_id__in=group_list)
 
     return render(request, "users/detail.html", {
         "user": user,
-        "classes": classes,
+        "groups": groups,
     })
 
 @decorators.can_edit_user
@@ -105,8 +105,8 @@ def _edit(request, user_id):
     else:
         user = get_object_or_404(User, pk=user_id)
 
-    roster = Roster.objects.filter(user=user).values('_class')
-    classes = Class.objects.filter(class_id__in=roster)
+    roster = Roster.objects.filter(user=user).values('group')
+    groups = Group.objects.filter(group_id__in=roster)
     files = File.objects.filter(uploaded_by=user, status=FileStatus.READY)
 
     if request.POST:
@@ -124,7 +124,7 @@ def _edit(request, user_id):
     return render(request, "users/edit.html", {
         "other_user": user,
         "files": files,
-        "classes": classes,
+        "groups": groups,
         "form": form,
     })
 
@@ -159,17 +159,17 @@ def delete(request, user_id):
     roster = Roster.objects.filter(user=user)
     is_teacher = roster.filter(role=UserRole.ADMIN)
     if is_teacher:
-        classes = Class.objects.filter(class_id__in=is_teacher.values('_class'))
+        groups = Group.objects.filter(group_id__in=is_teacher.values('group'))
     else:
-        classes = None
+        groups = None
 
     files = File.objects.filter(uploaded_by=user)
 
     # add related objects to the list
     for r in roster:
         will_be_deleted.append(r)
-    if classes:
-        for c in classes:
+    if groups:
+        for c in groups:
             will_be_deleted.append(c)
     for f in files:
         will_be_deleted.append(f)

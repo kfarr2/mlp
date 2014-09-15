@@ -6,8 +6,8 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.utils.unittest import skipIf
 from mlp.users.models import User
-from mlp.classes.models import Class, Roster
-from mlp.classes.enums import UserRole
+from mlp.groups.models import Group, Roster
+from mlp.groups.enums import UserRole
 from mlp.tags.models import Tag
 from .models import File, FileTag
 from .enums import FileType, FileStatus
@@ -61,15 +61,15 @@ def create_users(self):
     a.save()
     self.admin = a
 
-def create_classes(self):
+def create_groups(self):
     """
-    Create new classes
+    Create new groups
     """
-    c = Class(crn=12345, name="class 101", description="this is a description")
+    c = Group(crn=12345, name="class 101", description="this is a description")
     c.save()
-    self.classes = c
+    self.groups = c
 
-    r = Roster(user=self.admin, _class=c, role=UserRole.ADMIN)
+    r = Roster(user=self.admin, group=c, role=UserRole.ADMIN)
     r.save()
     self.roster = r
 
@@ -190,7 +190,7 @@ class UploadViewTest(TestCase):
         super(UploadViewTest, self).setUp()
         create_users(self)
         create_files(self)
-        create_classes(self)
+        create_groups(self)
     
     def test_not_logged_in(self):
         response = self.client.get(reverse('files-upload'))
@@ -212,9 +212,9 @@ class UploadViewTest(TestCase):
         self.assertRedirects(response, reverse('files-list'))
         self.assertIn("ERROR", [str(m) for m in response.context['messages']])
 
-    def test_upload_to_class(self):
+    def test_upload_togroup(self):
         self.client.login(email=self.admin.email, password='foobar')
-        response = self.client.post(reverse('files-upload-to-class', args=(self.classes.pk,)))
+        response = self.client.post(reverse('files-upload-to-class', args=(self.groups.pk,)))
         self.assertEqual(response.status_code, 200)
 
 class DownloadViewTest(TestCase):

@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse_lazy
 from mlp.home import views as home
 from mlp.users import views as users
 from mlp.files import views as files
-from mlp.classes import views as classes
+from mlp.groups import views as groups
 
 admin.autodiscover()
 
@@ -35,33 +35,33 @@ urlpatterns = patterns('',
     url(r'^files/?$', files.list_, name='files-list'),
     url(r'^files/detail/(?P<file_id>\d+)/?$', files.detail, name='files-detail'),
     url(r'^files/upload/?$', files.upload, name='files-upload'),
-    url(r'^files/upload/(?P<class_id>\d+)/?$', files.upload_to_class, name='files-upload-to-class'),
+    url(r'^files/upload/(?P<group_id>\d+)/?$', files.upload_to_group, name='files-upload-to-group'),
     url(r'^files/store/?$', files.store, name='files-store'),
     url(r'^files/download/(?P<file_id>\d+)/?$', files.download, name="files-download"),
     url(r'^files/delete/(?P<file_id>\d+)/?$', files.delete, name="files-delete"),
     url(r'^files/edit/(?P<file_id>\d+)/?$', files.edit, name="files-edit"),
 
-    # classes
-    url(r'^classes/?$', classes.list_, name='classes-list'),
-    url(r'^classes/create/?$', classes.create, name='classes-create'),
-    url(r'^classes/edit/(?P<class_id>\d+)/?$', classes.edit, name='classes-edit'),
-    url(r'^classes/detail/(?P<class_id>\d+)/?$', classes.detail, name='classes-detail'),
-    url(r'^classes/enroll/(?P<class_id>\d+)/?$', classes.enroll, name='classes-enroll'),
-    url(r'^classes/delete/(?P<class_id>\d+)/?$', classes.delete, name='classes-delete'),
-    url(r'^classes/edit/instructor/(?P<class_id>\d+)/(?P<user_id>\d+)/?$', classes.make_instructor, name='classes-make_instructor'),
+    # groups
+    url(r'^groups/?$', groups.list_, name='groups-list'),
+    url(r'^groups/create/?$', groups.create, name='groups-create'),
+    url(r'^groups/edit/(?P<group_id>\d+)/?$', groups.edit, name='groups-edit'),
+    url(r'^groups/detail/(?P<group_id>\d+)/?$', groups.detail, name='groups-detail'),
+    url(r'^groups/enroll/(?P<group_id>\d+)/?$', groups.enroll, name='groups-enroll'),
+    url(r'^groups/delete/(?P<group_id>\d+)/?$', groups.delete, name='groups-delete'),
+    url(r'^groups/edit/instructor/(?P<group_id>\d+)/(?P<user_id>\d+)/?$', groups.make_instructor, name='groups-make_instructor'),
 
     # roster
-    url(r'^roster/add/(?P<class_id>\d+)/(?P<user_id>\d+)/?$', classes.roster_add, name='roster-add'),
-    url(r'^roster/remove/(?P<class_id>\d+)/(?P<user_id>\d+)/?$', classes.roster_remove, name='roster-remove'),
+    url(r'^roster/add/(?P<group_id>\d+)/(?P<user_id>\d+)/?$', groups.roster_add, name='roster-add'),
+    url(r'^roster/remove/(?P<group_id>\d+)/(?P<user_id>\d+)/?$', groups.roster_remove, name='roster-remove'),
 
     # sign up
-    url(r'^signed_up/add/(?P<class_id>\d+)/(?P<user_id>\d+)/?$', classes.signed_up_add, name='signed_up-add'),
-    url(r'^signed_up/remove/(?P<class_id>\d+)/(?P<user_id>\d+)/?$', classes.signed_up_remove, name='signed_up-remove'),
+    url(r'^signed_up/add/(?P<group_id>\d+)/(?P<user_id>\d+)/?$', groups.signed_up_add, name='signed_up-add'),
+    url(r'^signed_up/remove/(?P<group_id>\d+)/(?P<user_id>\d+)/?$', groups.signed_up_remove, name='signed_up-remove'),
 
     # class files
-    url(r'^classes/(?P<class_id>\d+)/files/?$', classes.file_list, name='classes-file_list'),
-    url(r'^classes/(?P<class_id>\d+)/files/add/(?P<file_id>\d+)/?$', classes.file_add, name='classes-file_add'),
-    url(r'^classes/(?P<class_id>\d+)/files/remove/(?P<file_id>\d+)/?$', classes.file_remove, name='classes-file_remove'),
+    url(r'^groups/(?P<group_id>\d+)/files/?$', groups.file_list, name='groups-file_list'),
+    url(r'^groups/(?P<group_id>\d+)/files/add/(?P<file_id>\d+)/?$', groups.file_add, name='groups-file_add'),
+    url(r'^groups/(?P<group_id>\d+)/files/remove/(?P<file_id>\d+)/?$', groups.file_remove, name='groups-file_remove'),
 
     # password reset stuff - handled by django auth
     url(r'^registration/reset/?$', 'django.contrib.auth.views.password_reset', {"from_email": "django@pdx.edu"}, name="password_reset"),
