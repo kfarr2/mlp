@@ -41,10 +41,13 @@ def list_(request):
     teachers = User.objects.filter(user_id__in=teachers)
     students = Roster.objects.filter(role=UserRole.STUDENT).values('user')
     students = User.objects.filter(user_id__in=students)
-
+    lead_students = Roster.objects.filter(role=UserRole.TA).values('user')
+    lead_students = User.objects.filter(user_id__in=lead_students)
+    
     return render(request, "users/list.html", {
         "teachers": teachers,
         "students": students,
+        "lead_students": lead_students,
         "roles": roles,
         "form": form,
         "users": users,
