@@ -62,6 +62,7 @@ def detail(request, group_id):
         "files": files,
         "signed_up": signed_up,
         "enrolled": enrolled,
+        "UserRole": UserRole,
     })
 
 @decorators.can_enroll_students
@@ -312,3 +313,25 @@ def make_instructor(request, group_id, user_id):
         "teacher": teacher,
         "user": user,
     })
+
+def make_ta(request, group_id, user_id):
+    """
+    Takes a user and a group and adds the user to the group as a Lead Student
+    """
+    user = get_object_or_404(User, pk=user_id)
+    group = get_object_or_404(Group, pk=group_id)
+    roster = Roster.objects.get(user=user, group=group)
+    roster.role = UserRole.TA
+    roster.save()
+    return HttpResponseRedirect(reverse('groups-edit', args=(group_id,)))
+   
+def remove_ta(request, group_id, user_id):
+    """
+    Takes a user and a group and removes
+    """
+    user = get_object_or_404(User, pk=user_id)
+    group = get_object_or_404(Group, pk=group_id)
+    roster = Roster.objects.get(user=user, group=group)
+    roster.role=UserRole.STUDENT
+    roster.save()
+    return HttpResponseRedirect(reverse('groups-edit', args=(group_id,)))

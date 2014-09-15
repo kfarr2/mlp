@@ -51,3 +51,7 @@ def can_create_group(user):
 def can_enroll_students(user, group):
     return can_edit_group(user, group)
 
+@permission(model=Group)
+def is_lead_student(user, group):
+    roster = Roster.objects.filter(user=user, group=group, role=UserRole.TA)
+    return roster.exists()

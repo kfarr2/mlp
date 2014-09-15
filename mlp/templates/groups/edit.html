@@ -1,8 +1,11 @@
 {% extends "base.html" %}
+{% block head %}
 {% load permissions %}
+{{ form.media }}
+{% endblock %}
 {% block content %}
 <h3>{% if group.name %}Edit: {{ group.name }}{% else %}Create{% endif %}</h3>
-<div class="col-md-5">
+<div class="col-md-4">
     <form method="post">
         {% if form %}
             {{ form|bootstrap }}
@@ -15,7 +18,7 @@
         {% endif%}
     </form>
 </div>
-<div class="col-md-5">
+<div class="col-md-8">
     {% if group.pk %}
     <form method="post">
         <h3>Current Teacher: {{ instructor }}</h3>
@@ -26,7 +29,17 @@
                 <td>{{ student.last_name }}</td>
                 <td>{{ student.first_name }}</td>
                 <td>{{ student.email }}</td> 
-                <td><a class="btn btn-default btn-small pull-right" href="{% url 'groups-make_instructor' group.pk student.pk %}">Make Teacher</a></td>
+                <td>
+                    <a class="btn btn-default btn-sm" href="{% url 'groups-make_instructor' group.pk student.pk %}">Make Teacher</a>
+                </td>
+                <td>
+                    {% if student|is_lead_student:group %}
+                        <a class="btn btn-default btn-sm" href="{% url 'groups-remove-ta' group.pk student.pk %}">Remove Lead Student</a>
+                    {% else %}
+                        <a class="btn btn-default btn-sm" href="{% url 'groups-make-ta' group.pk student.pk %}">Make Lead Student</a>
+                    {% endif %}
+                </td>
+            
             </tr>
             {% endfor %}
         </table>

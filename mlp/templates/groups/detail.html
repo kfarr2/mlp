@@ -75,10 +75,12 @@
                 <td>
                     {% for student in students %}
                         {% if student.user == ros %}
-                            {% if student.role == 1 %}
+                            {% if student.role == UserRole.RESEARCHER %}
                                 Researcher 
-                            {% elif student.role == 2 %}
+                            {% elif student.role == UserRole.STUDENT %}
                                 Student
+                            {% elif student.role == UserRole.TA %}
+                                Lead Student
                             {% else %}
                                 Admin
                             {% endif %}

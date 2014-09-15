@@ -49,6 +49,9 @@ urlpatterns = patterns('',
     url(r'^groups/enroll/(?P<group_id>\d+)/?$', groups.enroll, name='groups-enroll'),
     url(r'^groups/delete/(?P<group_id>\d+)/?$', groups.delete, name='groups-delete'),
     url(r'^groups/edit/instructor/(?P<group_id>\d+)/(?P<user_id>\d+)/?$', groups.make_instructor, name='groups-make_instructor'),
+    url(r'^groups/(?P<group_id>\d+)/(?P<user_id>\d+)/add/?$', groups.make_ta, name='groups-make-ta'),
+    url(r'^groups/(?P<group_id>\d+)/(?P<user_id>\d+)/remove/?$', groups.remove_ta, name='groups-remove-ta'),
+
 
     # roster
     url(r'^roster/add/(?P<group_id>\d+)/(?P<user_id>\d+)/?$', groups.roster_add, name='roster-add'),
