@@ -80,12 +80,12 @@
                     {% endfor %}
                 </td>
                 <td>
-					{% if user|can_edit_user:ros %}
+                    {% if user|can_edit_user:ros %}
                     <div class="btn-group">
                         {% url 'users-detail' ros.pk as user_url %}
                         <a href="{{ user_url|obfuscate }}" class="btn btn-default">View</a>
                     </div>
-					{% endif %}
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

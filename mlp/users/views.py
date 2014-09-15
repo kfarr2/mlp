@@ -10,6 +10,7 @@ from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from mlp.files.models import File, FileTag
 from mlp.files.forms import FileSearchForm
+from mlp.files.enums import FileStatus
 from mlp.classes.models import Class, Roster, ClassFile, SignedUp
 from mlp.classes.enums import UserRole
 from mlp.classes.forms import ClassSearchForm
@@ -106,7 +107,7 @@ def _edit(request, user_id):
 
     roster = Roster.objects.filter(user=user).values('_class')
     classes = Class.objects.filter(class_id__in=roster)
-    files = File.objects.filter(uploaded_by=user)
+    files = File.objects.filter(uploaded_by=user, status=FileStatus.READY)
 
     if request.POST:
         form = UserForm(request.POST, instance=user, user=request.user)
