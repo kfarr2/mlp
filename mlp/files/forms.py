@@ -78,8 +78,8 @@ class FileForm(forms.ModelForm):
     """
     This form is for editing an already existing File model.
     """
-    tags = TagField(required=False, label="")
-    description = CharField(required=False, label="", widget=forms.Textarea)
+    tags = TagField(required=False, label="Tags")
+    description = CharField(required=False, label="Description", widget=forms.Textarea)
 
     class Meta:
         model = File
