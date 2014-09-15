@@ -48,12 +48,12 @@
             <div class="alert alert-default">You do not have ownership of any files</div>
         {% endif %}
         <br />
-        <h3>Classes</h3>
+        <h3>Groups</h3>
         <hr />
-        {% if classes %}
-            {% include 'classes/_class.html' %}
+        {% if groups %}
+            {% include 'groups/group.html' %}
         {% else %}
-            <div class="alert alert-default">You are not involved in any classes</div>
+            <div class="alert alert-default">You are not involved in any groups</div>
         {% endif %}
     {% endif %}
 </div>

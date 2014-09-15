@@ -72,11 +72,11 @@
     {% if user.is_authenticated %}
     <div>
         {% if used_in %}
-            {% with used_in as classes %} 
-            {% include "classes/_class.html" %}
+            {% with used_in as class= %} 
+            {% include "groups/group.html" %}
             {% endwith %}
         {% else %}
-            <div class="alert alert-default">This file is not used in any classes.</div>
+            <div class="alert alert-default">This file is not used in any groups.</div>
         {% endif %}
     </div>
     {% endif %}

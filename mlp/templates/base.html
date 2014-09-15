@@ -46,7 +46,7 @@
                         {% if user.is_authenticated %}
                         <ul class="nav navbar-nav">
                             <li><a href="{% url 'users-workflow' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
-                            <li><a href="{% url 'classes-list' %}"><span class="glyphicon glyphicon-book"></span> Classes</a></li>
+                            <li><a href="{% url 'groups-list' %}"><span class="glyphicon glyphicon-book"></span> Groups</a></li>
                             <li><a href="{% url 'files-list' %}"><span class="glyphicon glyphicon-folder-open"></span> Files</a></li>
                             {% if user|has_admin_access %}
                                 <li><a href="{% url 'users-list' %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>
