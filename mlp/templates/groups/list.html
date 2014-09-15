@@ -27,8 +27,8 @@
     <a href="{% url 'groups-create' %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-book"></span> New Group</a>
     {% endif %}
     <hr />
-    {% if user_group %}
-        {% with user_group as group %} 
+    {% if user_groups %}
+        {% with user_groups as group %} 
         {% include "groups/group.html" %}
         {% endwith %}
     {% else %}

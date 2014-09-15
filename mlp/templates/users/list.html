@@ -49,6 +49,8 @@
                 Teacher
             {% elif user in students %}
                 Student
+            {% elif user in lead_students %}
+                Lead Student
             {% else %}
                 Researcher
             {% endif %}

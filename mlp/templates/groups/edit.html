@@ -21,8 +21,24 @@
 <div class="col-md-8">
     {% if group.pk %}
     <form method="post">
-        <h3>Current Teacher: {{ instructor }}</h3>
+        <h3>Current Teachers:</h3>
+        <table class="table">
+            {% for teacher in instructor %}
+                <tr>
+                    <td>{{ teacher.last_name }}</td>
+                    <td>{{ teacher.first_name }}</td>
+                    <td>{{ teacher.email }}</td>
+                    <td>
+                        <a href="{% url 'groups-remove_instructor' group.pk teacher.pk %}" class="btn btn-default btn-sm">Remove Teacher</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
         {% csrf_token %}
+    </form>
+    <br />
+    <form method="post">
+        <h3>Current Students:</h3>
         <table class="table">
             {% for student in enrolled %}
             <tr>

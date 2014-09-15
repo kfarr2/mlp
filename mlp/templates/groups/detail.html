@@ -19,7 +19,10 @@
     {% endif %}
     </h3>
     <hr />
-    <p><strong>Instructor:</strong> {{ instructor.last_name }}, {{ instructor.first_name }}</p>
+    <p><strong>Instructors:</strong></p>
+        {% for teacher in instructor %}
+            <p>{{ teacher.last_name }}, {{ teacher.first_name }}</p>
+        {% endfor %}        
     <p><strong>Course Reference Number:</strong> {{ group.crn }}</p>
     <p><strong>Description:</strong> {{ group.description }}</p>
     <p><strong>Number of students enrolled in this group</strong> {{ enrolled }}</p>
