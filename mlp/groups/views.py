@@ -47,7 +47,7 @@ def detail(request, group_id):
     students = Roster.objects.filter(group=group).exclude(role=UserRole.ADMIN) 
     roster = User.objects.filter(user_id__in=students.values('user'))
     instructor = Roster.objects.filter(group=group, role=UserRole.ADMIN).values('user')
-    instructor = User.objects.get(user_id__in=instructor)
+    instructor = User.objects.filter(user_id__in=instructor)
     group_files = GroupFile.objects.filter(group=group).values('file') 
     files = File.objects.filter(file_id__in=group_files)
     signed_up = SignedUp.objects.filter(group=group).values('user')
@@ -154,33 +154,33 @@ def _edit(request, group_id):
     """
     if group_id is None:
         # create new class
-        group_ = None
+        group = None
         instructor = None
         enrolled = None
     else:
         # edit existing class
-        group_ = get_object_or_404(Group, pk=group_id)
-        instructor = Roster.objects.filter(group=group_, role=UserRole.ADMIN).values('user')
-        instructor = User.objects.get(user_id__in=instructor)
-        enrolled = Roster.objects.filter(group=group_).values('user')
-        enrolled = User.objects.filter(user_id__in=enrolled).exclude(user_id=instructor.user_id)
+        group = get_object_or_404(Group, pk=group_id)
+        instructor = Roster.objects.filter(group=group, role=UserRole.ADMIN).values('user')
+        instructor = User.objects.filter(user_id__in=instructor)
+        enrolled = Roster.objects.filter(group=group).values('user')
+        enrolled = User.objects.filter(user_id__in=enrolled).exclude(user_id__in=instructor.values('user_id'))
 
     if request.POST:
-        form = GroupForm(request.POST, instance=group_, user=request.user)
+        form = GroupForm(request.POST, instance=group, user=request.user)
         if form.is_valid():
             form.save()
-            instructor = Roster.objects.filter(group=group_, role=4)
+            instructor = Roster.objects.filter(group=group, role=4)
             messages.success(request, "Group saved")
             return HttpResponseRedirect(reverse("groups-list"))
 
     else:
-        form = GroupForm(instance=group_, user=request.user)
+        form = GroupForm(instance=group, user=request.user)
 
     return render(request, 'groups/edit.html', {
         "enrolled": enrolled,
         "instructor": instructor,
         "form": form,    
-        "group": group_,
+        "group": group,
     })
 
 @decorators.can_edit_group
@@ -295,20 +295,33 @@ def make_instructor(request, group_id, user_id):
     """
     user = get_object_or_404(User, pk=user_id)
     group = get_object_or_404(Group, pk=group_id)
-    teacher = Roster.objects.get(group=group, role=UserRole.ADMIN)
+    teacher = Roster.objects.filter(group=group, role=UserRole.ADMIN)
     if request.method == "POST":
-        if teacher:
-            Roster.objects.create(group=group, user=teacher.user, role=UserRole.STUDENT)
-            teacher = Roster.objects.get(user=teacher, group=group, role=UserRole.ADMIN)
-            teacher.delete()
-
-        old_user = Roster.objects.get(group=group, user=user)
-        old_user.delete()
-        new_teacher = Roster.objects.create(group=group, user=user, role=UserRole.ADMIN)
-
+        roster = Roster.objects.get(group=group, user=user)
+        roster.role = UserRole.ADMIN
+        roster.save()
         return HttpResponseRedirect(reverse('groups-detail', args=(group_id,)))
 
     return render(request, 'groups/make_teacher.html', {
+        "group": group,
+        "teacher": teacher,
+        "user": user,
+    })
+
+def remove_instructor(request, group_id, user_id):
+    """
+    Takes a user and a group and changes that users role from admin to student
+    """
+    user = get_object_or_404(User, pk=user_id)
+    group = get_object_or_404(Group, pk=group_id)
+    teacher = Roster.objects.filter(group=group, role=UserRole.ADMIN)
+    if request.method == "POST":
+        roster = Roster.objects.get(group=group, user=user)
+        roster.role = UserRole.STUDENT
+        roster.save()
+        return HttpResponseRedirect(reverse('groups-detail', args=(group_id,)))
+    
+    return render(request, 'groups/remove_teacher.html', {
         "group": group,
         "teacher": teacher,
         "user": user,
