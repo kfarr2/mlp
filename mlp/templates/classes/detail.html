@@ -12,8 +12,10 @@
 <hr />
 <div class="col-md-5">
     <h3>Info
-    {% if user|can_edit_class:class %}
-        <a href="{% url 'classes-edit' class.pk %}" class="btn btn-default pull-right"><span class="glyphicon glyphicon-book"></span> Edit</a>
+    {% if user.is_authenticated %}
+        {% if user|can_edit_class:class %}
+            <a href="{% url 'classes-edit' class.pk %}" class="btn btn-default pull-right"><span class="glyphicon glyphicon-book"></span> Edit</a>
+        {% endif %}
     {% endif %}
     </h3>
     <hr />
@@ -22,37 +24,41 @@
     <p><strong>Description:</strong> {{ class.description }}</p>
     <p><strong>Number of students enrolled in this class:</strong> {{ enrolled }}</p>
     <br />
-    {% if user|can_enroll_students:class %}
-        <h3>Sign-up Requests</h3>
-        {% if signed_up %}
-            <table class="table">
-                <tr>
-                    <td>Last</td>
-                    <td>First</td>
-                    <td></td>
-                </tr>
-                {% for student in signed_up %}
+    {% if user.is_authenticated %}
+        {% if user|can_enroll_students:class %}
+            <h3>Sign-up Requests</h3>
+            {% if signed_up %}
+                <table class="table">
                     <tr>
-                        <td>{{ student.last_name }}</td>
-                        <td>{{ student.first_name }}</td>
-                        <td>
-                            <div class="btn-group">
-                                <a href="{% url 'roster-add' class.pk student.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></a>
-                                <a href="{% url 'signed_up-remove' class.pk student.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></a>
-                            </div>
-                        </td>
+                        <td>Last</td>
+                        <td>First</td>
+                        <td></td>
                     </tr>
-                {% endfor %}
-            </table>
-        {% else %}
-            <div class="alert alert-default">No pending requests</div>
+                    {% for student in signed_up %}
+                        <tr>
+                            <td>{{ student.last_name }}</td>
+                            <td>{{ student.first_name }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'roster-add' class.pk student.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></a>
+                                    <a href="{% url 'signed_up-remove' class.pk student.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <div class="alert alert-default">No pending requests</div>
+            {% endif %}
+            <br />
         {% endif %}
-        <br />
     {% endif %}
 
     <h3>Roster</h3>
-    {% if user|can_edit_class:class %}
-        <a href="{% url 'classes-enroll' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-user"></span> Edit</a>
+    {% if user.is_authenticated %}
+        {% if user|can_edit_class:class %}
+            <a href="{% url 'classes-enroll' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-user"></span> Edit</a>
+        {% endif %}
     {% endif %}
     {% if roster %}
         <table class="table">
@@ -80,11 +86,13 @@
                     {% endfor %}
                 </td>
                 <td>
-                    {% if user|can_edit_user:ros %}
-                    <div class="btn-group">
-                        {% url 'users-detail' ros.pk as user_url %}
-                        <a href="{{ user_url|obfuscate }}" class="btn btn-default">View</a>
-                    </div>
+                    {% if user.is_authenticated %}
+                        {% if user|can_edit_user:ros %}
+                        <div class="btn-group">
+                            {% url 'users-detail' ros.pk as user_url %}
+                            <a href="{{ user_url|obfuscate }}" class="btn btn-default">View</a>
+                        </div>
+                        {% endif %}
                     {% endif %}
                 </td>
             </tr>
@@ -96,7 +104,9 @@
 </div>
 <div class="col-md-7">
     <h3>Files</h3>
-    {% if user|can_edit_class:class %}<a href="{% url 'classes-file_list' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-folder-open"></span> Edit</a>{% endif %}
+    {% if user.is_authenticated %}
+        {% if user|can_edit_class:class %}<a href="{% url 'classes-file_list' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-folder-open"></span> Edit</a>{% endif %}
+    {% endif %}    
     <hr />
     {% for file in files %}
         {% include "files/_file.html" %} 
