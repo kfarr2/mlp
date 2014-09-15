@@ -13,5 +13,5 @@ class UserRole(ChoiceEnum):
         (RESEARCHER, "Researcher"),
         (STUDENT, "Student"),
         (ADMIN, "Admin"),
-        (TA, "Teachers Assistant"),
+        (TA, "Lead Student"),
     )
