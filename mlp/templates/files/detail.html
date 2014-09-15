@@ -69,16 +69,5 @@
         <p><strong>Description:</strong></p>
         <p>{{ file.description }}</p>
     </div>
-    {% if user.is_authenticated %}
-    <div>
-        {% if used_in %}
-            {% with used_in as class= %} 
-            {% include "groups/group.html" %}
-            {% endwith %}
-        {% else %}
-            <div class="alert alert-default">This file is not used in any groups.</div>
-        {% endif %}
-    </div>
-    {% endif %}
 </div>
 {% endblock %}

@@ -110,11 +110,8 @@ def detail(request, file_id):
     file = get_object_or_404(File, pk=file_id)
     file_tags = file.filetag_set.all().select_related("tag")
     duration = str(datetime.timedelta(seconds=math.floor(file.duration)))
-    used_in = GroupFile.objects.filter(file=file).values('group')
-    used_in = Group.objects.filter(group_id__in=used_in)
 
     return render(request, 'files/detail.html', {
-        'used_in': used_in,
         'duration': duration,
         'file': file,
         'file_tags': file_tags,
