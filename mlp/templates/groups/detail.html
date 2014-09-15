@@ -3,29 +3,29 @@
 {% load unfriendly_tags %}
 {{ form.media }}
 {% block content %}
-<div class="text-center"><h1>{{ class.name }}</h1></div>
+<div class="text-center"><h1>{{ group.name }}</h1></div>
 {% if user.is_authenticated %}
-    {% if not user|can_edit_class:class and user not in roster %}
-        <a href="{% url 'signed_up-add' class.pk user.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;">Sign Up</a>
+    {% if not user|can_edit_group:group and user not in roster %}
+        <a href="{% url 'signed_up-add' group.pk user.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;">Sign Up</a>
     {% endif %}
 {% endif %}
 <hr />
 <div class="col-md-5">
     <h3>Info
     {% if user.is_authenticated %}
-        {% if user|can_edit_class:class %}
-            <a href="{% url 'classes-edit' class.pk %}" class="btn btn-default pull-right"><span class="glyphicon glyphicon-book"></span> Edit</a>
+        {% if user|can_edit_group:group %}
+            <a href="{% url 'groups-edit' group.pk %}" class="btn btn-default pull-right"><span class="glyphicon glyphicon-book"></span> Edit</a>
         {% endif %}
     {% endif %}
     </h3>
     <hr />
     <p><strong>Instructor:</strong> {{ instructor.last_name }}, {{ instructor.first_name }}</p>
-    <p><strong>Course Reference Number:</strong> {{ class.crn }}</p>
-    <p><strong>Description:</strong> {{ class.description }}</p>
-    <p><strong>Number of students enrolled in this class:</strong> {{ enrolled }}</p>
+    <p><strong>Course Reference Number:</strong> {{ group.crn }}</p>
+    <p><strong>Description:</strong> {{ group.description }}</p>
+    <p><strong>Number of students enrolled in this group</strong> {{ enrolled }}</p>
     <br />
     {% if user.is_authenticated %}
-        {% if user|can_enroll_students:class %}
+        {% if user|can_enroll_students:group %}
             <h3>Sign-up Requests</h3>
             {% if signed_up %}
                 <table class="table">
@@ -40,8 +40,8 @@
                             <td>{{ student.first_name }}</td>
                             <td>
                                 <div class="btn-group">
-                                    <a href="{% url 'roster-add' class.pk student.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></a>
-                                    <a href="{% url 'signed_up-remove' class.pk student.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></a>
+                                    <a href="{% url 'roster-add' group.pk student.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></a>
+                                    <a href="{% url 'signed_up-remove' group.pk student.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></a>
                                 </div>
                             </td>
                         </tr>
@@ -56,8 +56,8 @@
 
     <h3>Roster</h3>
     {% if user.is_authenticated %}
-        {% if user|can_edit_class:class %}
-            <a href="{% url 'classes-enroll' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-user"></span> Edit</a>
+        {% if user|can_edit_group:group %}
+            <a href="{% url 'groups-enroll' group.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-user"></span> Edit</a>
         {% endif %}
     {% endif %}
     {% if roster %}
@@ -99,13 +99,13 @@
             {% endfor %}
         </table>
     {% else %}
-        <div class="alert alert-default">Nobody is enrolled in this class</div>
+        <div class="alert alert-default">Nobody is enrolled in this group.</div>
     {% endif %}
 </div>
 <div class="col-md-7">
     <h3>Files</h3>
     {% if user.is_authenticated %}
-        {% if user|can_edit_class:class %}<a href="{% url 'classes-file_list' class.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-folder-open"></span> Edit</a>{% endif %}
+        {% if user|can_edit_group:group %}<a href="{% url 'groups-file_list' group.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-folder-open"></span> Edit</a>{% endif %}
     {% endif %}    
     <hr />
     {% for file in files %}

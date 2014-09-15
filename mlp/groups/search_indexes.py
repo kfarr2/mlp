@@ -1,12 +1,12 @@
 from elasticmodels import Indexable
 from django.template.loader import render_to_string
-from .models import Class
+from .models import Group
 
-class ClassIndex(Indexable):
+class GroupIndex(Indexable):
     """
-    Search index for classes
+    Search index for groups
     """
-    model = Class
+    model = Group
 
     def mapping(self):
         return {
@@ -20,5 +20,5 @@ class ClassIndex(Indexable):
     def prepare(self, obj):
         return {
             "pk": obj.pk,
-            "content": render_to_string("classes/search.txt", {"object": obj}),
+            "content": render_to_string("groups/search.txt", {"object": obj}),
         }

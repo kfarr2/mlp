@@ -4,41 +4,41 @@ from django.db.models import Q
 from mlp.users.models import User
 from mlp.users.perms import has_admin_access
 from .enums import UserRole
-from .models import Class, Roster
+from .models import Group, Roster
 from .enums import UserRole
 
-@permission(model=Class)
-def is_enrolled(user, _class):
+@permission(model=Group)
+def is_enrolled(user, group):
     """
     Is the user enrolled in this class.
     """
     if user.is_anonymous():
         return False
-    roster = Roster.objects.filter(user=user, _class=_class)
+    roster = Roster.objects.filter(user=user, group=group)
     return user.is_staff or roster.exists()
 
-@permission(model=Class)
-def can_list_class(user, _class):
-    return is_enrolled(user, _class)
+@permission(model=Group)
+def can_list_group(user, group):
+    return is_enrolled(user, group)
 
 @permission
-def can_list_all_classes(user):
+def can_list_all_groups(user):
     return has_admin_access(user) 
 
-@permission(model=Class)
-def can_edit_class(user, _class):
+@permission(model=Group)
+def can_edit_group(user, group):
     """
     Is the user staff or are they the teacher to this class.
     """
     if user.is_anonymous():
         return False
-    roster = Roster.objects.filter(user=user, _class=_class, role=UserRole.ADMIN)
+    roster = Roster.objects.filter(user=user, group=group, role=UserRole.ADMIN)
     if user.is_staff or roster.exists():
         return True
     return False
 
 @permission
-def can_create_class(user):
+def can_create_group(user):
     """
     Is the user staff or are they a teacher.
     """
@@ -47,7 +47,7 @@ def can_create_class(user):
         return True
     return False
 
-@permission(model=Class)
-def can_enroll_students(user, _class):
-    return can_edit_class(user, _class)
+@permission(model=Group)
+def can_enroll_students(user, group):
+    return can_edit_group(user, group)
 

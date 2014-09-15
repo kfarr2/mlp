@@ -1,0 +1,23 @@
+{% load unfriendly_tags %}
+<table class="table">
+    <tr>
+        <td><strong>Group ID</strong></td>
+        <td><strong>Name</strong></td>
+        <td><strong>CRN</strong></td>
+        <td><strong>Description</strong></td>
+        <td></td>
+    </tr>
+    {% for group in groups %}
+        <tr>
+            <td>{{ group.group_id }}</td>
+            <td>{{ group.name }}</td>
+            <td>{{ group.crn }}</td>
+            <td>{{ group.description|truncatechars:75 }}</td>
+            <td>
+                {% url 'groups-detail' group.pk as group_url %}
+                <a href="{{ group_url|obfuscate }}" class="btn btn-default">View</a>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+{% include '_pagination.html' with items=groups %}
