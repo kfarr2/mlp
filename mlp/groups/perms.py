@@ -37,6 +37,10 @@ def can_edit_group(user, group):
         return True
     return False
 
+@permission(model=Group)
+def can_add_to_group(user, group):
+    return has_admin_access(user) or is_lead_student(user, group)
+
 @permission
 def can_create_group(user):
     """

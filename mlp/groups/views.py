@@ -10,7 +10,8 @@ from mlp.users.perms import has_admin_access
 from mlp.users.forms import UserSearchForm
 from mlp.files.models import File
 from mlp.files.forms import FileSearchForm
-from mlp.files.perms import decorators
+from mlp.files.perms import decorators, can_upload_to_group
+from mlp.files.enums import FileStatus
 from .perms import decorators, can_list_all_groups
 from .enums import UserRole
 from .models import Group, Roster, GroupFile, SignedUp
@@ -49,7 +50,7 @@ def detail(request, group_id):
     instructor = Roster.objects.filter(group=group, role=UserRole.ADMIN).values('user')
     instructor = User.objects.filter(user_id__in=instructor)
     group_files = GroupFile.objects.filter(group=group).values('file') 
-    files = File.objects.filter(file_id__in=group_files)
+    files = File.objects.filter(file_id__in=group_files, status=FileStatus.READY)
     signed_up = SignedUp.objects.filter(group=group).values('user')
     signed_up = User.objects.filter(user_id__in=signed_up)
     enrolled = len(students)
@@ -91,10 +92,10 @@ def file_list(request, group_id):
     """
     group = get_object_or_404(Group, pk=group_id)
     group_files = GroupFile.objects.filter(group=group).values('file')
-    group_files = File.objects.filter(file_id__in=group_files)
+    group_files = File.objects.filter(file_id__in=group_files, status=FileStatus.READY)
     form = FileSearchForm(request.GET, user=request.user)
     files = form.results(page=request.GET.get("page")).object_list
-    all_files = File.objects.all()
+    all_files = File.objects.filter(status=FileStatus.READY)
 
     return render(request, "groups/add_file.html", {
         "form": form,
@@ -104,7 +105,7 @@ def file_list(request, group_id):
         "group_files": group_files,
     })
 
-@decorators.can_edit_group
+@decorators.can_add_to_group
 def file_add(request, group_id, file_id):
     """
     Adds a file to a class

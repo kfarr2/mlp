@@ -4,6 +4,7 @@ from django.db.models import Q
 from mlp.users.models import User
 from mlp.groups.enums import UserRole
 from mlp.groups.models import Group, Roster, GroupFile
+from mlp.groups.perms import is_lead_student
 from mlp.users.perms import has_admin_access
 from .models import File
 
@@ -14,7 +15,7 @@ def can_upload_file(user):
 
 @permission(model=Group)
 def can_upload_to_group(user, group):
-    return has_admin_access(user)
+    return has_admin_access(user) or is_lead_student(user,group)
 
 @permission(model=File)
 def can_edit_file(user, file):

@@ -158,6 +158,8 @@ def _upload(request, group_id):
             
         elif request.user.is_staff or admin.exists():
             return HttpResponseRedirect(reverse('files-list'))
+        elif group_id:
+            return HttpResponseRedirect(reverse('files-upload-to-group', args=(group_id,)))
         else:
             return HttpResponseRedirect(reverse('files-upload'))
     
@@ -198,7 +200,6 @@ def download(request, file_id):
     return response
 
 @csrf_exempt
-@decorators.can_upload_file
 def store(request):
     """
     This view recieves a chunk of a file and saves it. When all
