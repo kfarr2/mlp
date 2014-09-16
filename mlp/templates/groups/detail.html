@@ -110,7 +110,7 @@
 <div class="col-md-7">
     <h3>Files</h3>
     {% if user.is_authenticated %}
-        {% if user|can_edit_group:group %}<a href="{% url 'groups-file_list' group.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-folder-open"></span> Edit</a>{% endif %}
+        {% if user|can_upload_to_group:group %}<a href="{% url 'groups-file_list' group.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-folder-open"></span> Edit</a>{% endif %}
     {% endif %}    
     <hr />
     {% for file in files %}

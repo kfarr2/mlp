@@ -28,7 +28,7 @@
     {% endif %}
     <hr />
     {% if user_groups %}
-        {% with user_groups as group %} 
+        {% with user_groups as groups %} 
         {% include "groups/group.html" %}
         {% endwith %}
     {% else %}
