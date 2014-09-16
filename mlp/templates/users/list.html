@@ -47,10 +47,10 @@
         <td>
             {% if user in teachers %}
                 Teacher
-            {% elif user in students %}
-                Student
             {% elif user in lead_students %}
                 Lead Student
+            {% elif user in students %}
+                Student
             {% else %}
                 Researcher
             {% endif %}

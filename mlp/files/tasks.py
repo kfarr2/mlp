@@ -13,7 +13,7 @@ from functools import partial
 from django.conf import settings
 from django.db import IntegrityError, transaction, DatabaseError
 from celery import shared_task
-from .enums import FileStatus, VIDEO_FILE_MIME_TYPES, FileType, AUDIO_FILE_MIME_TYPES
+from .enums import FileStatus, VIDEO_FILE_MIME_TYPES, FileType, AUDIO_FILE_MIME_TYPES, TEXT_FILE_MIME_TYPES
 from .models import File
 
 
@@ -60,6 +60,11 @@ def process_uploaded_file(total_number_of_chunks, file):
  
         if was_successful:
             file.status = FileStatus.READY
+    
+    elif mime_type in TEXT_FILE_MIME_TYPES:
+        file.type = FileType.TEXT
+        file.status = FileStatus.READY
+
     else:
         file.status = FileStatus.FAILED
 

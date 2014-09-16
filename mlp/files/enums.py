@@ -22,15 +22,24 @@ AUDIO_FILE_MIME_TYPES = set([
     'audio/vnd.wav',
 ])
 
+TEXT_FILE_MIME_TYPES = set([
+    'application/msword',
+    'application/pdf',
+    'application/rtf',
+    'text/plain',
+])
+
 class FileType(ChoiceEnum):
     UNKNOWN = 0
     VIDEO = 1
     AUDIO = 2
+    TEXT = 4
 
     _choices = (
         (UNKNOWN, "Unknown"),
         (VIDEO, "Video"),
         (AUDIO, "Audio"),
+        (TEXT, "Text"),
     )
 
 class FileStatus(ChoiceEnum):

@@ -6,6 +6,7 @@ from mlp.groups.enums import UserRole
 from mlp.groups.models import Group, Roster, GroupFile
 from mlp.groups.perms import is_lead_student
 from mlp.users.perms import has_admin_access
+from .enums import FileType
 from .models import File
 
 @permission
@@ -35,4 +36,4 @@ def can_view_file(user, file):
 
 @permission(model=File)
 def can_download_file(user, file):
-    return can_edit_file(user, file)
+    return can_edit_file(user, file) or file.type == FileType.TEXT

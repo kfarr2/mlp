@@ -18,7 +18,7 @@ from mlp.groups.models import Roster, GroupFile, Group
 from mlp.groups.enums import UserRole
 from mlp.groups.views import file_add
 from .perms import decorators, can_list_all_files
-from .models import File, FileTag
+from .models import File, FileTag, AssociatedFile
 from .enums import FileType, FileStatus
 from .forms import FileForm, FileSearchForm
 from .tasks import process_uploaded_file
@@ -35,12 +35,12 @@ def list_(request):
     uploaded = File.objects.filter(
         status=FileStatus.UPLOADED,
         uploaded_by=request.user,
-    )
+    ).exclude(type=FileType.TEXT)
 
     failed = File.objects.filter(
         status=FileStatus.FAILED,
         uploaded_by=request.user,
-    )
+    ).exclude(type=FileType.TEXT)
 
     return render(request, 'files/list.html', {
         'files': files,
@@ -58,10 +58,13 @@ def delete(request, file_id):
     related_objects = []
     file_tags = FileTag.objects.filter(file=file)
     group_files = GroupFile.objects.filter(file=file)
+    associated_files = AssociatedFile.objects.filter(main_file=file)
 
     # add related objects to list
     for f in file_tags:
         related_objects.append(f)
+    for a in associated_files:
+        related_objects.append(a)
     for c in group_files:
         related_objects.append(c)
     
@@ -87,6 +90,8 @@ def edit(request, file_id):
     Edit a file
     """
     file = get_object_or_404(File, pk=file_id)
+    associated_files = AssociatedFile.objects.filter(main_file=file).values('associated_file')
+    associated_files = File.objects.filter(file_id__in=associated_files, status=FileStatus.READY)
     if request.POST:
         form = FileForm(request.POST, instance=file)
         if form.is_valid():
@@ -97,6 +102,7 @@ def edit(request, file_id):
         form = FileForm(instance=file)
 
     return render(request, 'files/edit.html', {
+        'associated_files': associated_files,
         'form': form,
         'file': file,
         'FileType': FileType,
@@ -110,11 +116,14 @@ def detail(request, file_id):
     file = get_object_or_404(File, pk=file_id)
     file_tags = file.filetag_set.all().select_related("tag")
     duration = str(datetime.timedelta(seconds=math.floor(file.duration)))
+    associated_files = AssociatedFile.objects.filter(main_file=file).values('associated_file')
+    associated_files = File.objects.filter(file_id__in=associated_files, status=FileStatus.READY)
 
     return render(request, 'files/detail.html', {
         'duration': duration,
         'file': file,
         'file_tags': file_tags,
+        'associated_files': associated_files,
         'FileType': FileType,
         'FileStatus': FileStatus,
     })
@@ -156,7 +165,7 @@ def _upload(request, group_id):
             for file in File.objects.filter(status=FileStatus.UPLOADED, uploaded_by=request.user):
                 file_add(request, group_id, file.pk) 
             
-        elif request.user.is_staff or admin.exists():
+        if request.user.is_staff or admin.exists():
             return HttpResponseRedirect(reverse('files-list'))
         elif group_id:
             return HttpResponseRedirect(reverse('files-upload-to-group', args=(group_id,)))
@@ -180,6 +189,59 @@ def _upload(request, group_id):
         'chunk_size': settings.CHUNK_SIZE,    
         'group': group,
     })
+
+def upload_associated_file(request, file_id):
+    """
+    Takes a file id and uploads text files, then links them to that file.
+    """
+    main_file = get_object_or_404(File, pk=file_id)
+    associated_files = AssociatedFile.objects.filter(main_file=main_file).values('associated_file')
+    associated_files = File.objects.filter(file_id__in=associated_files, status=FileStatus.READY)
+    if request.method == "POST":
+        if request.POST.get("error_message"):
+            messages.error(request, request.POST["error_message"])
+        else:
+            messages.success(request, "Associated Files Uploaded! Processing...")
+    
+        for associated_file in File.objects.filter(uploaded_by=request.user, type=FileType.TEXT):
+            if AssociatedFile.objects.filter(main_file=main_file, associated_file=associated_file).exists():
+                pass
+            else:
+                AssociatedFile.objects.create(main_file=main_file, associated_file=associated_file)            
+
+        return HttpResponseRedirect(reverse('files-edit', args=(file_id,)))
+
+    uploaded = File.objects.filter(
+        status=FileStatus.UPLOADED,
+        uploaded_by=request.user,
+    )
+
+    failed = File.objects.filter(
+        status=FileStatus.FAILED,
+        uploaded_by=request.user,
+    )
+
+    return render(request, 'files/upload_associated.html', {
+        "file": main_file,
+        "uploaded": uploaded,
+        "failed": failed,
+        "chunk_size": settings.CHUNK_SIZE,
+        "associated_files": associated_files,
+        "FileType": FileType,
+        "FileStatus": FileStatus,
+    })
+
+def delete_associated_file(request, file_id):
+    """
+    Deletes an associated file.
+    """
+    file = get_object_or_404(File, pk=file_id)
+    associated_file = AssociatedFile.objects.get(associated_file=file)
+    main_file = associated_file.main_file
+    associated_file.delete()
+    file.delete()
+    messages.success(request, 'File deleted!')
+    return HttpResponseRedirect(reverse('files-edit', args=(main_file.pk,)))
 
 @decorators.can_download_file
 def download(request, file_id):

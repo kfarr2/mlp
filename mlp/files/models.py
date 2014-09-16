@@ -128,6 +128,7 @@ class File(models.Model):
     def delete(self):
         # delete related objects
         FileTag.objects.filter(file=self).delete()
+        AssociatedFile.objects.filter(main_file=self).delete()
         try:
             shutil.rmtree(str(self.directory))
         except OSError as e:
@@ -150,3 +151,14 @@ class FileTag(models.Model):
     class Meta:
         db_table = "file_tag"
 
+
+class AssociatedFile(models.Model):
+    """
+    Used to map media files to their assiciated files
+    """
+    id = models.AutoField(primary_key=True)
+    main_file = models.ForeignKey(File, related_name="main_file_set", null=True, on_delete=models.SET_NULL)
+    associated_file = models.ForeignKey(File, related_name="associated_file_set", null=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        db_table = "associated_files"

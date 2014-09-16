@@ -9,7 +9,7 @@ from mlp.users.perms import has_admin_access
 from mlp.groups.models import Group, GroupFile, Roster
 from .search_indexes import FileIndex
 from .models import FileTag, File
-from .enums import FileStatus, FileOrderChoices
+from .enums import FileStatus, FileOrderChoices, FileType
 from .perms import can_list_all_files
 from bootstrap3_datetime.widgets import DateTimePicker
 
@@ -35,7 +35,7 @@ class FileSearchForm(SearchForm):
         if has_admin_access(self.user):
             files = File.objects.filter(
                 status=FileStatus.READY
-            ).select_related("uploaded_by_id").prefetch_related("filetag_set__tag")
+            ).exclude(type=FileType.TEXT).select_related("uploaded_by_id").prefetch_related("filetag_set__tag")
         else:
             roster = Roster.objects.filter(user=self.user).values('group')
             groups = Group.objects.filter(group_id__in=roster)
@@ -44,7 +44,7 @@ class FileSearchForm(SearchForm):
             files = File.objects.filter(
                 status=FileStatus.READY,
                 file_id__in=group_files,
-            ).select_related("uploaded_by_id").prefetch_related("filetag_set__tag")
+            ).exclude(type=FileType.TEXT).select_related("uploaded_by_id").prefetch_related("filetag_set__tag")
         
         return files
 

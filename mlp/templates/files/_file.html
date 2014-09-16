@@ -1,4 +1,14 @@
 {% load unfriendly_tags %}
+{% if file.type == FileType.TEXT %}
+<div class="media">
+    <div class="media-body" style="background-color:{{ file.filetag_set.tag.background_color }};">
+        <h5 class="media-heading">
+            {% url 'files-download' file.pk as file_url %}
+            <a href="{{ file_url|obfuscate }}"><span class="glyphicon glyphicon-download"></span><strong> {{ file.name }}</strong></a> <em>(uploaded {{ file.uploaded_on }})</em>
+        </h5>
+    </div>
+</div>
+{% else %}
 <div class="media">
     <a class="pull-left media-thumbnail-link" href="{% url 'files-download' file.pk %}">
         <img class="media-object" src="{{ file.thumbnail_url|default:"holder.js/64x64" }}" alt="Thumbnail"/>
@@ -18,3 +28,4 @@
         <p>{{ file.description|default:"(no description)" }}</p>
     </div>
 </div>
+{% endif %}

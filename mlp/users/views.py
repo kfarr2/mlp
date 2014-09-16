@@ -10,7 +10,7 @@ from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from mlp.files.models import File, FileTag
 from mlp.files.forms import FileSearchForm
-from mlp.files.enums import FileStatus
+from mlp.files.enums import FileStatus, FileType
 from mlp.groups.models import Group, Roster, GroupFile, SignedUp
 from mlp.groups.enums import UserRole
 from mlp.groups.forms import GroupSearchForm

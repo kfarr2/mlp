@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block head %}
+{% load permissions %}
+{{ form.media }}
+{% load unfriendly_tags %}
+{% endblock %}
+{% block content %}
+
+<script src="{{ STATIC_URL }}js/resumable.js"></script>
+<script>var CHUNK_SIZE = {{ chunk_size }};</script>
+<script src="{{ STATIC_URL }}js/upload.js"></script>
+
+{% if failed %}
+<div class="alert alert-danger">
+    <strong>The following files failed to upload</strong>
+    {% for fail in failed %}
+        <li>{{ fail.name }} - <a href="{% url 'files-delete' fail.pk %}">Remove</a></li>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if uploaded %}
+<div class="alert alert-default">
+    <strong>The following files are being processed</strong>
+    {% for upload in uploaded %}
+        <li>{{ upload.name }} - <a class="strong" href="{% url 'files-edit' upload.pk %}">Edit Meta Data</a></li>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="col-md-7">
+    <h3>{{ file.name|truncatechars:75 }}</h3>
+    <hr />
+
+    {% if file.type == FileType.VIDEO %}
+        <video controls>
+            {% for path, mime in file.video_urls %}
+                <source src="{{ path }}" type="{{ mime }}">
+            {% endfor %}
+            Your browser failed to load the video.
+        </video>
+    {% endif %}
+
+    {% if file.type == FileType.AUDIO %}
+        {% if file.audio_urls %}
+            <audio controls>
+                {% for path, mime in file.audio_urls %}
+                    <source src="{{ path }}" type="{{ mime }}">
+                {% endfor %}
+                Your browser failed to load the audio.
+            </audio>
+        {% else%}
+            No audio urls were specified.
+        {% endif %}
+    {% endif %}
+
+    <div class="well">
+        <table class="table">
+            <tr>
+                <td>
+                    <p><strong>Uploader:</strong> {{ file.uploaded_by }}</p>
+                </td>
+                <td>
+                    <p><strong>Uploaded:</strong> {{ file.uploaded_on|date }}</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="col-md-5">
+    <button class="btn btn-default pull-right" onclick="window.history.go(-1); return false">Back</button>
+    <h3>Upload</h3>
+    <input type="file" name="file" id="file" style="display:none" />
+
+    <div id="dropbox" class="alert alert-default">
+        <div class="text-center"><strong>Click here to choose a file <em>or</em> drag a file into this area</strong></div>
+    </div>
+
+    <label class="checkbox"><input type="checkbox" id="agree" />I have obtained all necessary consents and permissions to share this content through MLP</label>
+
+    <button id="submit" class="btn btn-default"><span class="glyphicon glyphicon-upload"></span> Upload</button>
+
+    <div class="progress" style="display:none">
+        <div class="progress-bar" role="progressbar" style="width: 0%;" id="progress-bar"></div>
+    </div>
+
+    <form method="post" id="form">
+        {% csrf_token %}
+        <input id="error-message" type="hidden" name="error_message" />
+    </form>
+    <hr />
+    <h3>Associated Files</h3>
+    {% if associated_files %}
+        {% for file in associated_files %}
+            {% include 'files/_file.html' %}
+        {% endfor %}
+    {% else %}    
+    <div class="alert alert-default">There are no text files associated with this file.</div>
+    {% endif %}
+</div>
+{% endblock %}
