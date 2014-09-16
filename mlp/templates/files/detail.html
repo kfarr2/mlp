@@ -66,10 +66,10 @@
     </div>
     <h3>Associated Files:</h3>
     <br />
-    {% if associated_files %}
-        {% for file in associated_files %}
-            {% include "files/_file.html" %}
-        {% endfor %}
-    {% endif %}
+    {% for file in associated_files %}
+        {% include "files/_file.html" %}
+    {% empty %}
+        <div class="alert alert-default">There are no text files associated with this file.</div>
+    {% endfor %}
 </div>
 {% endblock %}
