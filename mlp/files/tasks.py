@@ -52,6 +52,7 @@ def process_uploaded_file(total_number_of_chunks, file):
         if was_successful:
             file.status = FileStatus.READY
             generate_thumbnail(file, datetime.time(second=1))
+
     elif mime_type in AUDIO_FILE_MIME_TYPES:
         
         file.type = FileType.AUDIO
@@ -254,14 +255,21 @@ def convert_audio(file):
 def convert_video(file):
     """
     Convert a video to mp4 and ogv
-    """    
-    mp4_code = convert_video_to_mp4(file)
-    ogv_code = convert_video_to_ogv(file)
+    """   
+    high = 1
+    low = 0
+    mp4_code_high = convert_video_to_mp4(file, high)
+    mp4_code_low = convert_video_to_mp4(file, low)
+    ogv_code_high = convert_video_to_ogv(file, high)
+    ogv_code_low = convert_video_to_ogv(file, low)
     
+    ogv_code = ogv_code_low + ogv_code_high
+    mp4_code = mp4_code_low + mp4_code_high
+
     # returns True if both conversions were successful
     return ogv_code == 0 and mp4_code == 0
 
-def convert_video_to_mp4(file):
+def convert_video_to_mp4(file, quality):
     """
     Convert a video to mp4
     Returns 0 on success.
@@ -274,10 +282,21 @@ def convert_video_to_mp4(file):
         stderr = open("/tmp/vcp.log", "w")
         stdout = stderr
 
+    if quality == 1:
+        bitrate = "3000k"
+        ext = os.path.splitext(file.name)[1] or ".unknown"
+        filename = os.path.join(file.directory, 'original_high')
+        shutil.copyfile(file.directory + "/original" + ext, filename + ext)
+    else:
+        bitrate = "400k"
+        ext = os.path.splitext(file.name)[1] or ".unknown"
+        filename = os.path.join(file.directory, 'original_low')
+        shutil.copyfile(file.directory + "/original" + ext, filename + ext)
+
     mp4_code = subprocess.call([
         "ffmpeg",
-        "-i", file.file.path, # input file
-        "-b:v", "200k", # bitrate of video
+        "-i", filename + ext, # input file
+        "-b:v", bitrate, # bitrate of video | started at 200k
         "-f", "mp4", # force the output to be mp4
         "-vcodec", "libx264", # video codec
         "-acodec", "aac", # audio codec
@@ -291,12 +310,12 @@ def convert_video_to_mp4(file):
         '-y',
         '-strict', 'experimental', # since AAC audio encoding is considered experimental, we need this flag
         # output filename
-        file.path_with_extension("mp4")
+        filename + ".mp4"
     ], stderr=stderr, stdout=stdout)
-
+    os.remove(filename + ext)
     return mp4_code
 
-def convert_video_to_ogv(file):
+def convert_video_to_ogv(file, quality):
     """
     Convert a video to ogv
     Returns 0 on success.
@@ -309,10 +328,21 @@ def convert_video_to_ogv(file):
         stderr = open("/tmp/vcp.log", "w")
         stdout = stderr
 
+    if quality == 1:
+        bitrate = "3000k"
+        ext = os.path.splitext(file.name)[1] or ".unknown"
+        filename = os.path.join(file.directory, 'original_high')
+        shutil.copyfile(file.directory + "/original" + ext, filename + ext)
+    else:
+        bitrate = "400k"
+        ext = os.path.splitext(file.name)[1] or ".unknown"
+        filename = os.path.join(file.directory, 'original_low')
+        shutil.copyfile(file.directory + "/original" + ext, filename + ext)
+
     ogv_code = subprocess.call([
         "ffmpeg",
-        "-i", file.file.path, # input file
-        "-b:v", "700k", # bitrate of video
+        "-i", filename + ext, # input file
+        "-b:v", bitrate, # bitrate of video | started at 700k
         "-r", "30", # fps
         "-f", "ogg", # force the output to be ogg
         "-vcodec", "libtheora", # video codec
@@ -322,7 +352,7 @@ def convert_video_to_ogv(file):
         "-vf", "scale='if (gte (iw/512\, ih/384)\, 512) + ifnot(gte(iw/512\, ih/384)\, -2): if (gte(ih/384\, iw/512)\, 384) + ifnot(gte(ih/384\, iw/512)\, -2)'",
         # Overwrite output files without asking.
         '-y',
-        file.path_with_extension("ogv")
+        filename + ".ogv"
     ], stderr=stderr, stdout=stdout)
-
+    os.remove(filename + ext)
     return ogv_code
