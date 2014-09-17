@@ -312,7 +312,6 @@ def convert_video_to_mp4(file, quality):
         # output filename
         filename + ".mp4"
     ], stderr=stderr, stdout=stdout)
-    os.remove(filename + ext)
     return mp4_code
 
 def convert_video_to_ogv(file, quality):
@@ -354,5 +353,4 @@ def convert_video_to_ogv(file, quality):
         '-y',
         filename + ".ogv"
     ], stderr=stderr, stdout=stdout)
-    os.remove(filename + ext)
     return ogv_code
