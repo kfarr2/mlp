@@ -128,7 +128,8 @@ class File(models.Model):
     def delete(self):
         # delete related objects
         FileTag.objects.filter(file=self).delete()
-        AssociatedFile.objects.filter(main_file=self).delete()
+        associated_files = AssociatedFile.objects.filter(main_file=self)
+        associated_files.delete()
         try:
             shutil.rmtree(str(self.directory))
         except OSError as e:

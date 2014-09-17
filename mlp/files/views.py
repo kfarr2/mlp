@@ -59,6 +59,7 @@ def delete(request, file_id):
     file_tags = FileTag.objects.filter(file=file)
     group_files = GroupFile.objects.filter(file=file)
     associated_files = AssociatedFile.objects.filter(main_file=file)
+    files = File.objects.filter(file_id__in=associated_files.values('associated_file'))
 
     # add related objects to list
     for f in file_tags:
@@ -67,8 +68,10 @@ def delete(request, file_id):
         related_objects.append(a)
     for c in group_files:
         related_objects.append(c)
-    
+
     if request.method == "POST" or file.status == FileStatus.FAILED:
+        for f in files:
+            related_objects.append(f)
         for item in related_objects:
             # delete related objects
             item.delete()
