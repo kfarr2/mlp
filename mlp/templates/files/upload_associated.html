@@ -33,12 +33,7 @@
     <hr />
 
     {% if file.type == FileType.VIDEO %}
-        <video controls>
-            {% for path, mime in file.video_urls %}
-                <source src="{{ path }}" type="{{ mime }}">
-            {% endfor %}
-            Your browser failed to load the video.
-        </video>
+        {% include "files/_video.html" %}
     {% endif %}
 
     {% if file.type == FileType.AUDIO %}
