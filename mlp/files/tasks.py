@@ -283,7 +283,7 @@ def convert_video_to_mp4(file, quality):
         stdout = stderr
 
     if quality == 1:
-        bitrate = "3000k"
+        bitrate = "8000k"
         ext = os.path.splitext(file.name)[1] or ".unknown"
         filename = os.path.join(file.directory, 'original_high')
         shutil.copyfile(file.directory + "/original" + ext, filename + ext)
@@ -329,7 +329,7 @@ def convert_video_to_ogv(file, quality):
         stdout = stderr
 
     if quality == 1:
-        bitrate = "3000k"
+        bitrate = "8000k"
         ext = os.path.splitext(file.name)[1] or ".unknown"
         filename = os.path.join(file.directory, 'original_high')
         shutil.copyfile(file.directory + "/original" + ext, filename + ext)
