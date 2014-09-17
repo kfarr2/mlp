@@ -286,11 +286,13 @@ def convert_video_to_mp4(file, quality):
         bitrate = "8000k"
         ext = os.path.splitext(file.name)[1] or ".unknown"
         filename = os.path.join(file.directory, 'original_high')
+        _file = open(filename + ext, "wb")
         shutil.copyfile(file.directory + "/original" + ext, filename + ext)
     else:
         bitrate = "400k"
         ext = os.path.splitext(file.name)[1] or ".unknown"
         filename = os.path.join(file.directory, 'original_low')
+        _file = open(filename + ext, "wb")
         shutil.copyfile(file.directory + "/original" + ext, filename + ext)
 
     mp4_code = subprocess.call([
@@ -312,6 +314,7 @@ def convert_video_to_mp4(file, quality):
         # output filename
         filename + ".mp4"
     ], stderr=stderr, stdout=stdout)
+    _file.close()
     return mp4_code
 
 def convert_video_to_ogv(file, quality):
@@ -331,11 +334,13 @@ def convert_video_to_ogv(file, quality):
         bitrate = "8000k"
         ext = os.path.splitext(file.name)[1] or ".unknown"
         filename = os.path.join(file.directory, 'original_high')
+        _file = open(filename + ext, "wb")
         shutil.copyfile(file.directory + "/original" + ext, filename + ext)
     else:
         bitrate = "400k"
         ext = os.path.splitext(file.name)[1] or ".unknown"
         filename = os.path.join(file.directory, 'original_low')
+        _file = open(filename + ext, "wb")
         shutil.copyfile(file.directory + "/original" + ext, filename + ext)
 
     ogv_code = subprocess.call([
@@ -353,4 +358,5 @@ def convert_video_to_ogv(file, quality):
         '-y',
         filename + ".ogv"
     ], stderr=stderr, stdout=stdout)
+    _file.close()
     return ogv_code
