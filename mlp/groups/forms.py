@@ -22,6 +22,7 @@ class GroupForm(forms.ModelForm):
     """
     Standard form for creating groups
     """
+    crn = forms.IntegerField(required=False)
 
     class Meta:
         model = Group

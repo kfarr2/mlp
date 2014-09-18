@@ -8,7 +8,7 @@ class Group(models.Model):
     Basic model for a class.
     """
     group_id = models.AutoField(primary_key=True)
-    crn = models.IntegerField()
+    crn = models.IntegerField(blank=True, null=True)
     name = models.CharField(max_length=255)
     description = models.TextField()
 
