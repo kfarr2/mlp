@@ -15,10 +15,10 @@ In your working directory
     
 Try to download ffmpeg.
 
-    wget http://johnvansickle.com/ffmpeg/releases/ffmpeg-2.3.3-64bit-static.tar.bz2
-    tar -xjvf ffmpeg-2.3.3-64bit-static.tar.bz2
-    mv ffmpeg-2.3.3-64bit-static/ffmpeg .env/bin
-    rm -rf ffmpeg-2.3.3-64bit-static ffmpeg-2.3.3-64bit-static.tar.bz2
+    wget http://johnvansickle.com/ffmpeg/releases/ffmpeg-2.4-64bit-static.tar.bz2
+    tar -xjvf ffmpeg-2.4-64bit-static.tar.bz2
+    mv ffmpeg-2.4-64bit-static/ffmpeg .env/bin
+    rm -rf ffmpeg-2.4-64bit-static ffmpeg-2.4-64bit-static.tar.bz2
 
 If the URL doesn't work, it means the listed version is no longer current.
 Go to the following url, find the link to the latest version and replace
