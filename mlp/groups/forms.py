@@ -15,6 +15,8 @@ from mlp.users.search_indexes import UserIndex
 from .models import Group, Roster
 from .perms import can_list_all_groups
 from .search_indexes import GroupIndex
+from .enums import UserRole
+
 
 class GroupForm(forms.ModelForm):
     """
@@ -38,12 +40,36 @@ class GroupForm(forms.ModelForm):
         Overridden save function automatically adds the user to the roster as 
         the admin of the class they created.
         """
-        super(GroupForm, self).save(*args, **kwargs)
-        roster = Roster.objects.filter(user=self.user, group=self.instance, role=4)
-        if not roster:
-            Roster.objects.create(user=self.user, group=self.instance, role=4)
-        
+        to_return = super(GroupForm, self).save(*args, **kwargs)
         make_searchable(self.instance)
+        return to_return
+
+class RosterForm(forms.ModelForm):
+    """
+    A form for creating a new group with a new teacher
+    """
+    user = forms.ModelChoiceField(label="Instructor", queryset=User.objects.all())
+
+    class Meta:
+        model = Roster
+        fields = (
+            'user',
+        )
+   
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super(RosterForm, self).__init__(*args, **kwargs)
+   
+    def clean(self):
+        cleaned_data = super(RosterForm, self).clean()
+        user = cleaned_data.get('user')
+        if user is None:
+            raise forms.ValidationError("Please Select an Instructor") 
+        return cleaned_data
+
+    def save(self, *args, **kwargs):
+        Roster.objects.create(user=self.cleaned_data['user'], group=self.instance, role=UserRole.ADMIN)
+        super(RosterForm, self).save(*args, **kwargs) 
 
 
 class GroupSearchForm(SearchForm):

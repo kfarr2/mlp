@@ -15,7 +15,7 @@ from mlp.files.enums import FileStatus
 from .perms import decorators, can_list_all_groups
 from .enums import UserRole
 from .models import Group, Roster, GroupFile, SignedUp
-from .forms import GroupForm, GroupSearchForm
+from .forms import GroupForm, GroupSearchForm, RosterForm
 
 
 @login_required
@@ -168,19 +168,27 @@ def _edit(request, group_id):
 
     if request.POST:
         form = GroupForm(request.POST, instance=group, user=request.user)
+        roster_form = RosterForm(request.POST, instance=group, user=request.user)
         if form.is_valid():
-            form.save()
-            instructor = Roster.objects.filter(group=group, role=4)
-            messages.success(request, "Group saved")
-            return HttpResponseRedirect(reverse("groups-list"))
+            if group_id:
+                roster_form.instance = form.save()
+                return HttpResponseRedirect(reverse('groups-detail', args=(group_id,)))
+            if roster_form.is_valid():
+                roster_form.instance = form.save()
+                roster_form.save()
+                instructor = Roster.objects.filter(group=group, role=UserRole.ADMIN)
+                messages.success(request, "Group saved")
+                return HttpResponseRedirect(reverse("groups-list"))
 
     else:
         form = GroupForm(instance=group, user=request.user)
+        roster_form = RosterForm(instance=group, user=request.user)
 
     return render(request, 'groups/edit.html', {
         "enrolled": enrolled,
         "instructor": instructor,
         "form": form,    
+        "roster_form": roster_form,
         "group": group,
     })
 
