@@ -7,6 +7,7 @@ from mlp.users.models import User
 from mlp.tags.models import Tag, TaggableManager
 from .enums import FileType, FileStatus
 
+
 class File(models.Model):
     """
     Model for a file.
@@ -89,10 +90,10 @@ class File(models.Model):
         return os.path.normpath(settings.MEDIA_URL + os.path.relpath(os.path.dirname(self.file.path), settings.MEDIA_ROOT) + "/file." + ext)
 
     def filepath_high(self):
-        return os.path.join(settings.MEDIA_URL, str(self.pk), 'original_high.mp4')
+        return os.path.join(settings.MEDIA_URL, str(self.pk), 'original_high')
 
     def filepath_low(self):
-        return os.path.join(settings.MEDIA_URL, str(self.pk), 'original_low.mp4')
+        return os.path.join(settings.MEDIA_URL, str(self.pk), 'original_low')
     
     @property
     def video_urls(self):

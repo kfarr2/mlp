@@ -282,23 +282,24 @@ def convert_video_to_mp4(file, quality):
         stderr = open("/tmp/vcp.log", "w")
         stdout = stderr
 
+    ext = os.path.splitext(file.name)[1] or ".unknown"
     if quality == 1:
-        bitrate = "8000k"
-        ext = os.path.splitext(file.name)[1] or ".unknown"
+        bitrate = "7000k"
         filename = os.path.join(file.directory, 'original_high')
-        _file = open(filename + ext, "wb")
-        shutil.copyfile(file.directory + "/original" + ext, filename + ext)
+        _file = open(filename + ".mp4", "wb")
+        resolution = "hd720"
+
     else:
         bitrate = "400k"
-        ext = os.path.splitext(file.name)[1] or ".unknown"
         filename = os.path.join(file.directory, 'original_low')
-        _file = open(filename + ext, "wb")
-        shutil.copyfile(file.directory + "/original" + ext, filename + ext)
+        _file = open(filename + ".mp4", "wb")
+        resolution = "hd480"
 
     mp4_code = subprocess.call([
         "ffmpeg",
-        "-i", filename + ext, # input file
+        "-i", file.file.path, # input file
         "-b:v", bitrate, # bitrate of video | started at 200k
+        #'-s', resolution,
         "-f", "mp4", # force the output to be mp4
         "-vcodec", "libx264", # video codec
         "-acodec", "aac", # audio codec
@@ -306,13 +307,11 @@ def convert_video_to_mp4(file, quality):
         "-ar", "44100", # Set the audio sampling frequency. For output streams it is set by default to the frequency of the corresponding input stream
         "-ab", "128k", # audio bitrate (I think)
         "-r", "30", # fps
-        # video filter: scale using -2 to ensure that width and height are both even, a requirement for the mp4 codec
-        "-vf", "scale='if (gte (iw/512\, ih/384)\, 512) + ifnot(gte(iw/512\, ih/384)\, -2): if (gte(ih/384\, iw/512)\, 384) + ifnot(gte(ih/384\, iw/512)\, -2)'",
         # Overwrite output files without asking.
         '-y',
         '-strict', 'experimental', # since AAC audio encoding is considered experimental, we need this flag
         # output filename
-        filename + ".mp4"
+        filename + ".mp4",
     ], stderr=stderr, stdout=stdout)
     _file.close()
     return mp4_code
@@ -330,32 +329,30 @@ def convert_video_to_ogv(file, quality):
         stderr = open("/tmp/vcp.log", "w")
         stdout = stderr
 
+    ext = os.path.splitext(file.name)[1] or ".unknown"
     if quality == 1:
-        bitrate = "8000k"
-        ext = os.path.splitext(file.name)[1] or ".unknown"
+        bitrate = "7000k"
         filename = os.path.join(file.directory, 'original_high')
-        _file = open(filename + ext, "wb")
-        shutil.copyfile(file.directory + "/original" + ext, filename + ext)
+        _file = open(filename + ".ogv", "wb")
+        resolution = "hd720"
     else:
         bitrate = "400k"
-        ext = os.path.splitext(file.name)[1] or ".unknown"
         filename = os.path.join(file.directory, 'original_low')
-        _file = open(filename + ext, "wb")
-        shutil.copyfile(file.directory + "/original" + ext, filename + ext)
+        _file = open(filename + ".ogv", "wb")
+        resolution = "hd480"
 
     ogv_code = subprocess.call([
         "ffmpeg",
-        "-i", filename + ext, # input file
+        "-i", file.file.path, # input file
         "-b:v", bitrate, # bitrate of video | started at 700k
         "-r", "30", # fps
         "-f", "ogg", # force the output to be ogg
         "-vcodec", "libtheora", # video codec
         "-acodec", "libvorbis", # audio codec
         "-g", "30", # don't know what this is for
-        # video filter: scale using -2 to ensure that width and height are both even, a requirement for the mp4 codec
-        "-vf", "scale='if (gte (iw/512\, ih/384)\, 512) + ifnot(gte(iw/512\, ih/384)\, -2): if (gte(ih/384\, iw/512)\, 384) + ifnot(gte(ih/384\, iw/512)\, -2)'",
         # Overwrite output files without asking.
         '-y',
+        #'-s', resolution,
         filename + ".ogv"
     ], stderr=stderr, stdout=stdout)
     _file.close()
