@@ -29,7 +29,7 @@ class TagWidget(forms.TextInput):
         """
         attrs = super(TagWidget, self).build_attrs(*args, **kwargs)
         attrs['data-tags'] = ",".join(str(choice) for choice in self.choices)
-        attrs['group'] = attrs.get("group", "") + " taggable"
+        attrs['class'] = attrs.get("class", "") + " taggable"
         return attrs
 
     def _format_value(self, value):
