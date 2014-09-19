@@ -23,9 +23,9 @@
         {% for teacher in instructor %}
             <p>{{ teacher.last_name }}, {{ teacher.first_name }}</p>
         {% endfor %}        
-    <p><strong>Course Reference Number:</strong> {{ group.crn }}</p>
+    {% if group.crn %}<p><strong>Course Reference Number:</strong> {{ group.crn }}</p>{% endif %}
     <p><strong>Description:</strong> {{ group.description }}</p>
-    <p><strong>Number of students enrolled in this group</strong> {{ enrolled }}</p>
+    <p><strong>Number of users enrolled in this group</strong> {{ enrolled }}</p>
     <br />
     {% if user.is_authenticated %}
         {% if user|can_enroll_students:group %}

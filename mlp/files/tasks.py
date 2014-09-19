@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+import json
 import re
 import collections
 import tempfile
@@ -252,6 +253,20 @@ def convert_audio(file):
     
     return mp3_code == 0 and ogg_code == 0
 
+def get_bitrate(file_path):
+    """
+    Get the bitrate of a video file
+    """
+    full_output =  subprocess.Popen([
+        "ffmpeg",
+        "-i", file_path,
+    ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = full_output.communicate()
+    start = str(err).find("bitrate") + len("bitrate: ")
+    end = str(err).find("b/s") - len(" k")
+    bitrate = str(err)[start:end] 
+    return bitrate
+
 def convert_video(file):
     """
     Convert a video to mp4 and ogv
@@ -275,6 +290,7 @@ def convert_video_to_mp4(file, quality):
     Returns 0 on success.
     """    
     
+    bitrate = get_bitrate(file.file.path)
     stderr = open(file.path_with_extension("log"), "a")
     stdout = stderr
 
@@ -284,22 +300,18 @@ def convert_video_to_mp4(file, quality):
 
     ext = os.path.splitext(file.name)[1] or ".unknown"
     if quality == 1:
-        bitrate = "7000k"
         filename = os.path.join(file.directory, 'original_high')
         _file = open(filename + ".mp4", "wb")
-        resolution = "hd720"
 
     else:
-        bitrate = "400k"
+        bitrate = str(int(bitrate) // 2)
         filename = os.path.join(file.directory, 'original_low')
         _file = open(filename + ".mp4", "wb")
-        resolution = "hd480"
 
     mp4_code = subprocess.call([
         "ffmpeg",
         "-i", file.file.path, # input file
-        "-b:v", bitrate, # bitrate of video | started at 200k
-        #'-s', resolution,
+        "-b:v", bitrate + "k", # bitrate of video | started at 200k
         "-f", "mp4", # force the output to be mp4
         "-vcodec", "libx264", # video codec
         "-acodec", "aac", # audio codec
@@ -321,9 +333,11 @@ def convert_video_to_ogv(file, quality):
     Convert a video to ogv
     Returns 0 on success.
     """    
-      
+    
+    bitrate = get_bitrate(file.file.path)
     stderr = open(file.path_with_extension("log"), "a")
     stdout = stderr
+    
 
     if settings.TEST:
         stderr = open("/tmp/vcp.log", "w")
@@ -331,20 +345,17 @@ def convert_video_to_ogv(file, quality):
 
     ext = os.path.splitext(file.name)[1] or ".unknown"
     if quality == 1:
-        bitrate = "7000k"
         filename = os.path.join(file.directory, 'original_high')
         _file = open(filename + ".ogv", "wb")
-        resolution = "hd720"
     else:
-        bitrate = "400k"
+        bitrate = str(int(bitrate) // 2)
         filename = os.path.join(file.directory, 'original_low')
         _file = open(filename + ".ogv", "wb")
-        resolution = "hd480"
 
     ogv_code = subprocess.call([
         "ffmpeg",
         "-i", file.file.path, # input file
-        "-b:v", bitrate, # bitrate of video | started at 700k
+        "-b:v", bitrate + "k", # bitrate of video | started at 700k
         "-r", "30", # fps
         "-f", "ogg", # force the output to be ogg
         "-vcodec", "libtheora", # video codec
@@ -352,7 +363,6 @@ def convert_video_to_ogv(file, quality):
         "-g", "30", # don't know what this is for
         # Overwrite output files without asking.
         '-y',
-        #'-s', resolution,
         filename + ".ogv"
     ], stderr=stderr, stdout=stdout)
     _file.close()

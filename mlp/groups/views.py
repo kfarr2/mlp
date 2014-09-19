@@ -257,7 +257,7 @@ def roster_remove(request, group_id, user_id):
     roster = Roster.objects.filter(group=group, user=user)
     if roster:
         roster.delete()
-        messages.success(request, "User successfully dropped from class.")
+        messages.success(request, "User successfully dropped from group.")
     else:
         messages.warning(request, "Error: User not found.")
 

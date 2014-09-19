@@ -171,7 +171,7 @@ def _upload(request, group_id):
         if request.user.is_staff or admin.exists():
             return HttpResponseRedirect(reverse('files-list'))
         elif group_id:
-            return HttpResponseRedirect(reverse('files-upload-to-group', args=(group_id,)))
+            return HttpResponseRedirect(reverse('groups-file_list', args=(group_id,)))
         else:
             return HttpResponseRedirect(reverse('files-upload'))
     
