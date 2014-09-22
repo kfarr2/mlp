@@ -1,6 +1,9 @@
 {% extends "base.html" %}
+{% block head %}
 {% load unfriendly_tags %}
+{{ form.media }}
 {% load permissions %}
+{% endblock %}
 {% block content %}
 <div class="col-md-7">
     <h3>Edit: {{ file.name|truncatechars:75 }}</h3>

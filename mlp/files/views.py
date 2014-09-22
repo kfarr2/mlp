@@ -160,7 +160,8 @@ def _upload(request, group_id):
         group = get_object_or_404(Group, pk=group_id)
         group = Roster.objects.filter(group=group, user=request.user)
 
-    my_files = File.objects.filter(uploaded_by=request.user, status=FileStatus.READY)
+    associated_files = AssociatedFile.objects.all().values('associated_file')
+    my_files = File.objects.filter(uploaded_by=request.user, status=FileStatus.READY).exclude(file_id__in=associated_files)
     if request.method == "POST":
         if request.POST.get("error_message"):
             messages.error(request, request.POST["error_message"])

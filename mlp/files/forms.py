@@ -78,7 +78,7 @@ class FileForm(forms.ModelForm):
     """
     This form is for editing an already existing File model.
     """
-    tags = TagField(required=False, label="Tags")
+    tags = TagField()
     description = CharField(required=False, label="Description", widget=forms.Textarea)
 
     class Meta:
@@ -92,6 +92,7 @@ class FileForm(forms.ModelForm):
         super(FileForm, self).__init__(*args, **kwargs)
         self.fields['tags'].initial = Tag.objects.filter(filetag_set__file_id=self.instance)
         self.fields['tags'].choices = Tag.objects.all()
+        self.fields['tags'].widget.attrs['placeholder'] = "Tags"
 
     def save(self, *args, **kwargs):
         user = kwargs.pop("user")

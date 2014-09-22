@@ -27,6 +27,7 @@ TEXT_FILE_MIME_TYPES = set([
     'application/pdf',
     'application/rtf',
     'text/plain',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ])
 
 class FileType(ChoiceEnum):
