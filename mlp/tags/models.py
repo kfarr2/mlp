@@ -90,7 +90,7 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
-    def to_cssgroup(self):
+    def to_css_class(self):
         """
         This encodes a tag name as a valid CSS identifier. It mirrors the
         encodeTag function in our JavaScript
