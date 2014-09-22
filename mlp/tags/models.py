@@ -13,7 +13,7 @@ class TaggableManager(models.Manager):
         classname
         """
         # we assume the many2many table has a field with this particular name
-        field_name = taggable_object._group__.__name__.lower()
+        field_name = taggable_object.__class__.__name__.lower()
         tags = set(tags or [])
         queryset = self.filter(**{
             field_name: taggable_object,
