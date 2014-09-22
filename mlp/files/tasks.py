@@ -304,7 +304,7 @@ def convert_video_to_mp4(file, quality):
         _file = open(filename + ".mp4", "wb")
 
     else:
-        bitrate = str(int(bitrate) // 2)
+        bitrate = str(int(bitrate) // 3)
         filename = os.path.join(file.directory, 'original_low')
         _file = open(filename + ".mp4", "wb")
 
@@ -348,7 +348,7 @@ def convert_video_to_ogv(file, quality):
         filename = os.path.join(file.directory, 'original_high')
         _file = open(filename + ".ogv", "wb")
     else:
-        bitrate = str(int(bitrate) // 2)
+        bitrate = str(int(bitrate) // 3)
         filename = os.path.join(file.directory, 'original_low')
         _file = open(filename + ".ogv", "wb")
 
