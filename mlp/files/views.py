@@ -121,6 +121,11 @@ def detail(request, file_id):
     duration = str(datetime.timedelta(seconds=math.floor(file.duration)))
     associated_files = AssociatedFile.objects.filter(main_file=file).values('associated_file')
     associated_files = File.objects.filter(file_id__in=associated_files, status=FileStatus.READY)
+    if not associated_files:
+        associated_files = AssociatedFile.objects.all().values('associated_file')
+        associated_files = File.objects.filter(uploaded_by=request.user, status=FileStatus.READY, type=FileType.TEXT).exclude(file_id__in=associated_files)
+        for _file in associated_files:
+            AssociatedFile.objects.create(main_file=file, associated_file=_file)
 
     return render(request, 'files/detail.html', {
         'duration': duration,
