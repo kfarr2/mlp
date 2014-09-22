@@ -54,8 +54,8 @@ CELERY_RESULT_BACKEND = 'amqp'
 ITEMS_PER_PAGE = 25
 
 # file upload stuff
-MAX_UPLOAD_SIZE = 50 * 2**20
-CHUNK_SIZE = 1 * 2**20
+MAX_UPLOAD_SIZE = 8 * 2**30 # Roughly 8.59 gigs
+CHUNK_SIZE = 1 * 2**20 # Roughly 1 mb
 
 AUTH_USER_MODEL = 'users.User'
 
