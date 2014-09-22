@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load permissions %}
+{% load unfriendly_tags %}
 {% block content %}
 <h3>{{ file.name|truncatechars:75 }}</h3>
 {% if file and user|can_edit_file:file %}
@@ -13,7 +14,6 @@
     {% if file.type == FileType.VIDEO %}
         {% include "files/_video.html" %}
     {% endif %}
-
     {% if file.type == FileType.AUDIO %}
         {% if file.audio_urls %}
             <audio controls>
@@ -35,7 +35,8 @@
                 <td><p><strong>Uploaded:</strong> {{ file.uploaded_on|date }}</p></td>
                 <td>
                     {% if file.file and user.is_authenticated %}
-                    <p><a class="btn btn-default" href="{% url 'files-download' file.pk %}" download="{{ file.file }}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
+                    {% url 'files-download' file.pk as file_url %}
+                    <p><a class="btn btn-default" href="{{ file_url|obfuscate }}" download="{{ file.file }}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
                     {% endif %}
                 </td>
             </tr>

@@ -10,7 +10,8 @@
 </div>
 {% else %}
 <div class="media">
-    <a class="pull-left media-thumbnail-link" href="{% url 'files-download' file.pk %}">
+    {% url 'files-download' file.pk as file_url %}
+    <a class="pull-left media-thumbnail-link" href="{{ file_url|obfuscate }}">
         <img class="media-object" src="{{ file.thumbnail_url|default:"holder.js/64x64" }}" alt="Thumbnail"/>
     </a>
     <div class="media-body" style="background-color:{{ file.filetag_set.tag.background_color }};">
