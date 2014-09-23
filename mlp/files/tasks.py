@@ -264,8 +264,11 @@ def get_bitrate(file_path):
     out, err = full_output.communicate()
     start = str(err).find("bitrate") + len("bitrate: ")
     end = str(err).find("b/s") - len(" k")
-    bitrate = str(err)[start:end] 
-    return bitrate
+    try:
+        bitrate = int(str(err)[start:end])
+    except ValueError as e:
+        bitrate = 0
+    return str(bitrate)
 
 def convert_video(file):
     """
@@ -293,6 +296,10 @@ def convert_video_to_mp4(file, quality):
     bitrate = get_bitrate(file.file.path)
     stderr = open(file.path_with_extension("log"), "a")
     stdout = stderr
+
+    if bitrate == '0':
+        file.status = FileStatus.FAILED
+        return 1
 
     if settings.TEST:
         stderr = open("/tmp/vcp.log", "w")
@@ -337,7 +344,10 @@ def convert_video_to_ogv(file, quality):
     bitrate = get_bitrate(file.file.path)
     stderr = open(file.path_with_extension("log"), "a")
     stdout = stderr
-    
+   
+    if bitrate == '0':
+        file.status = FileStatus.FAILED
+        return 1
 
     if settings.TEST:
         stderr = open("/tmp/vcp.log", "w")
