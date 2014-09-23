@@ -42,6 +42,7 @@ urlpatterns = patterns('',
     url(r'^files/download/(?P<file_id>\d+)/?$', files.download, name="files-download"),
     url(r'^files/delete/(?P<file_id>\d+)/?$', files.delete, name="files-delete"),
     url(r'^files/edit/(?P<file_id>\d+)/?$', files.edit, name="files-edit"),
+    url(r'^media/(.*)$', files.media, name="media"),
 
     # groups
     url(r'^groups/?$', groups.list_, name='groups-list'),
