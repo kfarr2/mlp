@@ -1,3 +1,4 @@
+from datetime import datetime
 from model_mommy.mommy import make
 import os, sys, shutil, mimetypes, math, tempfile, threading, mock
 from django.http import HttpResponse, HttpResponseRedirect
@@ -90,6 +91,15 @@ class ListViewTest(TestCase):
         response = self.client.get(reverse('files-list'))
         self.assertTrue(len(response.context['files']), 1)
 
+    def test_file_search(self):
+        """
+        Login and search
+        """
+        self.client.login(email=self.admin.email, password='foobar')
+        form = FileSearchForm(user=self.admin, data={ "q": self.file.name, "start_date": datetime(2010,1,1), "end_date": datetime.now() })
+        self.assertTrue(form.is_valid())
+        form.search()
+
     def test_list_none(self):
         """
         Don't login and try to list all
@@ -158,7 +168,9 @@ class EditViewTest(TestCase):
     def test_invalid_post(self):
         self.client.login(email=self.user.email, password='foobar')
         data = {
-            "name": self.file.name,        
+            "name": self.file.name,
+            "description": None,
+            "tags": None
         }
         response = self.client.post(reverse('files-edit', args=(self.file.pk,)), data)
         self.assertEqual(response.status_code, 302)
@@ -206,16 +218,10 @@ class UploadViewTest(TestCase):
         response = self.client.post(reverse('files-upload'))
         self.assertEqual(response.status_code, 302)
 
-    def test_logged_in_post_with_error(self):
+    def test_upload_to_group(self):
         self.client.login(email=self.admin.email, password='foobar')
-        response = self.client.post(reverse('files-upload'), {'error_message': "ERROR"}, follow=True)
-        self.assertRedirects(response, reverse('files-list'))
-        self.assertIn("ERROR", [str(m) for m in response.context['messages']])
-
-    def test_upload_togroup(self):
-        self.client.login(email=self.admin.email, password='foobar')
-        response = self.client.post(reverse('files-upload-to-class', args=(self.groups.pk,)))
-        self.assertEqual(response.status_code, 200)
+        response = self.client.post(reverse('files-upload-to-group', args=(self.groups.pk,)))
+        self.assertEqual(response.status_code, 302)
 
 class DownloadViewTest(TestCase):
     """
@@ -263,7 +269,7 @@ class StoreViewTest(TestCase):
             "resumableIdentifier": "abcd1234",
             "resumableChunkNumber": "1",
             "resumableTotalChunks": "1",
-            "resumableFilename": "UNIQUE_STRING.txt",
+            "resumableFilename": "UNIQUE_STRING.xml",
             "resumableTotalSize": len(self.file_content),            
         })
         self.assertEqual(response.status_code, 200)
@@ -280,8 +286,8 @@ class StoreViewTest(TestCase):
         self.assertEqual(original_num_files_in_temp, len(os.listdir(settings.TMP_ROOT)))
         # and the file was put together correctly in the media dir
         f = File.objects.all().order_by("-pk").first()
-        self.assertEqual(f.name, "UNIQUE_STRING.txt")
-        file_path = os.path.join(settings.MEDIA_ROOT, str(f.pk), "original.txt")
+        self.assertEqual(f.name, "UNIQUE_STRING.xml")
+        file_path = os.path.join(settings.MEDIA_ROOT, str(f.pk), "original.xml")
         self.assertEqual(self.file_content, open(file_path).read())
 
     def test_single_chunk_upload_too_big(self):
@@ -400,15 +406,6 @@ class FileTest(TestCase):
         self.assertEqual(file.size, 500)
         shutil.rmtree(file.directory)
 
-    def test_thumbnail_url_does_exist(self):
-        path = os.path.join(settings.MEDIA_ROOT, "file.png")
-        with open(path, "w") as f:
-            f.write('hi')
-
-        f = File(file="test.mov")
-        self.assertEqual(f.thumbnail_url, settings.MEDIA_URL + "file.png")
-        os.remove(path)
-
     def test_video_urls(self):
         f = File(file="test.mov")
         urls = f.video_urls
@@ -469,7 +466,7 @@ class ProcessUploadedFileTest(TestCase):
         f = File(
             name="Kittens",
             description="Kittens and stuff",
-            file="test.txt",
+            file="test.xml",
             type=FileType.UNKNOWN,
             status=FileStatus.UPLOADED,
             uploaded_by=self.admin,
@@ -486,7 +483,7 @@ class ProcessUploadedFileTest(TestCase):
         with open(os.path.join(path, "3.part"), "w") as f:
             f.write("and stuff")
 
-        self.file.name = "test.txt"
+        self.file.name = "test.xml"
         self.file.tmp_path = path
         process_uploaded_file(3, self.file)
 
@@ -515,8 +512,10 @@ class ProcessUploadedFileTest(TestCase):
         file = File.objects.get(pk=self.file.pk)
         self.assertEqual(file.status, FileStatus.READY)
         # make sure the files got saved
-        self.assertTrue(os.path.exists(os.path.join(os.path.dirname(file.file.path), "file.mp4")))
-        self.assertTrue(os.path.exists(os.path.join(os.path.dirname(file.file.path), "file.ogv")))
+        self.assertTrue(os.path.exists(os.path.join(os.path.dirname(file.file.path), "original_high.mp4")))
+        self.assertTrue(os.path.exists(os.path.join(os.path.dirname(file.file.path), "original_low.mp4")))
+        self.assertTrue(os.path.exists(os.path.join(os.path.dirname(file.file.path), "original_high.ogv")))
+        self.assertTrue(os.path.exists(os.path.join(os.path.dirname(file.file.path), "original_low.ogv")))
         self.assertTrue(os.path.exists(os.path.join(os.path.dirname(file.file.path), "file.png")))
 
     def test_duration_calculation(self):
@@ -554,3 +553,4 @@ class FilesPermsTest(TestCase):
         self.assertTrue(can_list_all_files(self.admin))
         self.assertTrue(can_view_file(self.admin, self.file))
         self.assertTrue(can_download_file(self.admin, self.file))
+

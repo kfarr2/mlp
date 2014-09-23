@@ -12,7 +12,7 @@ from mlp.files.enums import FileType, FileStatus
 from .models import Group, Roster, GroupFile, SignedUp
 from .perms import decorators
 from .enums import UserRole
-from .forms import GroupSearchForm
+from .forms import GroupSearchForm, GroupForm, RosterForm
 
 def create_users(self):
     """
@@ -136,11 +136,15 @@ class GroupTest(TestCase):
         pre_count = Group.objects.count()
         data = {
             "name": "class2",
-            "crn": 12345,
             "description": "desc",
+            "user": self.user
         }
-        response = self.client.post(reverse('groups-create'), data)
-        self.assertEqual(response.status_code, 302)
+        g_form = GroupForm(user=self.admin, data=data)
+        r_form = RosterForm(user=self.user, data={ "user": self.user.pk })
+        self.assertTrue(g_form.is_valid())
+        self.assertTrue(r_form.is_valid())
+        r_form.instance = g_form.save()
+        r_form.save()
         self.assertEqual(pre_count+1, Group.objects.count())
 
     def test_delete(self):
@@ -176,7 +180,7 @@ class RosterTest(TestCase):
     def test_roster_add(self):
         pre_count = Roster.objects.count()
         response = self.client.get(reverse('roster-add', args=(self.groups.pk, self.user.pk,)), follow=True)
-        self.assertIn("User successfully enrolled in class.", [str(m) for m in response.context['messages']])
+        self.assertIn("User successfully added to group.", [str(m) for m in response.context['messages']])
         self.assertEqual(response.status_code, 200)
         self.assertEqual(pre_count+1, Roster.objects.count())
         response = self.client.get(reverse('roster-add', args=(self.groups.pk, self.admin.pk,)), follow=True)
