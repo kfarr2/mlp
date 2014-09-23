@@ -1,8 +1,9 @@
-import re
+import re, hashlib
 import os, sys, shutil
 from elasticmodels import make_searchable
 from django.db import models
 from django.conf import settings
+from django.utils.text import slugify
 from mlp.users.models import User
 from mlp.tags.models import Tag, TaggableManager
 from .enums import FileType, FileStatus
@@ -26,6 +27,8 @@ class File(models.Model):
     edited_on = models.DateTimeField(auto_now=True)
     md5_sum = models.CharField(max_length=32, blank=True)
 
+    slug = models.SlugField(max_length=50, unique=True)
+
     class Meta:
         db_table = "files"
 
@@ -48,12 +51,11 @@ class File(models.Model):
         """
         if not self.file:
             return None
-
-        path = self.path_with_extension("png")
-        if not os.path.exists(path):
+        elif not self.slug:
             return None
 
-        return settings.MEDIA_URL + os.path.relpath(path, settings.MEDIA_ROOT)
+        slug = self.slug + '/'
+        return settings.MEDIA_URL + slug + "file.png"
 
     @property
     def size(self):
@@ -126,8 +128,12 @@ class File(models.Model):
     def __unicode__(self):
         return "%s (%s)" % (self.name, FileType._choices[self.type][1])
 
+    def get_slug(self, length=16):
+        return hashlib.sha1(os.urandom(length)).hexdigest()
+
     def save(self, *args, **kwargs):
         # make the file searchable
+        self.slug = self.get_slug()
         to_return = super(File, self).save(*args, **kwargs)
         make_searchable(self)
         return to_return

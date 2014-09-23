@@ -14,7 +14,7 @@
     {% url 'files-download' file.pk as file_url %}
     <a class="pull-left media-thumbnail-link" id="file-link" href="{{ file_url|obfuscate }}">
         {% if file.type == FileType.VIDEO %}
-            <img class="media-object" src="{{ file.thumbnail_url|default:"holder.js/64x64" }}" alt="Thumbnail"/>
+            <img class="media-object" src="{{ file.thumbnail_url|default:"holder.js/64x64"|obfuscate }}" alt="Thumbnail"/>
         {% else %}
             <span class="glyphicon glyphicon-volume-up"></span>
         {% endif %}

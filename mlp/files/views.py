@@ -275,6 +275,19 @@ def download(request, file_id):
         shutil.copyfileobj(open(file.file.path), response)
     return response
 
+def media(request, slug):
+    """
+    Takes a request and a slug and passes back the file
+    """
+    slug, file_part = os.path.split(slug)
+    file = File.objects.get(slug=slug)
+    path = os.path.join(file.directory, file_part)
+    file = open(path, 'rb')
+    response = StreamingHttpResponse(file)
+    response['Content-Type'] = mimetypes.guess_type(path)[0]
+    response['X-Sendfile'] = path
+    return response
+
 @csrf_exempt
 def store(request):
     """
