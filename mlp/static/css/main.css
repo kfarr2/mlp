@@ -599,3 +599,11 @@ body > div > div#content_container {
 .filetag span:last-child:after {
     content: '';
 }
+
+#file-link {
+    text-align: center;
+}
+
+span.glyphicon-volume-up {
+    font-size: 1.7em;
+}

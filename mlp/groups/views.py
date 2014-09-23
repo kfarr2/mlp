@@ -11,7 +11,7 @@ from mlp.users.forms import UserSearchForm
 from mlp.files.models import File
 from mlp.files.forms import FileSearchForm
 from mlp.files.perms import decorators, can_upload_to_group
-from mlp.files.enums import FileStatus
+from mlp.files.enums import FileStatus, FileType
 from .perms import decorators, can_list_all_groups
 from .enums import UserRole
 from .models import Group, Roster, GroupFile, SignedUp
@@ -64,6 +64,8 @@ def detail(request, group_id):
         "signed_up": signed_up,
         "enrolled": enrolled,
         "UserRole": UserRole,
+        'FileType': FileType,
+        'FileStatus': FileStatus,
     })
 
 @decorators.can_enroll_students
@@ -103,6 +105,8 @@ def file_list(request, group_id):
         "files": files,
         "group": group,
         "group_files": group_files,
+        'FileType': FileType,
+        'FileStatus': FileStatus,
     })
 
 @decorators.can_add_to_group

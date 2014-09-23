@@ -1,3 +1,4 @@
+{% load permissions %}
 {% load unfriendly_tags %}
 {% if file.type == FileType.TEXT %}
 <div class="media">
@@ -11,8 +12,12 @@
 {% else %}
 <div class="media">
     {% url 'files-download' file.pk as file_url %}
-    <a class="pull-left media-thumbnail-link" href="{{ file_url|obfuscate }}">
-        <img class="media-object" src="{{ file.thumbnail_url|default:"holder.js/64x64" }}" alt="Thumbnail"/>
+    <a class="pull-left media-thumbnail-link" id="file-link" href="{{ file_url|obfuscate }}">
+        {% if file.type == FileType.VIDEO %}
+            <img class="media-object" src="{{ file.thumbnail_url|default:"holder.js/64x64" }}" alt="Thumbnail"/>
+        {% else %}
+            <span class="glyphicon glyphicon-volume-up"></span>
+        {% endif %}
     </a>
     <div class="media-body" style="background-color:{{ file.filetag_set.tag.background_color }};">
         <h5 class="media-heading">

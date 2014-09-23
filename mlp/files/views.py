@@ -47,6 +47,8 @@ def list_(request):
         'uploaded': uploaded,
         'failed': failed,
         'form': form,
+        'FileType': FileType,
+        'FileStatus': FileStatus,
     })
 
 @decorators.can_edit_file
@@ -122,10 +124,11 @@ def detail(request, file_id):
     associated_files = AssociatedFile.objects.filter(main_file=file).values('associated_file')
     associated_files = File.objects.filter(file_id__in=associated_files, status=FileStatus.READY)
     if not associated_files:
-        associated_files = AssociatedFile.objects.all().values('associated_file')
-        associated_files = File.objects.filter(uploaded_by=request.user, status=FileStatus.READY, type=FileType.TEXT).exclude(file_id__in=associated_files)
-        for _file in associated_files:
-            AssociatedFile.objects.create(main_file=file, associated_file=_file)
+        if request.user.is_authenticated():
+            associated_files = AssociatedFile.objects.all().values('associated_file')
+            associated_files = File.objects.filter(uploaded_by=request.user, status=FileStatus.READY, type=FileType.TEXT).exclude(file_id__in=associated_files)
+            for _file in associated_files:
+                AssociatedFile.objects.create(main_file=file, associated_file=_file)
 
     return render(request, 'files/detail.html', {
         'duration': duration,
@@ -197,6 +200,8 @@ def _upload(request, group_id):
         'my_files': my_files,
         'chunk_size': settings.CHUNK_SIZE,    
         'group': group,
+        'FileType': FileType,
+        'FileStatus': FileStatus,
     })
 
 def upload_associated_file(request, file_id):

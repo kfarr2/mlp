@@ -72,6 +72,8 @@ def workflow(request):
         "num_files": num_files,
         "groups": groups,
         "files": files,
+        'FileType': FileType,
+        'FileStatus': FileStatus,
     })
 
 @decorators.can_view_user_detail
@@ -129,6 +131,8 @@ def _edit(request, user_id):
         "files": files,
         "groups": groups,
         "form": form,
+        'FileType': FileType,
+        'FileStatus': FileStatus,
     })
 
 def hire(request, user_id):
