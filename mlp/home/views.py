@@ -17,8 +17,10 @@ def home(request):
     """
     if request.user.is_authenticated():
         return HttpResponseRedirect(reverse("users-home"))
-
-    intro_text = IntroText.objects.last().text
+    try:
+        intro_text = IntroText.objects.last().text
+    except AttributeError as e:
+        intro_text = "Welcome to the Mobile Learning Project"
 
     if request.POST:
         form = LoginForm(request.POST)
@@ -52,7 +54,9 @@ def admin(request):
     else:
         form = IntroTextForm(instance=intro_text)
 
-    intro_text = intro_text.text
+    intro_text = intro_text.text or "Welcome to the Mobile Learning Project"
+
+
     return render(request, 'home/admin.html', {
         "intro_text": intro_text,
         "form": form,
