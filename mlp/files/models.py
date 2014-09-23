@@ -133,7 +133,13 @@ class File(models.Model):
 
     def save(self, *args, **kwargs):
         # make the file searchable
-        self.slug = self.get_slug()
+        try:
+            self.slug = self.get_slug()
+        except IntegrityError as e: 
+            # Running this twice should fix any issues with collisions since there are well over
+            # 3x10^30 possibilities for ASCII strings of length 16 alone.
+            self.slug = self.get_slug()
+
         to_return = super(File, self).save(*args, **kwargs)
         make_searchable(self)
         return to_return
