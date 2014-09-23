@@ -18,6 +18,7 @@ urlpatterns = patterns('',
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', home.home, name='home'),
+    url(r'^home/admin/?$', home.admin, name='home-admin'),
     url(r'^logout/?$', 'django.contrib.auth.views.logout', {"next_page": reverse_lazy("home")}, name="logout"),
 
     # users

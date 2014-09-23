@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Admin Page</h1>
+<hr />
+<div class="col-md-4">
+    <form method="post">
+        {% csrf_token %}
+        {{ form|bootstrap }}
+        <div class="btn-group">
+            <button class="btn btn-default" type="submit" value="Submit" name="submit">Submit</button>
+            <a class="btn btn-default" href="{% url 'users-home' %}">Cancel</a>
+        </div>
+    </form>
+</div>
+<div class="col-md-8">
+    <div class="panel panel-default">
+        <div class="panel-heading"><h3>Current Intro Text</h3></div>
+        <div class="panel-body">
+            <p>{{ intro_text|linebreaks }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

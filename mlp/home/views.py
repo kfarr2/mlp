@@ -8,7 +8,8 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.utils.http import is_safe_url
 from mlp.users.forms import LoginForm
-from mlp.files.models import File
+from .models import IntroText
+from .forms import IntroTextForm
 
 def home(request):
     """
@@ -16,6 +17,8 @@ def home(request):
     """
     if request.user.is_authenticated():
         return HttpResponseRedirect(reverse("users-home"))
+
+    intro_text = IntroText.objects.last().text
 
     if request.POST:
         form = LoginForm(request.POST)
@@ -32,5 +35,25 @@ def home(request):
 
     return render(request, 'home/home.html', {
         "form": form,
+        "intro_text": intro_text,
     })
 
+def admin(request):
+    """
+    Admin page for editing the intro paragraph
+    """
+    intro_text = IntroText.objects.last()
+    if request.POST:
+        form = IntroTextForm(request.POST, instance=intro_text)
+        if form.is_valid():
+            messages.success(request, "Intro Text Updated.")
+            form.save()
+            return HttpResponseRedirect(reverse('home-admin'))
+    else:
+        form = IntroTextForm(instance=intro_text)
+
+    intro_text = intro_text.text
+    return render(request, 'home/admin.html', {
+        "intro_text": intro_text,
+        "form": form,
+    })
