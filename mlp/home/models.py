@@ -7,3 +7,6 @@ class IntroText(models.Model):
     """
     text_id = models.AutoField(primary_key=True)
     text = models.TextField()
+
+    class Meta:
+        db_table = "intro_text"

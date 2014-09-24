@@ -9,7 +9,7 @@
         {{ form|bootstrap }}
         <div class="btn-group">
             <button class="btn btn-default" type="submit" value="Submit" name="submit">Submit</button>
-            <a class="btn btn-default" href="{% url 'users-home' %}">Cancel</a>
+            <button class="btn btn-default" onclick="window.history.go(-1); return false">Cancel</button>
         </div>
     </form>
 </div>

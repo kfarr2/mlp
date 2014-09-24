@@ -49,7 +49,7 @@ class RosterForm(forms.ModelForm):
     """
     A form for creating a new group with a new teacher
     """
-    user = forms.ModelChoiceField(label="Instructor", queryset=User.objects.all())
+    user = forms.ModelChoiceField(required=True, label="Instructor", queryset=User.objects.all())
 
     class Meta:
         model = Roster
@@ -64,8 +64,6 @@ class RosterForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super(RosterForm, self).clean()
         user = cleaned_data.get('user')
-        if user is None:
-            raise forms.ValidationError("Please Select an Instructor") 
         return cleaned_data
 
     def save(self, *args, **kwargs):

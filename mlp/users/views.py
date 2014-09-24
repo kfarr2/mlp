@@ -118,7 +118,10 @@ def _edit(request, user_id):
         form = UserForm(request.POST, instance=user, user=request.user)
         if form.is_valid():
             user = form.save()
-            messages.success(request, "Updated")
+            if user_id.exists():
+                messages.success(request, "Updated")
+            else:
+                messages.success(request, "New User Created!")
             if request.user.is_staff:
                 return HttpResponseRedirect(reverse("users-list"))
             else:
@@ -139,20 +142,25 @@ def hire(request, user_id):
     """
     Elevate another users priviledges. (make staff)
     """
-    user = get_object_or_404(User, pk=user_id)
-    user.is_staff = True
-    user.save()
-    return HttpResponseRedirect(reverse("users-edit", args=(user_id,)))
-
+    if request.user.is_staff:
+        user = get_object_or_404(User, pk=user_id)
+        user.is_staff = True
+        user.save()
+        return HttpResponseRedirect(reverse("users-edit", args=(user_id,)))
+    else:
+        return HttpResponseRedirect(reverse("users-home"))
 
 def fire(request, user_id):
     """
     Elevate another users priviledges. (make staff)
     """
-    user = get_object_or_404(User, pk=user_id)
-    user.is_staff = False
-    user.save()
-    return HttpResponseRedirect(reverse("users-edit", args=(user_id,)))
+    if request.user.is_staff:
+        user = get_object_or_404(User, pk=user_id)
+        user.is_staff = False
+        user.save()
+        return HttpResponseRedirect(reverse("users-edit", args=(user_id,)))
+    else:
+        return HttpResponseRedirect(reverse("users-home"))
 
 @decorators.can_edit_user
 def delete(request, user_id):
