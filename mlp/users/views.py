@@ -118,7 +118,7 @@ def _edit(request, user_id):
         form = UserForm(request.POST, instance=user, user=request.user)
         if form.is_valid():
             user = form.save()
-            if user_id.exists():
+            if user_id:
                 messages.success(request, "Updated")
             else:
                 messages.success(request, "New User Created!")
