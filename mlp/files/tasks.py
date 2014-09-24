@@ -86,44 +86,7 @@ def process_uploaded_file(total_number_of_chunks, file):
             shutil.rmtree(file.tmp_path)
 
     return file.status
-
-def get_matching_file(path):
-    '''
-    returns a File object with a md5_sum that matches that of path,
-    IF it exists. Otherwise, returns None.
     
-    There's some tricky stuff with permissions, so in its current state,
-    this should only be used when importing orgs.
-    '''
-    md5_sum = get_md5_sum(path)
-    
-    files = File.objects.filter(md5_sum=md5_sum)
-    
-    if len(files) > 0:
-        return files[0]
-    else:
-        return None
-    
-def conditional_copy(src_path, dest_path):
-    '''
-    only copies the file if the destination doesn't match the source,
-    either because it doesn't exist or because the file sizes don't match.
-    '''
-    if are_duplicate_files(src_path, dest_path):
-        return
-    
-    shutil.copyfile(src_path, dest_path)
-        
-def are_duplicate_files(src_path, dest_path):
-    ''' assumes the 1st file exists. doesn't assume anything about the 2nd. '''    
-    if os.path.isfile(dest_path):
-        src_size = os.stat(src_path).st_size
-        dst_size = os.stat(dest_path).st_size
-
-        if src_size == dst_size:
-            return True        
-    return False
-
 def get_media_file_duration(filepath):
     '''
     gets the duration of a media file, using ffmpeg.
