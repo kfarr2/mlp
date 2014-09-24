@@ -54,7 +54,10 @@ def admin(request):
     else:
         form = IntroTextForm(instance=intro_text)
 
-    intro_text = intro_text.text or "Welcome to the Mobile Learning Project"
+    try:
+        intro_text = intro_text.text 
+    except AttributeError as e:
+        intro_text = "Welcome to the Mobile Learning Project"
 
 
     return render(request, 'home/admin.html', {
