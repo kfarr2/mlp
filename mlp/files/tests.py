@@ -10,7 +10,7 @@ from mlp.users.models import User
 from mlp.groups.models import Group, Roster
 from mlp.groups.enums import UserRole
 from mlp.tags.models import Tag
-from .models import File, FileTag
+from .models import File, FileTag, AssociatedFile
 from .enums import FileType, FileStatus
 from .forms import FileForm, FileSearchForm
 from .perms import can_upload_file, can_edit_file, can_list_file, can_list_all_files, can_view_file, can_download_file
@@ -174,7 +174,6 @@ class EditViewTest(TestCase):
         }
         response = self.client.post(reverse('files-edit', args=(self.file.pk,)), data)
         self.assertEqual(response.status_code, 302)
-        
 
 class DetailViewTest(TestCase):
     """
@@ -232,8 +231,6 @@ class DownloadViewTest(TestCase):
         create_users(self)
         self.client.login(email=self.admin.email, password='foobar')
         create_files(self)
-        self.f = open(os.path.join(settings.MEDIA_ROOT, "test.txt"), "w")
-        self.f.write("hello, world!")
         settings.DEBUG = True
 
     def test_download(self):
@@ -289,6 +286,7 @@ class StoreViewTest(TestCase):
         self.assertEqual(f.name, "UNIQUE_STRING.xml")
         file_path = os.path.join(settings.MEDIA_ROOT, str(f.pk), "original.xml")
         self.assertEqual(self.file_content, open(file_path).read())
+        shutil.rmtree(f.directory)
 
     def test_single_chunk_upload_too_big(self):
         original_settings = settings.MAX_UPLOAD_SIZE
@@ -303,7 +301,7 @@ class StoreViewTest(TestCase):
         })
         self.assertEqual(response.status_code, 404)
         settings.MAX_UPLOAD_SIZE = original_settings
-    
+        
     def test_single_chunk_upload_chunk_too_big(self):
         original_settings = settings.MAX_UPLOAD_SIZE
         settings.CHUNK_SIZE = 2
@@ -374,7 +372,7 @@ class StoreViewTest(TestCase):
         self.assertEqual(f.name, "UNIQUE_STRING.txt")
         file_path = os.path.join(settings.MEDIA_ROOT, str(f.pk), "original.txt")
         self.assertEqual(self.file_content*2, open(file_path).read())
-
+        f.delete()
 
 class FileTest(TestCase):
     """
@@ -396,6 +394,7 @@ class FileTest(TestCase):
     def test_directory(self):
         f = make(File)
         self.assertEqual(f.directory, os.path.join(settings.MEDIA_ROOT, str(f.pk)))
+        f.delete()
 
     def test_size(self):
         file = make(File)
@@ -404,7 +403,7 @@ class FileTest(TestCase):
             f.write("a"*500)
 
         self.assertEqual(file.size, 500)
-        shutil.rmtree(file.directory)
+        file.delete()
 
     def test_video_urls(self):
         f = File(file="test.mov")
@@ -413,10 +412,8 @@ class FileTest(TestCase):
             (("/media/file.ogv"), "video/ogg"),
             (("/media/file.mp4"), "video/mp4"),
         ])
-
         f = File()
         self.assertEqual(f.video_urls, [])
-
 
 class FileFormTest(TestCase):
     """
@@ -494,6 +491,7 @@ class ProcessUploadedFileTest(TestCase):
         file = File.objects.get(pk=self.file.pk)
         # this will be failed since it didn't convert
         self.assertEqual(file.status, FileStatus.FAILED)
+        shutil.rmtree(self.file.directory)
 
     # to run this test (since it takes so long) you have to explicitly run
     # ./manage.py vcp.files
@@ -517,6 +515,7 @@ class ProcessUploadedFileTest(TestCase):
         self.assertTrue(os.path.exists(os.path.join(os.path.dirname(file.file.path), "original_high.ogv")))
         self.assertTrue(os.path.exists(os.path.join(os.path.dirname(file.file.path), "original_low.ogv")))
         self.assertTrue(os.path.exists(os.path.join(os.path.dirname(file.file.path), "file.png")))
+        shutil.rmtree(self.file.directory)
 
     def test_duration_calculation(self):
         duration = get_duration(os.path.join(settings.STATICFILES_DIRS[0], "test.mov"))
@@ -535,6 +534,7 @@ class ProcessUploadedFileTest(TestCase):
         process_uploaded_file(1, self.file)
         file = File.objects.get(pk=self.file.pk)
         self.assertEqual(file.status, FileStatus.FAILED) 
+        shutil.rmtree(self.file.directory)
 
 class FilesPermsTest(TestCase):
     """
@@ -554,3 +554,48 @@ class FilesPermsTest(TestCase):
         self.assertTrue(can_view_file(self.admin, self.file))
         self.assertTrue(can_download_file(self.admin, self.file))
 
+class AssociatedFileTest(TestCase):
+    """
+    Test things having to do with associated files
+    """
+    def setUp(self):
+        super(AssociatedFileTest, self).setUp()
+        create_users(self)
+        create_files(self)
+
+    def test_upload_get_invalid(self):
+        self.client.login(email=self.user.email, password="foobar")
+        response = self.client.get(reverse('files-upload-associated', args=(self.adminfile.pk,)))
+        self.assertEqual(response.status_code, 403)
+
+    def test_upload_get(self):
+        self.client.login(email=self.admin.email, password="foobar")
+        response = self.client.get(reverse('files-upload-associated', args=(self.adminfile.pk,)))
+        self.assertEqual(response.status_code, 200)
+
+    def test_upload_post_invalid(self):
+        self.client.login(email=self.admin.email, password="foobar")
+        response = self.client.post(reverse('files-upload-associated', args=(self.adminfile.pk,)), {"error_message": "ERROR!"}, follow=True)
+        self.assertRedirects(response, reverse('files-edit', args=(self.adminfile.pk,)))
+        self.assertIn("ERROR!", [str(m) for m in response.context['messages']])
+
+    def test_upload_post(self):
+        self.client.login(email=self.admin.email, password="foobar")
+        response = self.client.post(reverse('files-upload-associated', args=(self.adminfile.pk,)), follow=True)
+        self.assertRedirects(response, reverse('files-edit', args=(self.adminfile.pk,)))
+
+    def test_delete_get_invalid(self):
+        self.client.login(email=self.user.email, password="foobar")
+        response = self.client.get(reverse('files-delete-associated', args=(self.adminfile.pk,)))
+        self.assertEqual(response.status_code, 403)
+
+    def test_delete_valid(self):
+        associated_file = AssociatedFile(main_file=self.adminfile, associated_file=self.file)
+        associated_file.save()
+        precount_a = File.objects.count()
+        precount_b = AssociatedFile.objects.count()
+        self.client.login(email=self.admin.email, password='foobar')
+        response = self.client.get(reverse('files-delete-associated', args=(self.file.pk,)))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(precount_a-1, File.objects.count())
+        self.assertEqual(precount_b-1, AssociatedFile.objects.count())

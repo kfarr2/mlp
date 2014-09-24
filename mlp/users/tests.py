@@ -155,4 +155,17 @@ class UserViewsTest(TestCase):
 
     def test_cloak_as(self):
         self.assertTrue(self.admin.can_cloak_as(self.user))
+
+    def test_hire(self):
+        count = User.objects.filter(is_staff=True).count()
+        response = self.client.get(reverse('users-hire', args=(self.user.pk,)))
+        self.assertRedirects(response, reverse('users-edit', args=(self.user.pk,)))
+        self.assertEqual(count+1, User.objects.filter(is_staff=True).count())
     
+    def test_fire(self):
+        self.user.is_staff = True
+        self.user.save()
+        count = User.objects.filter(is_staff=True).count()
+        response = self.client.get(reverse('users-fire', args=(self.user.pk,)))
+        self.assertRedirects(response, reverse('users-edit', args=(self.user.pk,)))
+        self.assertEqual(count-1, User.objects.filter(is_staff=True).count())

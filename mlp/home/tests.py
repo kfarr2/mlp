@@ -53,3 +53,33 @@ class HomeTest(TestCase):
         }
         response = self.client.post(reverse('home'), data)
         self.assertEqual(response.status_code, 302)
+
+
+class AdminTest(TestCase):
+    """
+    Test the admin page
+    """
+    def setUp(self):
+        super(AdminTest, self).setUp()
+        create_users(self)
+
+    def test_not_admin(self):
+        self.client.login(email=self.user.email, password="foobar")
+        response = self.client.get(reverse('home-admin'))
+        self.assertEqual(response.status_code, 302)
+        self.client.logout()
+
+    def test_get(self):
+        self.client.login(email=self.admin.email, password="foobar")
+        response = self.client.get(reverse('home-admin'), follow=True)
+        self.assertEqual(response.status_code, 200)
+
+    def test_post(self):
+        self.client.login(email=self.admin.email, password="foobar")
+        text = "This is sample text"
+        data = {
+            "text": text,
+        }
+        response = self.client.post(reverse('home-admin'), data=data)
+        self.assertEqual(response.status_code, 200)
+

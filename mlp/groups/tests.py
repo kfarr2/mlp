@@ -156,15 +156,6 @@ class GroupTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(pre_count-1, Group.objects.count())
 
-    def test_make_instructor(self):
-        self.client.post(reverse('roster-add', args=(self.groups.pk, self.user.pk)))
-        response = self.client.post(reverse('groups-make_instructor', args=(self.groups.pk, self.user.pk)))
-        self.assertEqual(response.status_code, 302)
-        status = Roster.objects.get(user=self.user, group=self.groups)
-        self.assertEqual(status.role, UserRole.ADMIN)
-        response = self.client.get(reverse('groups-make_instructor', args=(self.groups.pk, self.user.pk)))
-        self.assertEqual(response.status_code, 200)
-
 
 class RosterTest(TestCase):
     """
@@ -193,6 +184,39 @@ class RosterTest(TestCase):
         self.assertEqual(response.status_code, 302)
         response = self.client.get(reverse('roster-remove', args=(self.groups.pk, self.user.pk,)))
         self.assertEqual(response.status_code, 302)
+
+    def test_make_instructor(self):
+        self.client.post(reverse('roster-add', args=(self.groups.pk, self.user.pk)))
+        response = self.client.post(reverse('groups-make_instructor', args=(self.groups.pk, self.user.pk)))
+        self.assertEqual(response.status_code, 302)
+        status = Roster.objects.get(user=self.user, group=self.groups)
+        self.assertEqual(status.role, UserRole.ADMIN)
+        response = self.client.get(reverse('groups-make_instructor', args=(self.groups.pk, self.user.pk)))
+        self.assertEqual(response.status_code, 200)
+
+    def test_remove_instructor(self):
+        Roster.objects.create(group=self.groups, user=self.user, role=UserRole.ADMIN)
+        pre_count = Roster.objects.filter(role=UserRole.ADMIN).count()
+        response = self.client.post(reverse('groups-remove_instructor', args=(self.groups.pk, self.user.pk)))
+        self.assertRedirects(response, reverse('groups-detail', args=(self.groups.pk,)))
+        self.assertEqual(pre_count-1, Roster.objects.filter(role=UserRole.ADMIN).count())
+        response = self.client.get(reverse('groups-remove_instructor', args=(self.groups.pk, self.user.pk)))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(pre_count-1, Roster.objects.filter(role=UserRole.ADMIN).count())
+
+    def test_make_ta(self):
+        Roster.objects.create(group=self.groups, user=self.user, role=UserRole.STUDENT)
+        pre_count = Roster.objects.filter(role=UserRole.TA).count()
+        response = self.client.get(reverse('groups-make-ta', args=(self.groups.pk, self.user.pk,)))
+        self.assertRedirects(response, reverse('groups-edit', args=(self.groups.pk,)))
+        self.assertEqual(pre_count+1, Roster.objects.filter(role=UserRole.TA).count())
+
+    def test_remove_ta(self):
+        Roster.objects.create(group=self.groups, user=self.user, role=UserRole.TA)
+        pre_count = Roster.objects.filter(role=UserRole.TA).count()
+        response = self.client.get(reverse('groups-remove-ta', args=(self.groups.pk, self.user.pk,)))
+        self.assertRedirects(response, reverse('groups-edit', args=(self.groups.pk,)))
+        self.assertEqual(pre_count-1, Roster.objects.filter(role=UserRole.TA).count())
 
 
 class SignedUpTest(TestCase):
