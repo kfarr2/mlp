@@ -204,6 +204,7 @@ def _upload(request, group_id):
         'FileStatus': FileStatus,
     })
 
+@decorators.can_edit_file
 def upload_associated_file(request, file_id):
     """
     Takes a file id and uploads text files, then links them to that file.
@@ -245,6 +246,7 @@ def upload_associated_file(request, file_id):
         "FileStatus": FileStatus,
     })
 
+@decorators.can_edit_file
 def delete_associated_file(request, file_id):
     """
     Deletes an associated file.

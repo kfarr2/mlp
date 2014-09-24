@@ -179,6 +179,7 @@ def delete(request, user_id):
         groups = None
 
     files = File.objects.filter(uploaded_by=user)
+    group_files = GroupFile.objects.filter(file_id__in=files)
 
     # add related objects to the list
     for r in roster:
@@ -188,6 +189,8 @@ def delete(request, user_id):
             will_be_deleted.append(c)
     for f in files:
         will_be_deleted.append(f)
+    for g in group_files:
+        will_be_deleted.append(g)
 
     if request.method == "POST":
         if user:

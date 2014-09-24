@@ -306,6 +306,8 @@ def make_instructor(request, group_id, user_id):
     """
     Takes a user and makes them the instructor for a class
     """
+    if not request.user.is_staff:
+        return HttpResponseRedirect(reverse('groups-list'))
     user = get_object_or_404(User, pk=user_id)
     group = get_object_or_404(Group, pk=group_id)
     teacher = Roster.objects.filter(group=group, role=UserRole.ADMIN)
@@ -325,6 +327,8 @@ def remove_instructor(request, group_id, user_id):
     """
     Takes a user and a group and changes that users role from admin to student
     """
+    if not request.user.is_staff:
+        return HttpResponseRedirect(reverse('groups-list'))
     user = get_object_or_404(User, pk=user_id)
     group = get_object_or_404(Group, pk=group_id)
     teacher = Roster.objects.filter(group=group, role=UserRole.ADMIN)
@@ -344,6 +348,8 @@ def make_ta(request, group_id, user_id):
     """
     Takes a user and a group and adds the user to the group as a Lead Student
     """
+    if not request.user.is_staff:
+        return HttpResponseRedirect(reverse('groups-list'))
     user = get_object_or_404(User, pk=user_id)
     group = get_object_or_404(Group, pk=group_id)
     roster = Roster.objects.get(user=user, group=group)
@@ -355,6 +361,8 @@ def remove_ta(request, group_id, user_id):
     """
     Takes a user and a group and removes
     """
+    if not request.user.is_staff:
+        return HttpResponseRedirect(reverse('groups-list'))
     user = get_object_or_404(User, pk=user_id)
     group = get_object_or_404(Group, pk=group_id)
     roster = Roster.objects.get(user=user, group=group)

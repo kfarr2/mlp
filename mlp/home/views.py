@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.utils.http import is_safe_url
 from mlp.users.forms import LoginForm
+from mlp.users.models import User
 from .models import IntroText
 from .forms import IntroTextForm
 
@@ -40,17 +41,22 @@ def home(request):
         "intro_text": intro_text,
     })
 
+@login_required
 def admin(request):
     """
     Admin page for editing the intro paragraph
     """
+    if not request.user.is_staff:
+        return HttpResponseRedirect(reverse('users-home'))
+    
     intro_text = IntroText.objects.last()
+    
     if request.POST:
         form = IntroTextForm(request.POST, instance=intro_text)
         if form.is_valid():
             messages.success(request, "Intro Text Updated.")
             form.save()
-            return HttpResponseRedirect(reverse('home-admin'))
+            intro_text = IntroText.objects.last()
     else:
         form = IntroTextForm(instance=intro_text)
 
@@ -58,7 +64,6 @@ def admin(request):
         intro_text = intro_text.text 
     except AttributeError as e:
         intro_text = "Welcome to the Mobile Learning Project"
-
 
     return render(request, 'home/admin.html', {
         "intro_text": intro_text,
