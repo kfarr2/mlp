@@ -18,6 +18,7 @@ DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'no-reply@pdx.edu'
 
 # in test mode?
 TEST = False
+TEST_RUNNER = "mlp.runner.MLPRunner"
 
 LOGIN_URL = reverse_lazy("home")
 LOGIN_REDIRECT_URL = reverse_lazy("users-home")
