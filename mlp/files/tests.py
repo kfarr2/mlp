@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.utils.unittest import skipIf
 from mlp.users.models import User
-from mlp.groups.models import Group, Roster
+from mlp.groups.models import Group, Roster, GroupFile
 from mlp.groups.enums import UserRole
 from mlp.tags.models import Tag
 from .models import File, FileTag, AssociatedFile
@@ -47,6 +47,29 @@ def create_files(self):
     )
     a.save()
     self.adminfile = a
+
+def create_associated_files(self):
+    if not self.adminfile and not self.file:
+        create_files(self)
+    
+    f = File(
+        name="Pumpkin",
+        description="no more spiced latte's",
+        file="test.txt",
+        type=FileType.TEXT,
+        status=FileStatus.READY,
+        uploaded_by=self.admin,
+        tmp_path="pumpkin",
+    )
+    f.save()
+    self.af = f
+
+    af = AssociatedFile(
+        main_file = self.file,
+        associated_file = f,
+    )
+    af.save()
+    self.associated_file = af
 
 def create_users(self):
     """
@@ -599,3 +622,34 @@ class AssociatedFileTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(precount_a-1, File.objects.count())
         self.assertEqual(precount_b-1, AssociatedFile.objects.count())
+
+class DeleteFileTest(TestCase):
+    """
+    Tests having to do with deleting multiple/associated files
+    """
+    def setUp(self):
+        super(DeleteFileTest, self).setUp()
+        # create initial
+        create_users(self)
+        create_files(self)
+        create_groups(self)
+        create_associated_files(self)
+        self.client.login(email=self.admin.email, password="foobar")
+        
+        # create related
+        tag = Tag.objects.create(name="pumpkin")
+        FileTag.objects.create(file=self.file, tag=tag)
+        GroupFile.objects.create(group=self.groups, file=self.file)
+
+    def test_delete_related_files(self):
+        count_filetag = FileTag.objects.count()
+        count_files = File.objects.count()
+        count_associated_files = AssociatedFile.objects.count()
+        count_group_files = GroupFile.objects.count()
+
+        self.client.post(reverse('files-delete', args=(self.file.pk,)))
+
+        self.assertEqual(count_filetag-1, FileTag.objects.count())
+        self.assertEqual(count_files-2, File.objects.count())
+        self.assertEqual(count_associated_files-1, AssociatedFile.objects.count())
+        self.assertEqual(count_group_files-1, GroupFile.objects.count())
