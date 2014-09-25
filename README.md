@@ -15,10 +15,10 @@ In your working directory
     
 Try to download ffmpeg *
 
-    wget http://johnvansickle.com/ffmpeg/releases/ffmpeg-2.4-64bit-static.tar.xz
-    tar -xJf ffmpeg-2.4-64bit-static.tar.xz
-    mv ffmpeg-2.4-64bit-static/ffmpeg .env/bin
-    rm -rf ffmpeg-2.4-64bit-static ffmpeg-2.4-64bit-static.tar.xz
+    wget http://johnvansickle.com/ffmpeg/releases/ffmpeg-2.4.1-64bit-static.tar.xz
+    tar -xJf ffmpeg-2.4.1-64bit-static.tar.xz
+    mv ffmpeg-2.4.1-64bit-static/ffmpeg .env/bin
+    rm -rf ffmpeg-2.4.1-64bit-static ffmpeg-2.4.1-64bit-static.tar.xz
 
 Install RabbitMQ
 
@@ -98,7 +98,7 @@ Then visit:
 *If the URL doesn't work, it means the listed version is no longer current.
 Go to the following url, find the link to the latest version and replace
 the version numbers in the previous syntax. 
-e.g. if the link says "ffmpeg-2.3.1-64bit-static.tar.bz2", the version is 2.3.1.
+e.g. if the link says "ffmpeg-2.4.1-64bit-static.tar.xz", the version is 2.4.1.
 
     http://johnvansickle.com/ffmpeg/
 
