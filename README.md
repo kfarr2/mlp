@@ -101,7 +101,7 @@ e.g. if the link says "ffmpeg-2.4.1-64bit-static.tar.xz", the version is 2.4.1.
 
     http://johnvansickle.com/ffmpeg/
 
-### ELASTICSEARCH
+### ElasticSearch
 
 **If you get an error saying "Can't start up: Not enough memory", update your version of java
 
