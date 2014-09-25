@@ -13,7 +13,7 @@ In your working directory
     pip install -r requirements.txt
     
     
-Try to download ffmpeg*
+Try to download ffmpeg *
 
     wget http://johnvansickle.com/ffmpeg/releases/ffmpeg-2.4-64bit-static.tar.xz
     tar -xJf ffmpeg-2.4-64bit-static.tar.xz
@@ -26,7 +26,7 @@ Install RabbitMQ
     service rabbitmq-server start
     chkconfig rabbitmq-server on
 
-Install ElasticSearch**
+Install ElasticSearch **
 
     rpm --import http://packages.elasticsearch.org/GPG-KEY-elasticsearch
     echo "[elasticsearch-1.1]
@@ -93,14 +93,14 @@ Then visit:
 
 ## Notes
 
-*If the URL doesn't work, it means the listed version is no longer current.
+* If the URL doesn't work, it means the listed version is no longer current.
 Go to the following url, find the link to the latest version and replace
 the version numbers in the previous syntax. 
 e.g. if the link says "ffmpeg-2.3.1-64bit-static.tar.bz2", the version is 2.3.1.
 
     http://johnvansickle.com/ffmpeg/
 
-**If you get an error saying "Can't start up: Not enough memory", update your version of java
+** If you get an error saying "Can't start up: Not enough memory", update your version of java
 
     yum install java-1.6.0-openjdk
 
