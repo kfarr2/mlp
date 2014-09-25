@@ -93,7 +93,7 @@ Then visit:
 
 ## Notes & Troubleshooting
 
-FFMPEG
+### FFMPEG
 
 *If the URL doesn't work, it means the listed version is no longer current.
 Go to the following url, find the link to the latest version and replace
@@ -102,7 +102,7 @@ e.g. if the link says "ffmpeg-2.3.1-64bit-static.tar.bz2", the version is 2.3.1.
 
     http://johnvansickle.com/ffmpeg/
 
-ELASTICSEARCH
+### ELASTICSEARCH
 
 **If you get an error saying "Can't start up: Not enough memory", update your version of java
 
