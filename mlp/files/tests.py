@@ -240,10 +240,16 @@ class UploadViewTest(TestCase):
         response = self.client.post(reverse('files-upload'))
         self.assertEqual(response.status_code, 302)
 
+    def test_post_with_error(self):
+        self.client.login(email=self.admin.email, password='foobar')
+        response = self.client.post(reverse('files-upload'), {"error_message": "ERROR!"}, follow=True)
+        self.assertRedirects(response, reverse('files-list'))
+        self.assertIn("ERROR!", [str(m) for m in response.context['messages']])
+
     def test_upload_to_group(self):
         self.client.login(email=self.admin.email, password='foobar')
-        response = self.client.post(reverse('files-upload-to-group', args=(self.groups.pk,)))
-        self.assertEqual(response.status_code, 302)
+        response = self.client.post(reverse('files-upload-to-group', args=(self.groups.pk,)), follow=True)
+        self.assertRedirects(response, reverse('groups-file_list', args=(self.groups.pk,)))
 
 class DownloadViewTest(TestCase):
     """
@@ -401,6 +407,11 @@ class FileTest(TestCase):
     """
     Test files
     """
+    def setUp(self):
+        super(FileTest, self).setUp()
+        create_users(self)
+        create_files(self)
+
     def test_sanitize_filename(self):
         self.assertEqual(File.sanitize_filename("../../%^&*("), "")
         self.assertEqual(File.sanitize_filename("../foo..^&*"), "..foo..")
@@ -437,6 +448,7 @@ class FileTest(TestCase):
         ])
         f = File()
         self.assertEqual(f.video_urls, [])
+
 
 class FileFormTest(TestCase):
     """

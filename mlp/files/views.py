@@ -177,10 +177,10 @@ def _upload(request, group_id):
             for file in File.objects.filter(status=FileStatus.UPLOADED, uploaded_by=request.user):
                 file_add(request, group_id, file.pk) 
             
-        if request.user.is_staff or admin.exists():
-            return HttpResponseRedirect(reverse('files-list'))
-        elif group_id:
+        if group_id:
             return HttpResponseRedirect(reverse('groups-file_list', args=(group_id,)))
+        elif request.user.is_staff or admin.exists():
+            return HttpResponseRedirect(reverse('files-list'))
         else:
             return HttpResponseRedirect(reverse('files-upload'))
     

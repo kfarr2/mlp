@@ -137,14 +137,10 @@ class GroupTest(TestCase):
         data = {
             "name": "class2",
             "description": "desc",
-            "user": self.user
+            "user": self.user.pk
         }
-        g_form = GroupForm(user=self.admin, data=data)
-        r_form = RosterForm(user=self.user, data={ "user": self.user.pk })
-        self.assertTrue(g_form.is_valid())
-        self.assertTrue(r_form.is_valid())
-        r_form.instance = g_form.save()
-        r_form.save()
+        response = self.client.post(reverse('groups-create'), data, follow=True)
+        self.assertRedirects(response, reverse('groups-list'))
         self.assertEqual(pre_count+1, Group.objects.count())
 
     def test_delete(self):
