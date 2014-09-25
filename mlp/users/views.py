@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
-from mlp.files.models import File, FileTag
+from mlp.files.models import File, FileTag, AssociatedFile
 from mlp.files.forms import FileSearchForm
 from mlp.files.enums import FileStatus, FileType
 from mlp.groups.models import Group, Roster, GroupFile, SignedUp
@@ -172,25 +172,19 @@ def delete(request, user_id):
 
     # Make a list of everything that will be deleted
     roster = Roster.objects.filter(user=user)
-    is_teacher = roster.filter(role=UserRole.ADMIN)
-    if is_teacher:
-        groups = Group.objects.filter(group_id__in=is_teacher.values('group'))
-    else:
-        groups = None
-
     files = File.objects.filter(uploaded_by=user)
     group_files = GroupFile.objects.filter(file_id__in=files)
+    associated_files = AssociatedFile.objects.filter(main_file__in=files)
 
     # add related objects to the list
     for r in roster:
         will_be_deleted.append(r)
-    if groups:
-        for c in groups:
-            will_be_deleted.append(c)
     for f in files:
         will_be_deleted.append(f)
     for g in group_files:
         will_be_deleted.append(g)
+    for a in associated_files:
+        will_be_deleted.append(a)
 
     if request.method == "POST":
         if user:

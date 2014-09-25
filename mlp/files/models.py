@@ -129,18 +129,19 @@ class File(models.Model):
         return "%s (%s)" % (self.name, FileType._choices[self.type][1])
 
     def get_slug(self, length=16):
+        """Generates a random string of default length 16 as a slug for the file"""
         return hashlib.sha1(os.urandom(length)).hexdigest()
 
     def save(self, *args, **kwargs):
-        # make the file searchable
+        # generate a slug for the file
         try:
             self.slug = self.get_slug()
         except IntegrityError as e: 
             # Running this twice should fix any issues with collisions since there are well over
             # 3x10^30 possibilities for ASCII strings of length 16 alone.
             self.slug = self.get_slug()
-
         to_return = super(File, self).save(*args, **kwargs)
+        # make the file searchable
         make_searchable(self)
         return to_return
 

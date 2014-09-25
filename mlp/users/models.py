@@ -43,15 +43,6 @@ class User(AbstractBaseUser):
         else:
             return self.email
 
-    def get_absolute_url(self):
-        return reverse("users-detail", args=[self.pk])
-
-    def __str__(self):
-        if self.last_name and self.first_name:
-            return self.get_full_name()
-        else:
-            return self.email
-
     def can_cloak_as(self, other_user):
         return self.is_staff
 

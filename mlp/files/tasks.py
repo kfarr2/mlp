@@ -87,55 +87,6 @@ def process_uploaded_file(total_number_of_chunks, file):
 
     return file.status
     
-def get_media_file_duration(filepath):
-    '''
-    gets the duration of a media file, using ffmpeg.
-    '''
-    # we need to determine what to do with filepath, which MAY or MAY NOT contain a file extension
-    # this code is almost identical to code in process_imported_video. might want to make a separate function.    
-    ext = os.path.splitext(filepath)[1] or None
-    
-    if ext is None:
-        if os.path.isfile(filepath + '.mp4'):
-            filepath = filepath + '.mp4'
-        elif os.path.isfile(filepath + '.ogv'):
-            filepath = filepath + '.ogv'
-        else:
-            print("Couldn't find file %s" % filepath)
-            return 0
-    else:
-        if not os.path.isfile(filepath):
-            print("Couldn't find file %s" % filepath)
-            return 0
-    
-    command = ['ffmpeg', '-i', filepath]
-
-    output = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[1]        # entire output comes through as an error, for some reason.
-    
-    try:    
-        duration_string = re.search('(?<=Duration: )[\d:.]+', output).group(0)          # fixme: error-checking
-    except AttributeError as e:
-        print("Error getting media file duration!")
-        return 0
-    
-    hours, minutes, seconds, subseconds = re.findall('\d+', duration_string)
-    duration = int(hours) * 3600 + int(minutes) * 60 + int(seconds) + float(subseconds) / 100
-    
-    return duration                  
-
-def get_md5_sum(filename):
-    '''
-    returns an md5_sum as a 32-character string
-    '''
-    with open(filename, mode='rb') as file:
-        md5 = hashlib.md5()
-        for buffer in iter(partial(file.read, 128), b''):
-            md5.update(buffer)
-    return md5.hexdigest()
-
-def path_has_extension(path):
-    return True if len(os.path.splitext(path)[1]) > 0 else False
-
 def get_duration(video_path):
     """Returns the duration of the file in seconds"""
     with tempfile.SpooledTemporaryFile() as output:

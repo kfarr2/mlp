@@ -37,10 +37,6 @@ class GroupForm(forms.ModelForm):
         super(GroupForm, self).__init__(*args, **kwargs)
 
     def save(self, *args, **kwargs):
-        """
-        Overridden save function automatically adds the user to the roster as 
-        the admin of the class they created.
-        """
         to_return = super(GroupForm, self).save(*args, **kwargs)
         make_searchable(self.instance)
         return to_return
