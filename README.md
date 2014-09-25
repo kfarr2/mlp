@@ -11,8 +11,7 @@ In your working directory
     virtualenv --no-site-packages .env
     source .env/bin/activate
     pip install -r requirements.txt
-    
-    
+        
 Try to download ffmpeg *
 
     wget http://johnvansickle.com/ffmpeg/releases/ffmpeg-2.4.1-64bit-static.tar.xz
