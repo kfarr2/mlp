@@ -505,6 +505,20 @@ class ProcessUploadedFileTest(TestCase):
         )
         f.save()
         self.file = f
+ 
+        af = File(
+            name="Sound",
+            description="stuff",
+            file="test.mp3",
+            type=FileType.AUDIO,
+            status=FileStatus.UPLOADED,
+            uploaded_by=self.admin,
+        )
+        af.save()
+        self.audio_file = af
+
+    def test_process_audio_file(self):
+        result = process_audio_file()
 
     def test_chunks_are_merged_and_cleaned_up(self):
         path = tempfile.mkdtemp()

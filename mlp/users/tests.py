@@ -107,7 +107,7 @@ class UserViewsTest(TestCase):
     def test_list_view(self):
         response = self.client.get(reverse('users-list'))
         self.assertEqual(response.status_code, 200)
-
+        
     def test_detail_view(self):
         response = self.client.get(reverse('users-detail', args=(self.admin.pk,)))
         self.assertEqual(response.status_code, 200)
