@@ -1,3 +1,5 @@
+import hashlib, os, sys
+from elasticmodels import make_searchable
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.core.urlresolvers import reverse
@@ -19,6 +21,7 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True, blank=True, help_text="Inactive users cannot login")
     is_staff = models.BooleanField(default=False, blank=True)
 
+    slug = models.SlugField(max_length=25, unique=True)
 
     USERNAME_FIELD = 'email'
 
@@ -45,6 +48,16 @@ class User(AbstractBaseUser):
 
     def can_cloak_as(self, other_user):
         return self.is_staff
+
+    
+    def get_slug(self, length=8):
+        return str(hashlib.sha1(os.urandom(length)).hexdigest())
+
+    def save(self, *args, **kwargs):
+        self.slug = self.get_slug()
+        to_return = super(User, self).save(*args, **kwargs)
+        make_searchable(self)
+        return to_return
 
     def __getattr__(self, attr):
         """

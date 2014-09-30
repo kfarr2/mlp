@@ -1,3 +1,5 @@
+import hashlib, os, sys
+from elasticmodels import make_searchable
 from django.db import models
 from mlp.users.models import User
 from mlp.files.models import File
@@ -11,9 +13,20 @@ class Group(models.Model):
     crn = models.IntegerField(blank=True, null=True)
     name = models.CharField(max_length=255)
     description = models.TextField()
+    
+    slug = models.SlugField(max_length=25, unique=True)
 
     class Meta:
         db_table = "group"
+
+    def get_slug(self, length=8):
+        return str(hashlib.sha1(os.urandom(length)).hexdigest())
+
+    def save(self, *args, **kwargs):
+        self.slug = self.get_slug()
+        to_return = super(Group, self).save(*args, **kwargs)
+        make_searchable(self)
+        return to_return
 
     def delete(self):
         SignedUp.objects.filter(group=self).delete()
