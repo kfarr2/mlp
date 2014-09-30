@@ -267,6 +267,38 @@ class DownloadViewTest(TestCase):
         self.assertTrue(response.status_code, 200)
         self.assertEqual(response['X-Sendfile'], os.path.join(settings.MEDIA_ROOT, "test.txt"))
 
+
+class MediaViewTest(TestCase):
+    def setUp(self):
+        super(MediaViewTest, self).setUp()
+        create_users(self)
+        self.file = File(
+            name="Mango",
+            description="This is a test file",
+            file="original_high.mp4",
+            type=FileType.VIDEO,
+            status=FileStatus.READY,
+            uploaded_by=self.user,
+            tmp_path="mango",
+        )
+        self.file.save()
+        os.makedirs(self.file.directory)
+        with open(os.path.join(self.file.directory, "original_high.mp4"), "w") as f:
+            f.write("a"*512)
+        f.close()
+
+    def test_media_view(self):
+        slug = str(self.file.slug) + "/original_high.mp4"
+        response = self.client.get(reverse('media', args=(slug,)))
+        self.assertEqual(response.status_code, 200)
+
+    def test_media_view_ranged(self):
+        slug = str(self.file.slug) + "/original_high.mp4"
+        response = self.client.get(reverse('media', args=(slug,)), HTTP_RANGE="bytes=5-")
+        self.assertEqual(response.status_code, 206)
+        self.assertEqual(int(response['content-length']), len("a"*512)-5)
+
+
 class StoreViewTest(TestCase):
     """
     Test the store view
