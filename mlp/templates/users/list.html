@@ -35,7 +35,7 @@
     <tr>
         <td>
             {% url 'users-detail' user.pk as user_url %}
-            <a href="{{ user_url|obfuscate }}" class="btn btn-default"><span class="glyphicon glyphicon-zoom-in"></span></a>
+            <a href="{{ user_url }}" class="btn btn-default"><span class="glyphicon glyphicon-zoom-in"></span></a>
         </td>
         <td>{{ user.last_name }}</td>
         <td>{{ user.first_name }}</td>
