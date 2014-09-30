@@ -302,6 +302,7 @@ def signed_up_remove(request, group_id, user_id):
 
     return HttpResponseRedirect(reverse('groups-detail', args=(group_id,)))
 
+@decorators.can_edit_group
 def make_instructor(request, group_id, user_id):
     """
     Takes a user and makes them the instructor for a class
@@ -323,6 +324,7 @@ def make_instructor(request, group_id, user_id):
         "user": user,
     })
 
+@decorators.can_edit_group
 def remove_instructor(request, group_id, user_id):
     """
     Takes a user and a group and changes that users role from admin to student
