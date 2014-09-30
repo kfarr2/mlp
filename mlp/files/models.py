@@ -3,7 +3,6 @@ import os, sys, shutil
 from elasticmodels import make_searchable
 from django.db import models
 from django.conf import settings
-from django.utils.text import slugify
 from mlp.users.models import User
 from mlp.tags.models import Tag, TaggableManager
 from .enums import FileType, FileStatus
