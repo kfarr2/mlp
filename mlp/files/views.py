@@ -1,4 +1,5 @@
 from wsgiref.util import FileWrapper
+import arcutils
 import mimetypes
 import shutil
 import os
@@ -14,6 +15,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.conf import settings
+from mlp.utils import RangedFileReader, parse_range_header
 from mlp.groups.models import Roster, GroupFile, Group
 from mlp.groups.enums import UserRole
 from mlp.groups.views import file_add
@@ -21,7 +23,7 @@ from .perms import decorators, can_list_all_files
 from .models import File, FileTag, AssociatedFile
 from .enums import FileType, FileStatus
 from .forms import FileForm, FileSearchForm
-from .tasks import process_uploaded_file
+from .tasks import process_uploaded_file, get_duration
 
 @login_required
 def list_(request):
@@ -284,9 +286,28 @@ def media(request, slug):
     slug, file_part = os.path.split(slug)
     file = File.objects.get(slug=slug)
     path = os.path.join(file.directory, file_part)
-    file = open(path, 'rb')
-    response = StreamingHttpResponse(file)
-    response['Content-Type'] = mimetypes.guess_type(path)[0]
+    size = os.stat(path).st_size
+    file = RangedFileReader(open(path, 'rb'))
+    response = StreamingHttpResponse(file, mimetypes.guess_type(path)[0])
+    response['Content-Length'] = size
+    response['Accept-Ranges'] = "bytes"
+
+    if "HTTP_RANGE" in request.META:
+        try:
+            ranges = parse_range_header(request.META['HTTP_RANGE'], size)
+        except ValueError:
+            ranges = None
+
+        if ranges is not None and len(ranges) == 1:
+            start, stop = ranges[0]
+            if stop > size:
+                return HttpResponse(status=416)
+            file.start = start
+            file.stop = stop
+            response['Content-Range'] = "bytes %d-%d/%d" % (start, stop-1, size)
+            response['Content-Length'] = stop - start
+            response.status_code = 206
+
     response['X-Sendfile'] = path
     return response
 
