@@ -101,6 +101,7 @@ INSTALLED_APPS = (
     'mlp.files',
     'mlp.tags',
     'mlp.groups',
+    'mlp.utils',
 )
 
 MIDDLEWARE_CLASSES = (
