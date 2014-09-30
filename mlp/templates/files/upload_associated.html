@@ -14,7 +14,7 @@
 <div class="alert alert-danger">
     <strong>The following files failed to upload</strong>
     {% for fail in failed %}
-        <li>{{ fail.name }} - <a href="{% url 'files-delete' fail.pk %}">Remove</a></li>
+        <li>{{ fail.name }} - <a href="{% url 'files-delete' fail.slug %}">Remove</a></li>
     {% endfor %}
 </div>
 {% endif %}
@@ -23,7 +23,7 @@
 <div class="alert alert-default">
     <strong>The following files are being processed</strong>
     {% for upload in uploaded %}
-        <li>{{ upload.name }} - <a class="strong" href="{% url 'files-edit' upload.pk %}">Edit Meta Data</a></li>
+        <li>{{ upload.name }} - <a class="strong" href="{% url 'files-edit' upload.slug %}">Edit Meta Data</a></li>
     {% endfor %}
 </div>
 {% endif %}

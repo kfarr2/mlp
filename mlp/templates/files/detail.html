@@ -5,7 +5,7 @@
 <h3>{{ file.name|truncatechars:75 }}</h3>
 {% if file and user|can_edit_file:file %}
     {% if file.status == FileStatus.READY %}
-    <a class="btn btn-default pull-right" href="{% url 'files-edit' file.pk %}" style="margin-top: -40px;"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
+    <a class="btn btn-default pull-right" href="{% url 'files-edit' file.slug %}" style="margin-top: -40px;"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
     {% endif %}
 {% endif %}
 <div class="col-md-7">
@@ -35,8 +35,8 @@
                 <td><p><strong>Uploaded:</strong> {{ file.uploaded_on|date }}</p></td>
                 <td>
                     {% if file.file and user.is_authenticated %}
-                    {% url 'files-download' file.pk as file_url %}
-                    <p><a class="btn btn-default" href="{{ file_url|obfuscate }}" download="{{ file.file }}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
+                    {% url 'files-download' file.slug as file_url %}
+                    <p><a class="btn btn-default" href="{{ file_url }}" download="{{ file.file }}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
                     {% endif %}
                 </td>
             </tr>
