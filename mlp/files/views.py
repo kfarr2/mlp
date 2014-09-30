@@ -177,7 +177,7 @@ def _upload(request, slug):
         if group:
             # add files to a class if one was specified
             for file in File.objects.filter(status=FileStatus.UPLOADED, uploaded_by=request.user):
-                file_add(request, slug, file.slug) 
+                file_add(request, slug, file.pk) 
             
         if slug:
             return HttpResponseRedirect(reverse('groups-file_list', args=(slug,)))

@@ -35,7 +35,7 @@
         {% for file in files %}
         <tr>
             <td>
-                <a href="{% url 'groups-file_add' group.slug file.slug %}" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span></a>
+                <a href="{% url 'groups-file_add' group.slug file.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span></a>
             </td>
             <td>{% include "files/_file.html" %}</td>
         </tr>
@@ -60,7 +60,7 @@
         <tr>
             <td>
                 {% if user|can_edit_group:group %}
-                <a href="{% url 'groups-file_remove' group.slug file.slug %}" class="btn btn-default"><span class="glyphicon glyphicon-minus"></span></a>
+                <a href="{% url 'groups-file_remove' group.slug file.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-minus"></span></a>
                 {% endif %}        
             </td>
             <td>{% include "files/_file.html" %}</td>
