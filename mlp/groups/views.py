@@ -26,7 +26,7 @@ def list_(request):
     """
     all_groups = Group.objects.all()
     user_groups_list = Roster.objects.filter(user=request.user).values('group')
-    user_groups = Group.objects.filter(slug__in=user_groups_list) 
+    user_groups = Group.objects.filter(group_id__in=user_groups_list) 
     form = GroupSearchForm(request.GET, user=request.user)
     if can_list_all_groups(request.user):
         groups = form.results(page=request.GET.get("page"))
@@ -68,7 +68,7 @@ def detail(request, slug):
         'FileStatus': FileStatus,
     })
 
-#@decorators.can_enroll_students
+@decorators.can_enroll_students(field='slug')
 def enroll(request, slug):
     """
     View that allows admins to enroll students in a class.
@@ -87,7 +87,7 @@ def enroll(request, slug):
         "students": students,
     })
 
-#@decorators.can_list_group
+@decorators.can_list_group(field='slug')
 def file_list(request, slug):
     """
     View that allows an admin to view the files in their class.
@@ -109,7 +109,7 @@ def file_list(request, slug):
         'FileStatus': FileStatus,
     })
 
-#@decorators.can_add_to_group
+@decorators.can_add_to_group(field='slug')
 def file_add(request, slug, file_id):
     """
     Adds a file to a class
@@ -124,7 +124,7 @@ def file_add(request, slug, file_id):
         messages.warning(request, "File already added to class.")
     return HttpResponseRedirect(reverse('groups-file_list', args=(slug,)))
 
-#@decorators.can_edit_group
+@decorators.can_edit_group(field='slug')
 def file_remove(request, slug, file_id):
     """
     Removes a file from the class
@@ -139,14 +139,14 @@ def file_remove(request, slug, file_id):
         messages.warning(request, "File not found in class.")
     return HttpResponseRedirect(reverse('groups-file_list', args=(slug,)))
 
-#@decorators.can_edit_group
+@decorators.can_edit_group(field='slug')
 def edit(request, slug):
     """
     Edit a class
     """
     return _edit(request, slug)
 
-#@decorators.can_create_group
+@decorators.can_create_group(field='slug')
 def create(request):
     """
     Create a class
@@ -196,7 +196,7 @@ def _edit(request, slug):
         "group": group,
     })
 
-#@decorators.can_edit_group
+@decorators.can_edit_group(field='slug')
 def delete(request, slug):
     """
     Delete a class and its related objects.
@@ -229,7 +229,7 @@ def delete(request, slug):
         "group": group,    
     })
 
-#@decorators.can_enroll_students
+@decorators.can_enroll_students(field='slug')
 def roster_add(request, slug, user_id):
     """
     Takes a class id and a student id and adds them to the roster
@@ -250,7 +250,7 @@ def roster_add(request, slug, user_id):
     
     return HttpResponseRedirect(reverse('groups-enroll', args=(slug,)))
 
-#@decorators.can_enroll_students
+@decorators.can_enroll_students(field='slug')
 def roster_remove(request, slug, user_id):
     """
     Takes a class id and user id and 
@@ -286,7 +286,7 @@ def signed_up_add(request, slug, user_id):
     
     return HttpResponseRedirect(reverse('groups-detail', args=(slug,)))
 
-#@decorators.can_edit_group
+@decorators.can_edit_group(field='slug')
 def signed_up_remove(request, slug, user_id):
     """
     Removes a user from a groups sign-up list
@@ -302,7 +302,7 @@ def signed_up_remove(request, slug, user_id):
 
     return HttpResponseRedirect(reverse('groups-detail', args=(slug,)))
 
-#@decorators.can_edit_group
+@decorators.can_edit_group(field='slug')
 def make_instructor(request, slug, user_id):
     """
     Takes a user and makes them the instructor for a class
@@ -324,7 +324,7 @@ def make_instructor(request, slug, user_id):
         "user": user,
     })
 
-#@decorators.can_edit_group
+@decorators.can_edit_group(field='slug')
 def remove_instructor(request, slug, user_id):
     """
     Takes a user and a group and changes that users role from admin to student

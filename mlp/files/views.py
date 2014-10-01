@@ -53,7 +53,7 @@ def list_(request):
         'FileStatus': FileStatus,
     })
 
-#@decorators.can_edit_file
+@decorators.can_edit_file(field='slug')
 def delete(request, slug):
     """
     Delete a file
@@ -91,7 +91,7 @@ def delete(request, slug):
         "file": file,        
     })
 
-#@decorators.can_edit_file
+@decorators.can_edit_file(field='slug')
 def edit(request, slug):
     """
     Edit a file
@@ -141,14 +141,14 @@ def detail(request, slug):
         'FileStatus': FileStatus,
     })
 
-#@decorators.can_upload_file
+@decorators.can_upload_file(field='slug')
 def upload(request):
     """
     Uploads a file to the server
     """
     return _upload(request, slug=None)
 
-#@decorators.can_upload_to_group
+@decorators.can_upload_to_group(field='slug')
 def upload_to_group(request, slug):
     """
     Uploads a file directly to a class
@@ -206,7 +206,7 @@ def _upload(request, slug):
         'FileStatus': FileStatus,
     })
 
-#@decorators.can_edit_file
+@decorators.can_edit_file(field='slug')
 def upload_associated_file(request, slug):
     """
     Takes a file id and uploads text files, then links them to that file.
@@ -248,7 +248,7 @@ def upload_associated_file(request, slug):
         "FileStatus": FileStatus,
     })
 
-#@decorators.can_edit_file
+@decorators.can_edit_file(field='slug')
 def delete_associated_file(request, slug):
     """
     Deletes an associated file.
@@ -261,7 +261,7 @@ def delete_associated_file(request, slug):
     messages.success(request, 'File deleted!')
     return HttpResponseRedirect(reverse('files-edit', args=(main_file.slug,)))
 
-#@decorators.can_download_file
+@decorators.can_download_file(field='slug')
 def download(request, slug):
     """
     Basic download view
