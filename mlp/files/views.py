@@ -141,7 +141,7 @@ def detail(request, slug):
         'FileStatus': FileStatus,
     })
 
-@decorators.can_upload_file(field='slug')
+@decorators.can_upload_file
 def upload(request):
     """
     Uploads a file to the server

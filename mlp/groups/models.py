@@ -14,16 +14,20 @@ class Group(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     
-    slug = models.SlugField(max_length=25, unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
 
     class Meta:
         db_table = "group"
 
     def get_slug(self, length=8):
-        return str(hashlib.sha1(os.urandom(length)).hexdigest())
+        return hashlib.sha1(os.urandom(length)).hexdigest()
 
     def save(self, *args, **kwargs):
-        self.slug = self.get_slug()
+        try:
+            self.slug = self.get_slug()
+        except IntegrityError as e:
+            self.slug = self.get_slug()
+
         to_return = super(Group, self).save(*args, **kwargs)
         make_searchable(self)
         return to_return

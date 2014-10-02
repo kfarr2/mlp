@@ -35,7 +35,6 @@ def create_groups(self):
     c = Group(crn=12345, name="class 101", description="this is a description")
     c.save()
     self.groups = c
-    self.groups.save()
 
     r = Roster(user=self.admin, group=c, role=UserRole.ADMIN)
     r.save()
@@ -146,7 +145,7 @@ class GroupTest(TestCase):
 
     def test_delete(self):
         pre_count = Group.objects.count()
-        response = self.client.post(reverse('groups-delete', args=(self.groups.slug,)), follow=True)
+        response = self.client.get(reverse('groups-delete', args=(self.groups.slug,)), follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(pre_count, Group.objects.count())
         response = self.client.post(reverse('groups-delete', args=(self.groups.slug,)))

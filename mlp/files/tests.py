@@ -247,9 +247,10 @@ class UploadViewTest(TestCase):
         self.assertIn("ERROR!", [str(m) for m in response.context['messages']])
 
     def test_upload_to_group(self):
+        self.groups.save()
         self.client.login(email=self.admin.email, password='foobar')
-        response = self.client.post(reverse('files-upload-to-group', args=(self.groups.pk,)), follow=True)
-        self.assertRedirects(response, reverse('groups-file_list', args=(self.groups.pk,)))
+        response = self.client.post(reverse('files-upload-to-group', args=(self.groups.slug,)))
+        self.assertRedirects(response, reverse('groups-file_list', args=(self.groups.slug,)))
 
 class DownloadViewTest(TestCase):
     """
