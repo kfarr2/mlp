@@ -4,7 +4,7 @@ from django.db.models import Q
 from mlp.users.models import User
 from mlp.users.perms import has_admin_access
 from .enums import UserRole
-from .models import Group, Roster
+from .models import Group, Roster, GroupFile
 from .enums import UserRole
 
 @permission(model=Group)

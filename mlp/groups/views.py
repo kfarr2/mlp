@@ -40,11 +40,11 @@ def list_(request):
         "user_groups": user_groups,
     })
 
-def detail(request, group_id):
+def detail(request, slug):
     """
     Detail view for groups. Anyone can see the detail view.
     """
-    group = get_object_or_404(Group, pk=group_id)
+    group = get_object_or_404(Group, slug=slug)
     students = Roster.objects.filter(group=group).exclude(role=UserRole.ADMIN) 
     roster = User.objects.filter(user_id__in=students.values('user'))
     instructor = Roster.objects.filter(group=group, role=UserRole.ADMIN).values('user')
@@ -68,18 +68,18 @@ def detail(request, group_id):
         'FileStatus': FileStatus,
     })
 
-@decorators.can_enroll_students
-def enroll(request, group_id):
+@decorators.can_enroll_students(field='slug')
+def enroll(request, slug):
     """
     View that allows admins to enroll students in a class.
     """
-    group = get_object_or_404(Group, pk=group_id)
+    group = get_object_or_404(Group, slug=slug)
     roster = Roster.objects.filter(group=group).exclude(role=UserRole.ADMIN).values('user')
     roster = User.objects.filter(user_id__in=roster)
     form = UserSearchForm(request.GET, user=request.user)
     form.is_valid()
     students = form.results(page=request.GET.get("page"))
-    
+ 
     return render(request, "groups/enroll.html", {
         "group": group,
         "roster": roster, 
@@ -87,12 +87,12 @@ def enroll(request, group_id):
         "students": students,
     })
 
-@decorators.can_list_group
-def file_list(request, group_id):
+@decorators.can_list_group(field='slug')
+def file_list(request, slug):
     """
     View that allows an admin to view the files in their class.
     """
-    group = get_object_or_404(Group, pk=group_id)
+    group = get_object_or_404(Group, slug=slug)
     group_files = GroupFile.objects.filter(group=group).values('file')
     group_files = File.objects.filter(file_id__in=group_files, status=FileStatus.READY)
     form = FileSearchForm(request.GET, user=request.user)
@@ -109,12 +109,12 @@ def file_list(request, group_id):
         'FileStatus': FileStatus,
     })
 
-@decorators.can_add_to_group
-def file_add(request, group_id, file_id):
+@decorators.can_add_to_group(field='slug')
+def file_add(request, slug, file_id):
     """
     Adds a file to a class
     """
-    group = get_object_or_404(Group, pk=group_id)
+    group = get_object_or_404(Group, slug=slug)
     file = get_object_or_404(File, pk=file_id)
     group_file = GroupFile.objects.filter(group=group, file=file)
     if not group_file:
@@ -122,14 +122,14 @@ def file_add(request, group_id, file_id):
         messages.success(request, "File added to class.")
     else:
         messages.warning(request, "File already added to class.")
-    return HttpResponseRedirect(reverse('groups-file_list', args=(group_id,)))
+    return HttpResponseRedirect(reverse('groups-file_list', args=(slug,)))
 
-@decorators.can_edit_group
-def file_remove(request, group_id, file_id):
+@decorators.can_edit_group(field='slug')
+def file_remove(request, slug, file_id):
     """
     Removes a file from the class
     """
-    group = get_object_or_404(Group, pk=group_id)
+    group = get_object_or_404(Group, slug=slug)
     file = get_object_or_404(File, pk=file_id)
     group_file = GroupFile.objects.filter(group=group, file=file)
     if group_file.exists():
@@ -137,34 +137,34 @@ def file_remove(request, group_id, file_id):
         messages.success(request, "File removed from class.")
     else:
         messages.warning(request, "File not found in class.")
-    return HttpResponseRedirect(reverse('groups-file_list', args=(group_id,)))
+    return HttpResponseRedirect(reverse('groups-file_list', args=(slug,)))
 
-@decorators.can_edit_group
-def edit(request, group_id):
+@decorators.can_edit_group(field='slug')
+def edit(request, slug):
     """
     Edit a class
     """
-    return _edit(request, group_id)
+    return _edit(request, slug)
 
-@decorators.can_create_group
+@decorators.can_create_group(field='slug')
 def create(request):
     """
     Create a class
     """
-    return _edit(request, group_id=None)
+    return _edit(request, slug=None)
 
-def _edit(request, group_id):
+def _edit(request, slug):
     """
     Create or edit a class
     """
-    if group_id is None:
+    if slug is None:
         # create new class
         group = None
         instructor = None
         enrolled = None
     else:
         # edit existing class
-        group = get_object_or_404(Group, pk=group_id)
+        group = get_object_or_404(Group, slug=slug)
         instructor = Roster.objects.filter(group=group, role=UserRole.ADMIN).values('user')
         instructor = User.objects.filter(user_id__in=instructor)
         enrolled = Roster.objects.filter(group=group).values('user')
@@ -174,9 +174,9 @@ def _edit(request, group_id):
         form = GroupForm(request.POST, instance=group, user=request.user)
         roster_form = RosterForm(request.POST, instance=group, user=request.user)
         if form.is_valid():
-            if group_id:
+            if slug:
                 roster_form.instance = form.save()
-                return HttpResponseRedirect(reverse('groups-detail', args=(group_id,)))
+                return HttpResponseRedirect(reverse('groups-detail', args=(slug,)))
             if roster_form.is_valid():
                 roster_form.instance = form.save()
                 roster_form.save()
@@ -196,12 +196,12 @@ def _edit(request, group_id):
         "group": group,
     })
 
-@decorators.can_edit_group
-def delete(request, group_id):
+@decorators.can_edit_group(field='slug')
+def delete(request, slug):
     """
     Delete a class and its related objects.
     """
-    group = get_object_or_404(Group, pk=group_id)
+    group = get_object_or_404(Group, slug=slug)
     related_objects = []
     sign_up = SignedUp.objects.filter(group=group)
     group_roster = Roster.objects.filter(group=group)
@@ -229,13 +229,13 @@ def delete(request, group_id):
         "group": group,    
     })
 
-@decorators.can_enroll_students
-def roster_add(request, group_id, user_id):
+@decorators.can_enroll_students(field='slug')
+def roster_add(request, slug, user_id):
     """
     Takes a class id and a student id and adds them to the roster
     """
     user = get_object_or_404(User, pk=user_id)
-    group = get_object_or_404(Group, pk=group_id)
+    group = get_object_or_404(Group, slug=slug)
     roster = Roster.objects.filter(group=group, user=user)
     if roster.exists():
         # user already enrolled
@@ -248,16 +248,16 @@ def roster_add(request, group_id, user_id):
         delete.delete()
         messages.success(request, "User successfully added to group.")
     
-    return HttpResponseRedirect(reverse('groups-enroll', args=(group_id,)))
+    return HttpResponseRedirect(reverse('groups-enroll', args=(slug,)))
 
-@decorators.can_enroll_students
-def roster_remove(request, group_id, user_id):
+@decorators.can_enroll_students(field='slug')
+def roster_remove(request, slug, user_id):
     """
     Takes a class id and user id and 
     removes the matching entry from the roster.
     """
     user = get_object_or_404(User, pk=user_id)
-    group = get_object_or_404(Group, pk=group_id)
+    group = get_object_or_404(Group, slug=slug)
     roster = Roster.objects.filter(group=group, user=user)
     if roster:
         roster.delete()
@@ -265,15 +265,15 @@ def roster_remove(request, group_id, user_id):
     else:
         messages.warning(request, "Error: User not found.")
 
-    return HttpResponseRedirect(reverse('groups-enroll', args=(group_id,)))
+    return HttpResponseRedirect(reverse('groups-enroll', args=(slug,)))
 
-def signed_up_add(request, group_id, user_id):
+def signed_up_add(request, slug, user_id):
     """
     Takes a class id and a student id and 
     adds them to the sign up request sheet.
     """
     user = get_object_or_404(User, pk=user_id)
-    group = get_object_or_404(Group, pk=group_id)
+    group = get_object_or_404(Group, slug=slug)
     roster = Roster.objects.filter(group=group, user=user)
     signed_up = SignedUp.objects.filter(group=group, user=user)
     if roster.exists():
@@ -284,15 +284,15 @@ def signed_up_add(request, group_id, user_id):
         SignedUp.objects.create(user=user, group=group)
         messages.success(request, "User signed up for group. Pending instructor approval.")
     
-    return HttpResponseRedirect(reverse('groups-detail', args=(group_id,)))
+    return HttpResponseRedirect(reverse('groups-detail', args=(slug,)))
 
-@decorators.can_edit_group
-def signed_up_remove(request, group_id, user_id):
+@decorators.can_edit_group(field='slug')
+def signed_up_remove(request, slug, user_id):
     """
     Removes a user from a groups sign-up list
     """
     user = get_object_or_404(User, pk=user_id)
-    group = get_object_or_404(Group, pk=group_id)
+    group = get_object_or_404(Group, slug=slug)
     signed_up = SignedUp.objects.filter(group=group, user=user)
     if signed_up.exists():
         signed_up.delete()
@@ -300,23 +300,23 @@ def signed_up_remove(request, group_id, user_id):
     else:
         messages.warning(request, "Error: User not found.")
 
-    return HttpResponseRedirect(reverse('groups-detail', args=(group_id,)))
+    return HttpResponseRedirect(reverse('groups-detail', args=(slug,)))
 
-@decorators.can_edit_group
-def make_instructor(request, group_id, user_id):
+@decorators.can_edit_group(field='slug')
+def make_instructor(request, slug, user_id):
     """
     Takes a user and makes them the instructor for a class
     """
     if not request.user.is_staff:
         return HttpResponseRedirect(reverse('groups-list'))
     user = get_object_or_404(User, pk=user_id)
-    group = get_object_or_404(Group, pk=group_id)
+    group = get_object_or_404(Group, slug=slug)
     teacher = Roster.objects.filter(group=group, role=UserRole.ADMIN)
     if request.method == "POST":
         roster = Roster.objects.get(group=group, user=user)
         roster.role = UserRole.ADMIN
         roster.save()
-        return HttpResponseRedirect(reverse('groups-detail', args=(group_id,)))
+        return HttpResponseRedirect(reverse('groups-detail', args=(slug,)))
 
     return render(request, 'groups/make_teacher.html', {
         "group": group,
@@ -324,21 +324,21 @@ def make_instructor(request, group_id, user_id):
         "user": user,
     })
 
-@decorators.can_edit_group
-def remove_instructor(request, group_id, user_id):
+@decorators.can_edit_group(field='slug')
+def remove_instructor(request, slug, user_id):
     """
     Takes a user and a group and changes that users role from admin to student
     """
     if not request.user.is_staff:
         return HttpResponseRedirect(reverse('groups-list'))
     user = get_object_or_404(User, pk=user_id)
-    group = get_object_or_404(Group, pk=group_id)
+    group = get_object_or_404(Group, slug=slug)
     teacher = Roster.objects.filter(group=group, role=UserRole.ADMIN)
     if request.method == "POST":
         roster = Roster.objects.get(group=group, user=user)
         roster.role = UserRole.STUDENT
         roster.save()
-        return HttpResponseRedirect(reverse('groups-detail', args=(group_id,)))
+        return HttpResponseRedirect(reverse('groups-detail', args=(slug,)))
     
     return render(request, 'groups/remove_teacher.html', {
         "group": group,
@@ -346,28 +346,28 @@ def remove_instructor(request, group_id, user_id):
         "user": user,
     })
 
-def make_ta(request, group_id, user_id):
+def make_ta(request, slug, user_id):
     """
     Takes a user and a group and adds the user to the group as a Lead Student
     """
     if not request.user.is_staff:
         return HttpResponseRedirect(reverse('groups-list'))
     user = get_object_or_404(User, pk=user_id)
-    group = get_object_or_404(Group, pk=group_id)
+    group = get_object_or_404(Group, slug=slug)
     roster = Roster.objects.get(user=user, group=group)
     roster.role = UserRole.TA
     roster.save()
-    return HttpResponseRedirect(reverse('groups-edit', args=(group_id,)))
+    return HttpResponseRedirect(reverse('groups-edit', args=(slug,)))
    
-def remove_ta(request, group_id, user_id):
+def remove_ta(request, slug, user_id):
     """
     Takes a user and a group and removes
     """
     if not request.user.is_staff:
         return HttpResponseRedirect(reverse('groups-list'))
     user = get_object_or_404(User, pk=user_id)
-    group = get_object_or_404(Group, pk=group_id)
+    group = get_object_or_404(Group, slug=slug)
     roster = Roster.objects.get(user=user, group=group)
     roster.role=UserRole.STUDENT
     roster.save()
-    return HttpResponseRedirect(reverse('groups-edit', args=(group_id,)))
+    return HttpResponseRedirect(reverse('groups-edit', args=(slug,)))

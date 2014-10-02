@@ -141,12 +141,12 @@ class DeleteViewTest(TestCase):
         create_files(self)
 
     def test_get(self):
-        response = self.client.get(reverse("files-delete", args=[self.file.pk]))
+        response = self.client.get(reverse("files-delete", args=[self.file.slug]))
         self.assertEqual(response.status_code, 200)
 
     def test_post(self):
         pre_count = File.objects.count()
-        response = self.client.post(reverse('files-delete', args=[self.file.pk]))
+        response = self.client.post(reverse('files-delete', args=[self.file.slug]))
         self.assertRedirects(response, reverse('files-list'))
         self.assertEqual(pre_count-1, File.objects.count())
 
@@ -160,22 +160,22 @@ class EditViewTest(TestCase):
         create_files(self)
 
     def test_not_logged_in(self):
-        response = self.client.get(reverse('files-edit', args=(self.file.pk,)))
+        response = self.client.get(reverse('files-edit', args=(self.file.slug,)))
         self.assertEqual(response.status_code, 302)
 
     def test_logged_in_correct_user(self):
         self.client.login(email=self.user.email, password='foobar')
-        response = self.client.get(reverse('files-edit', args=(self.file.pk,)))
+        response = self.client.get(reverse('files-edit', args=(self.file.slug,)))
         self.assertEqual(response.status_code, 200)
 
     def test_logged_in_user(self):
         self.client.login(email=self.user.email, password='foobar')
-        response = self.client.get(reverse('files-edit', args=(self.adminfile.pk,)))
+        response = self.client.get(reverse('files-edit', args=(self.adminfile.slug,)))
         self.assertEqual(response.status_code, 403)
 
     def test_logged_in_admin(self):
         self.client.login(email=self.admin.email, password='foobar')
-        response = self.client.get(reverse('files-edit', args=(self.file.pk,)))
+        response = self.client.get(reverse('files-edit', args=(self.file.slug,)))
         self.assertEqual(response.status_code, 200)
 
     def test_valid_post(self):
@@ -185,7 +185,7 @@ class EditViewTest(TestCase):
             "description": self.file.description,
             "tags": "Robit",
         }
-        response = self.client.post(reverse('files-edit', args=(self.file.pk,)), data)
+        response = self.client.post(reverse('files-edit', args=(self.file.slug,)), data)
         self.assertEqual(response.status_code, 302)
 
     def test_invalid_post(self):
@@ -195,7 +195,7 @@ class EditViewTest(TestCase):
             "description": None,
             "tags": None
         }
-        response = self.client.post(reverse('files-edit', args=(self.file.pk,)), data)
+        response = self.client.post(reverse('files-edit', args=(self.file.slug,)), data)
         self.assertEqual(response.status_code, 302)
 
 class DetailViewTest(TestCase):
@@ -208,12 +208,12 @@ class DetailViewTest(TestCase):
         create_files(self)
 
     def test_not_logged_in(self):
-        response = self.client.get(reverse('files-detail', args=(self.file.pk,)))
+        response = self.client.get(reverse('files-detail', args=(self.file.slug,)))
         self.assertEqual(response.status_code, 200)
 
     def test_logged_in(self):
         self.client.login(email=self.user.email, password='foobar')
-        response = self.client.get(reverse('files-detail', args=(self.file.pk,)))
+        response = self.client.get(reverse('files-detail', args=(self.file.slug,)))
         self.assertEqual(response.status_code, 200)
 
 class UploadViewTest(TestCase):
@@ -247,9 +247,10 @@ class UploadViewTest(TestCase):
         self.assertIn("ERROR!", [str(m) for m in response.context['messages']])
 
     def test_upload_to_group(self):
+        self.groups.save()
         self.client.login(email=self.admin.email, password='foobar')
-        response = self.client.post(reverse('files-upload-to-group', args=(self.groups.pk,)), follow=True)
-        self.assertRedirects(response, reverse('groups-file_list', args=(self.groups.pk,)))
+        response = self.client.post(reverse('files-upload-to-group', args=(self.groups.slug,)))
+        self.assertRedirects(response, reverse('groups-file_list', args=(self.groups.slug,)))
 
 class DownloadViewTest(TestCase):
     """
@@ -263,7 +264,7 @@ class DownloadViewTest(TestCase):
         settings.DEBUG = True
 
     def test_download(self):
-        response = self.client.get(reverse('files-download', args=[self.file.pk]))
+        response = self.client.get(reverse('files-download', args=[self.file.slug]))
         self.assertTrue(response.status_code, 200)
         self.assertEqual(response['X-Sendfile'], os.path.join(settings.MEDIA_ROOT, "test.txt"))
 
@@ -282,8 +283,12 @@ class MediaViewTest(TestCase):
             tmp_path="mango",
         )
         self.file.save()
-        os.makedirs(self.file.directory)
-        with open(os.path.join(self.file.directory, "original_high.mp4"), "w") as f:
+        try:
+		os.makedirs(self.file.directory)
+        except OSError as e:
+		# directory exists
+		pass
+	with open(os.path.join(self.file.directory, "original_high.mp4"), "w") as f:
             f.write("a"*512)
         f.close()
 
@@ -512,7 +517,7 @@ class FileFormTest(TestCase):
         form = FileForm(data, instance=self.file)
         form.save(user=self.admin)
         # make sure the object got saved
-        f = File.objects.get(pk=self.file.pk)
+        f = File.objects.get(slug=self.file.slug)
         self.assertEqual(f.name, data['name'])
         # make sure the "Foo" tag got added (this will throw an exception if it doesn't)
         Tag.objects.get(name="Mango")
@@ -587,7 +592,7 @@ class ProcessUploadedFileTest(TestCase):
         self.file.name = "file.mov"
         self.file.tmp_path = path
         process_uploaded_file(1, self.file)
-        file = File.objects.get(pk=self.file.pk)
+        file = File.objects.get(slug=self.file.slug)
         self.assertEqual(file.status, FileStatus.READY)
         # make sure the files got saved
         self.assertTrue(os.path.exists(os.path.join(os.path.dirname(file.file.path), "original_high.mp4")))
@@ -645,28 +650,28 @@ class AssociatedFileTest(TestCase):
 
     def test_upload_get_invalid(self):
         self.client.login(email=self.user.email, password="foobar")
-        response = self.client.get(reverse('files-upload-associated', args=(self.adminfile.pk,)))
+        response = self.client.get(reverse('files-upload-associated', args=(self.adminfile.slug,)))
         self.assertEqual(response.status_code, 403)
 
     def test_upload_get(self):
         self.client.login(email=self.admin.email, password="foobar")
-        response = self.client.get(reverse('files-upload-associated', args=(self.adminfile.pk,)))
+        response = self.client.get(reverse('files-upload-associated', args=(self.adminfile.slug,)))
         self.assertEqual(response.status_code, 200)
 
     def test_upload_post_invalid(self):
         self.client.login(email=self.admin.email, password="foobar")
-        response = self.client.post(reverse('files-upload-associated', args=(self.adminfile.pk,)), {"error_message": "ERROR!"}, follow=True)
-        self.assertRedirects(response, reverse('files-edit', args=(self.adminfile.pk,)))
+        response = self.client.post(reverse('files-upload-associated', args=(self.adminfile.slug,)), {"error_message": "ERROR!"}, follow=True)
+        self.assertRedirects(response, reverse('files-edit', args=(self.adminfile.slug,)))
         self.assertIn("ERROR!", [str(m) for m in response.context['messages']])
 
     def test_upload_post(self):
         self.client.login(email=self.admin.email, password="foobar")
-        response = self.client.post(reverse('files-upload-associated', args=(self.adminfile.pk,)), follow=True)
-        self.assertRedirects(response, reverse('files-edit', args=(self.adminfile.pk,)))
+        response = self.client.post(reverse('files-upload-associated', args=(self.adminfile.slug,)), follow=True)
+        self.assertRedirects(response, reverse('files-edit', args=(self.adminfile.slug,)))
 
     def test_delete_get_invalid(self):
         self.client.login(email=self.user.email, password="foobar")
-        response = self.client.get(reverse('files-delete-associated', args=(self.adminfile.pk,)))
+        response = self.client.get(reverse('files-delete-associated', args=(self.adminfile.slug,)))
         self.assertEqual(response.status_code, 403)
 
     def test_delete_valid(self):
@@ -675,7 +680,7 @@ class AssociatedFileTest(TestCase):
         precount_a = File.objects.count()
         precount_b = AssociatedFile.objects.count()
         self.client.login(email=self.admin.email, password='foobar')
-        response = self.client.get(reverse('files-delete-associated', args=(self.file.pk,)))
+        response = self.client.get(reverse('files-delete-associated', args=(self.file.slug,)))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(precount_a-1, File.objects.count())
         self.assertEqual(precount_b-1, AssociatedFile.objects.count())
@@ -704,7 +709,7 @@ class DeleteFileTest(TestCase):
         count_associated_files = AssociatedFile.objects.count()
         count_group_files = GroupFile.objects.count()
 
-        self.client.post(reverse('files-delete', args=(self.file.pk,)))
+        self.client.post(reverse('files-delete', args=(self.file.slug,)))
 
         self.assertEqual(count_filetag-1, FileTag.objects.count())
         self.assertEqual(count_files-2, File.objects.count())

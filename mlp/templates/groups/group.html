@@ -14,8 +14,8 @@
             <td>{{ group.crn }}</td>
             <td>{{ group.description|truncatechars:75 }}</td>
             <td>
-                {% url 'groups-detail' group.pk as group_url %}
-                <a href="{{ group_url|obfuscate }}" class="btn btn-default">View</a>
+                
+                <a href="{% url 'groups-detail' group.slug %}" class="btn btn-default">View</a>
             </td>
         </tr>
     {% endfor %}

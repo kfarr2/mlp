@@ -11,7 +11,7 @@
             {{ form|bootstrap }}
             {% csrf_token %}
         {% endif%}
-        {% if not group.pk %}
+        {% if not group.slug %}
             {{ roster_form|bootstrap }}
             {% csrf_token %}
         {% endif %}
@@ -19,11 +19,11 @@
             <input type="submit" name="submit" value="Submit" class="btn btn-default" />
             <button class="btn btn-default" onclick="window.history.go(-1); return false">Cancel</button>    
         </div>
-        {% if group.pk %}<a href="{% url 'groups-delete' group.pk %}" class="btn btn-default btn-xs pull-right">Delete Group</a>{% endif %}
+        {% if group.slug %}<a href="{% url 'groups-delete' group.slug %}" class="btn btn-default btn-xs pull-right">Delete Group</a>{% endif %}
     </form>
 </div>
 <div class="col-md-8">
-    {% if group.pk %}
+    {% if group.slug %}
     <form method="post">
         <h3>Current Teachers:</h3>
         <table class="table">
@@ -33,7 +33,7 @@
                     <td>{{ teacher.first_name }}</td>
                     <td>{{ teacher.email }}</td>
                     <td>
-                        <a href="{% url 'groups-remove_instructor' group.pk teacher.pk %}" class="btn btn-default btn-sm">Remove Teacher</a>
+                        <a href="{% url 'groups-remove_instructor' group.slug teacher.pk %}" class="btn btn-default btn-sm">Remove Teacher</a>
                     </td>
                 </tr>
             {% endfor %}
@@ -50,13 +50,13 @@
                 <td>{{ student.first_name }}</td>
                 <td>{{ student.email }}</td> 
                 <td>
-                    <a class="btn btn-default btn-sm" href="{% url 'groups-make_instructor' group.pk student.pk %}">Make Teacher</a>
+                    <a class="btn btn-default btn-sm" href="{% url 'groups-make_instructor' group.slug student.pk %}">Make Teacher</a>
                 </td>
                 <td>
                     {% if student|is_lead_student:group %}
-                        <a class="btn btn-default btn-sm" href="{% url 'groups-remove-ta' group.pk student.pk %}">Remove Lead Student</a>
+                        <a class="btn btn-default btn-sm" href="{% url 'groups-remove-ta' group.slug student.pk %}">Remove Lead Student</a>
                     {% else %}
-                        <a class="btn btn-default btn-sm" href="{% url 'groups-make-ta' group.pk student.pk %}">Make Lead Student</a>
+                        <a class="btn btn-default btn-sm" href="{% url 'groups-make-ta' group.slug student.pk %}">Make Lead Student</a>
                     {% endif %}
                 </td>
             

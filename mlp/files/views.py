@@ -53,12 +53,12 @@ def list_(request):
         'FileStatus': FileStatus,
     })
 
-@decorators.can_edit_file
-def delete(request, file_id):
+@decorators.can_edit_file(field='slug')
+def delete(request, slug):
     """
     Delete a file
     """
-    file = get_object_or_404(File, pk=file_id)
+    file = get_object_or_404(File, slug=slug)
     related_objects = []
     file_tags = FileTag.objects.filter(file=file)
     group_files = GroupFile.objects.filter(file=file)
@@ -91,12 +91,12 @@ def delete(request, file_id):
         "file": file,        
     })
 
-@decorators.can_edit_file
-def edit(request, file_id):
+@decorators.can_edit_file(field='slug')
+def edit(request, slug):
     """
     Edit a file
     """
-    file = get_object_or_404(File, pk=file_id)
+    file = get_object_or_404(File, slug=slug)
     associated_files = AssociatedFile.objects.filter(main_file=file).values('associated_file')
     associated_files = File.objects.filter(file_id__in=associated_files, status=FileStatus.READY)
     if request.POST:
@@ -104,7 +104,7 @@ def edit(request, file_id):
         if form.is_valid():
             form.save(user=request.user)
             messages.success(request, "File edited!")
-            return HttpResponseRedirect(reverse("files-detail", args=(file.pk,)))
+            return HttpResponseRedirect(reverse("files-detail", args=(file.slug,)))
     else:
         form = FileForm(instance=file)
 
@@ -116,11 +116,11 @@ def edit(request, file_id):
         'FileStatus': FileStatus,
     })
 
-def detail(request, file_id):
+def detail(request, slug):
     """
     Detail view
     """
-    file = get_object_or_404(File, pk=file_id)
+    file = get_object_or_404(File, slug=slug)
     file_tags = file.filetag_set.all().select_related("tag")
     duration = str(datetime.timedelta(seconds=math.floor(file.duration)))
     associated_files = AssociatedFile.objects.filter(main_file=file).values('associated_file')
@@ -146,23 +146,23 @@ def upload(request):
     """
     Uploads a file to the server
     """
-    return _upload(request, group_id=None)
+    return _upload(request, slug=None)
 
-@decorators.can_upload_to_group
-def upload_to_group(request, group_id):
+@decorators.can_upload_to_group(field='slug')
+def upload_to_group(request, slug):
     """
     Uploads a file directly to a class
     """
-    return _upload(request, group_id)
+    return _upload(request, slug)
 
-def _upload(request, group_id):
+def _upload(request, slug):
     """
     Basic upload view
     """
-    if group_id is None:
+    if slug is None:
         group = None
     else:
-        group = get_object_or_404(Group, pk=group_id)
+        group = get_object_or_404(Group, slug=slug)
         group = Roster.objects.filter(group=group, user=request.user)
 
     associated_files = AssociatedFile.objects.all().values('associated_file')
@@ -177,10 +177,10 @@ def _upload(request, group_id):
         if group:
             # add files to a class if one was specified
             for file in File.objects.filter(status=FileStatus.UPLOADED, uploaded_by=request.user):
-                file_add(request, group_id, file.pk) 
+                file_add(request, slug, file.pk) 
             
-        if group_id:
-            return HttpResponseRedirect(reverse('groups-file_list', args=(group_id,)))
+        if slug:
+            return HttpResponseRedirect(reverse('groups-file_list', args=(slug,)))
         elif request.user.is_staff or admin.exists():
             return HttpResponseRedirect(reverse('files-list'))
         else:
@@ -206,12 +206,12 @@ def _upload(request, group_id):
         'FileStatus': FileStatus,
     })
 
-@decorators.can_edit_file
-def upload_associated_file(request, file_id):
+@decorators.can_edit_file(field='slug')
+def upload_associated_file(request, slug):
     """
     Takes a file id and uploads text files, then links them to that file.
     """
-    main_file = get_object_or_404(File, pk=file_id)
+    main_file = get_object_or_404(File, slug=slug)
     associated_files = AssociatedFile.objects.filter(main_file=main_file).values('associated_file')
     associated_files = File.objects.filter(file_id__in=associated_files, status=FileStatus.READY)
     if request.method == "POST":
@@ -226,7 +226,7 @@ def upload_associated_file(request, file_id):
             else:
                 AssociatedFile.objects.create(main_file=main_file, associated_file=associated_file)            
 
-        return HttpResponseRedirect(reverse('files-edit', args=(file_id,)))
+        return HttpResponseRedirect(reverse('files-edit', args=(slug,)))
 
     uploaded = File.objects.filter(
         status=FileStatus.UPLOADED,
@@ -248,28 +248,28 @@ def upload_associated_file(request, file_id):
         "FileStatus": FileStatus,
     })
 
-@decorators.can_edit_file
-def delete_associated_file(request, file_id):
+@decorators.can_edit_file(field='slug')
+def delete_associated_file(request, slug):
     """
     Deletes an associated file.
     """
-    file = get_object_or_404(File, pk=file_id)
+    file = get_object_or_404(File, slug=slug)
     associated_file = AssociatedFile.objects.get(associated_file=file)
     main_file = associated_file.main_file
     associated_file.delete()
     file.delete()
     messages.success(request, 'File deleted!')
-    return HttpResponseRedirect(reverse('files-edit', args=(main_file.pk,)))
+    return HttpResponseRedirect(reverse('files-edit', args=(main_file.slug,)))
 
-@decorators.can_download_file
-def download(request, file_id):
+@decorators.can_download_file(field='slug')
+def download(request, slug):
     """
     Basic download view
     
     TODO: this will actually need to be fixed to stop XSS injections in files.
     Files should be downloaded over a completely different domain.
     """
-    file = get_object_or_404(File, pk=file_id)
+    file = get_object_or_404(File, slug=slug)
     response = HttpResponse()
     response['Content-Type'] = mimetypes.guess_type(file.file.path)[0]
     response['X-Sendfile'] = file.file.path

@@ -34,42 +34,42 @@ urlpatterns = patterns('',
 
     # files
     url(r'^files/?$', files.list_, name='files-list'),
-    url(r'^files/detail/(?P<file_id>\d+)/?$', files.detail, name='files-detail'),
+    url(r'^files/detail/(?P<slug>[a-zA-Z0-9_.-]+)/?$', files.detail, name='files-detail'),
     url(r'^files/upload/?$', files.upload, name='files-upload'),
-    url(r'^files/upload/(?P<group_id>\d+)/?$', files.upload_to_group, name='files-upload-to-group'),
-    url(r'^files/upload/associated/(?P<file_id>\d+)/?$', files.upload_associated_file, name='files-upload-associated'),
-    url(r'^files/delete/associated/(?P<file_id>\d+)/?$', files.delete_associated_file, name='files-delete-associated'),
+    url(r'^files/upload/(?P<slug>[a-zA-Z0-9_.-]+)/?$', files.upload_to_group, name='files-upload-to-group'),
+    url(r'^files/upload/associated/(?P<slug>[a-zA-Z0-9_.-]+)/?$', files.upload_associated_file, name='files-upload-associated'),
+    url(r'^files/delete/associated/(?P<slug>[a-zA-Z0-9_.-]+)/?$', files.delete_associated_file, name='files-delete-associated'),
     url(r'^files/store/?$', files.store, name='files-store'),
-    url(r'^files/download/(?P<file_id>\d+)/?$', files.download, name="files-download"),
-    url(r'^files/delete/(?P<file_id>\d+)/?$', files.delete, name="files-delete"),
-    url(r'^files/edit/(?P<file_id>\d+)/?$', files.edit, name="files-edit"),
+    url(r'^files/download/(?P<slug>[a-zA-Z0-9_.-]+)/?$', files.download, name="files-download"),
+    url(r'^files/delete/(?P<slug>[a-zA-Z0-9_.-]+)/?$', files.delete, name="files-delete"),
+    url(r'^files/edit/(?P<slug>[a-zA-Z0-9_.-]+)/?$', files.edit, name="files-edit"),
     url(r'^media/(.*)$', files.media, name="media"),
 
     # groups
     url(r'^groups/?$', groups.list_, name='groups-list'),
     url(r'^groups/create/?$', groups.create, name='groups-create'),
-    url(r'^groups/edit/(?P<group_id>\d+)/?$', groups.edit, name='groups-edit'),
-    url(r'^groups/detail/(?P<group_id>\d+)/?$', groups.detail, name='groups-detail'),
-    url(r'^groups/enroll/(?P<group_id>\d+)/?$', groups.enroll, name='groups-enroll'),
-    url(r'^groups/delete/(?P<group_id>\d+)/?$', groups.delete, name='groups-delete'),
-    url(r'^groups/make/instructor/(?P<group_id>\d+)/(?P<user_id>\d+)/?$', groups.make_instructor, name='groups-make_instructor'),
-    url(r'^groups/remove/instructor/(?P<group_id>\d+)/(?P<user_id>\d+)/?$', groups.remove_instructor, name='groups-remove_instructor'),
-    url(r'^groups/(?P<group_id>\d+)/(?P<user_id>\d+)/add/?$', groups.make_ta, name='groups-make-ta'),
-    url(r'^groups/(?P<group_id>\d+)/(?P<user_id>\d+)/remove/?$', groups.remove_ta, name='groups-remove-ta'),
+    url(r'^groups/edit/(?P<slug>[a-zA-Z0-9_.-]+)/?$', groups.edit, name='groups-edit'),
+    url(r'^groups/detail/(?P<slug>[a-zA-Z0-9_.-]+)/?$', groups.detail, name='groups-detail'),
+    url(r'^groups/enroll/(?P<slug>[a-zA-Z0-9_.-]+)/?$', groups.enroll, name='groups-enroll'),
+    url(r'^groups/delete/(?P<slug>[a-zA-Z0-9_.-]+)/?$', groups.delete, name='groups-delete'),
+    url(r'^groups/make/instructor/(?P<slug>[a-zA-Z0-9_.-]+)/(?P<user_id>\d+)/?$', groups.make_instructor, name='groups-make_instructor'),
+    url(r'^groups/remove/instructor/(?P<slug>[a-zA-Z0-9_.-]+)/(?P<user_id>\d+)/?$', groups.remove_instructor, name='groups-remove_instructor'),
+    url(r'^groups/(?P<slug>[a-zA-Z0-9_.-]+)/(?P<user_id>\d+)/add/?$', groups.make_ta, name='groups-make-ta'),
+    url(r'^groups/(?P<slug>[a-zA-Z0-9_.-]+)/(?P<user_id>\d+)/remove/?$', groups.remove_ta, name='groups-remove-ta'),
 
 
     # roster
-    url(r'^roster/add/(?P<group_id>\d+)/(?P<user_id>\d+)/?$', groups.roster_add, name='roster-add'),
-    url(r'^roster/remove/(?P<group_id>\d+)/(?P<user_id>\d+)/?$', groups.roster_remove, name='roster-remove'),
+    url(r'^roster/add/(?P<slug>[a-zA-Z0-9_.-]+)/(?P<user_id>\d+)/?$', groups.roster_add, name='roster-add'),
+    url(r'^roster/remove/(?P<slug>[a-zA-Z0-9_.-]+)/(?P<user_id>\d+)/?$', groups.roster_remove, name='roster-remove'),
 
     # sign up
-    url(r'^signed_up/add/(?P<group_id>\d+)/(?P<user_id>\d+)/?$', groups.signed_up_add, name='signed_up-add'),
-    url(r'^signed_up/remove/(?P<group_id>\d+)/(?P<user_id>\d+)/?$', groups.signed_up_remove, name='signed_up-remove'),
+    url(r'^signed_up/add/(?P<slug>[a-zA-Z0-9_.-]+)/(?P<user_id>\d+)/?$', groups.signed_up_add, name='signed_up-add'),
+    url(r'^signed_up/remove/(?P<slug>[a-zA-Z0-9_.-]+)/(?P<user_id>\d+)/?$', groups.signed_up_remove, name='signed_up-remove'),
 
     # class files
-    url(r'^groups/(?P<group_id>\d+)/files/?$', groups.file_list, name='groups-file_list'),
-    url(r'^groups/(?P<group_id>\d+)/files/add/(?P<file_id>\d+)/?$', groups.file_add, name='groups-file_add'),
-    url(r'^groups/(?P<group_id>\d+)/files/remove/(?P<file_id>\d+)/?$', groups.file_remove, name='groups-file_remove'),
+    url(r'^groups/(?P<slug>[a-zA-Z0-9_.-]+)/files/?$', groups.file_list, name='groups-file_list'),
+    url(r'^groups/(?P<slug>[a-zA-Z0-9_.-]+)/files/add/(?P<file_id>\d+)/?$', groups.file_add, name='groups-file_add'),
+    url(r'^groups/(?P<slug>[a-zA-Z0-9_.-]+)/files/remove/(?P<file_id>\d+)/?$', groups.file_remove, name='groups-file_remove'),
 
     # password reset stuff - handled by django auth
     url(r'^registration/reset/?$', 'django.contrib.auth.views.password_reset', {"from_email": "django@pdx.edu"}, name="password_reset"),

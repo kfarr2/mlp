@@ -40,8 +40,8 @@
 </div>
 <div class="col-md-5">
     <h3>
-    {% url 'files-detail' file.pk as file_url %}
-    <a class="btn btn-default pull-right" href="{{ file_url|obfuscate }}">Back</a>
+    {% url 'files-detail' file.slug as file_url %}
+    <a class="btn btn-default pull-right" href="{{ file_url }}">Back</a>
     </h3>
     <br />
     <form method="post">
@@ -54,13 +54,13 @@
             <button class="btn btn-default" onclick="window.history.go(-1); return false">Cancel</button>    
         </div>
         {% if user|has_admin_access %}
-            <a href="{% url 'files-delete' file.pk %}" class="btn btn-default pull-right btn-xs">Delete File</a>
+            <a href="{% url 'files-delete' file.slug %}" class="btn btn-default pull-right btn-xs">Delete File</a>
         {% endif %}
     </form>
     <hr />
-    <p><strong>Associated Files:</strong><a href="{% url 'files-upload-associated' file.pk %}" class="btn btn-default pull-right btn-xs"><span class="glyphicon glyphicon-upload"></span> Upload Associated File</a>
+    <p><strong>Associated Files:</strong><a href="{% url 'files-upload-associated' file.slug %}" class="btn btn-default pull-right btn-xs"><span class="glyphicon glyphicon-upload"></span> Upload Associated File</a>
     <table>
-        {% for file in associated_files %}<tr>{% include "files/_file.html" %}<a href="{% url 'files-delete-associated' file.pk %}"><span class="glyphicon glyphicon-remove pull-right" style="margin-top: -20px;"></span></a></tr>
+        {% for file in associated_files %}<tr>{% include "files/_file.html" %}<a href="{% url 'files-delete-associated' file.slug %}"><span class="glyphicon glyphicon-remove pull-right" style="margin-top: -20px;"></span></a></tr>
         {% empty %}
             <div class="alert alert-default">There are no text files associated with this file.</div>
         {% endfor %}    
