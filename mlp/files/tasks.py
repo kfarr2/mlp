@@ -69,6 +69,8 @@ def process_uploaded_file(total_number_of_chunks, file):
 
     else:
         file.status = FileStatus.FAILED
+        log = open(file.path_with_extension("log"), "a")
+        log.write("File type not supported.")
 
     # since we were passed in serialized File object, some of the fields (like the
     # name or description may have changed, so we only want to update the
@@ -113,7 +115,7 @@ def generate_thumbnail(file, time):
     stdout = stderr
 
     if settings.TEST:
-        stderr = open("/tmp/vcp.log", "w")
+        stderr = open("/tmp/mlp.log", "w")
         stdout = stderr
 
     code = subprocess.call([
@@ -140,7 +142,7 @@ def convert_audio(file):
     stdout = stderr
 
     if settings.TEST:
-        stderr = open("/tmp/vcp.log", "w")
+        stderr = open("/tmp/mlp.log", "w")
         stdout = stderr
     
     mp3_code = subprocess.call([
@@ -216,7 +218,7 @@ def convert_video_to_mp4(file, quality):
         return 1
 
     if settings.TEST:
-        stderr = open("/tmp/vcp.log", "w")
+        stderr = open("/tmp/mlp.log", "w")
         stdout = stderr
 
     ext = os.path.splitext(file.name)[1] or ".unknown"
@@ -264,7 +266,7 @@ def convert_video_to_ogv(file, quality):
         return 1
 
     if settings.TEST:
-        stderr = open("/tmp/vcp.log", "w")
+        stderr = open("/tmp/mlp.log", "w")
         stdout = stderr
 
     ext = os.path.splitext(file.name)[1] or ".unknown"

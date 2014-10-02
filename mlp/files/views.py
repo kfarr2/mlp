@@ -167,6 +167,10 @@ def _upload(request, slug):
 
     associated_files = AssociatedFile.objects.all().values('associated_file')
     my_files = File.objects.filter(uploaded_by=request.user, status=FileStatus.READY).exclude(file_id__in=associated_files)
+    to_delete = File.objects.filter(uploaded_by=request.user, status=FileStatus.READY, type=FileType.TEXT).exclude(file_id__in=associated_files)
+    if to_delete.exists():
+        for file in to_delete:
+            file.delete()
     if request.method == "POST":
         if request.POST.get("error_message"):
             messages.error(request, request.POST["error_message"])

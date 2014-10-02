@@ -68,6 +68,9 @@ class File(models.Model):
             self._size = total_size 
         return self._size
 
+    @property
+    def log(self):
+        return open(self.path_with_extension("log"), "a+")
 
     @property
     def directory(self):
