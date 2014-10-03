@@ -46,7 +46,6 @@ ELASTIC_SEARCH_SETTINGS = {
 
 BROKER_URL = 'amqp://guest:guest@localhost//'
 CELERY_ACKS_LATE = True
-CELERY_RESULT_BACKEND = 'amqp'
 
 # uncomment to use CAS. You need to update requirements.txt too
 # CAS_SERVER_URL = 'https://sso.pdx.edu/cas/'
