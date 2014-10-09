@@ -94,7 +94,6 @@ INSTALLED_APPS = (
     'south',
     'cloak',
     'celery',
-    'unfriendly',
     'mlp.home',
     'mlp.users',
     'mlp.files',

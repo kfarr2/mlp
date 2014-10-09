@@ -284,13 +284,13 @@ class MediaViewTest(TestCase):
         )
         self.file.save()
         try:
-		os.makedirs(self.file.directory)
+            os.makedirs(self.file.directory)
         except OSError as e:
-		# directory exists
-		pass
-	with open(os.path.join(self.file.directory, "original_high.mp4"), "w") as f:
+        # directory exists
+            pass
+        with open(os.path.join(self.file.directory, "original_high.mp4"), "w") as f:
             f.write("a"*512)
-        f.close()
+            f.close()
 
     def test_media_view(self):
         slug = str(self.file.slug) + "/original_high.mp4"
@@ -316,7 +316,7 @@ class StoreViewTest(TestCase):
         self.f = open(os.path.join(settings.MEDIA_ROOT, "test.txt"), "w")
         self.f.write(self.file_content)
         self.f.close()
-        self.f = open(os.path.join(settings.MEDIA_ROOT, "test.txt"), "r")
+        self.f = open(os.path.join(settings.MEDIA_ROOT, "test.txt"), "rb")
 
     def test_bad_resumable_id(self):
         response = self.client.post(reverse('files-store'), {
@@ -363,7 +363,7 @@ class StoreViewTest(TestCase):
             "resumableChunkNumber": "1",
             "resumableTotalChunks": "1",
             "resumableFilename": "UNIQUE_STRING.txt",
-            "resumableTotalSize": len(self.file_content),            
+            "resumableTotalSize": len(self.file_content.encode()),            
         })
         self.assertEqual(response.status_code, 404)
         settings.MAX_UPLOAD_SIZE = original_settings
@@ -584,9 +584,9 @@ class ProcessUploadedFileTest(TestCase):
     def test_media_conversion_success(self):
         sys.stderr.write("patience")
         mov_path = os.path.join(settings.STATICFILES_DIRS[0], "test.mov")
-        mov = open(mov_path)
+        mov = open(mov_path, "rb")
         path = tempfile.mkdtemp()
-        with open(os.path.join(path, "1.part"), "w") as f:
+        with open(os.path.join(path, "1.part"), "wb") as f:
             f.write(mov.read())
 
         self.file.name = "file.mov"
@@ -609,9 +609,9 @@ class ProcessUploadedFileTest(TestCase):
 
     def test_media_conversion_fail(self):
         mov_path = os.path.join(settings.STATICFILES_DIRS[0], "test.mov")
-        mov = open(mov_path)
+        mov = open(mov_path, "rb")
         path = tempfile.mkdtemp()
-        with open(os.path.join(path, "1.part"), "w") as f:
+        with open(os.path.join(path, "1.part"), "wb") as f:
             f.write(mov.read(1000))
 
         self.file.name = "file.mov"

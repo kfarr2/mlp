@@ -80,7 +80,7 @@ def process_uploaded_file(total_number_of_chunks, file):
         try:
             # this query ensures we get a lock on the File object, and it (still) exists
             row = File.objects.select_for_update().get(pk=file.pk)
-            file.save(update_fields=['status', 'file', 'type', 'duration'])
+            file.save(update_fields=['status', 'file', 'type', 'duration', 'slug'])
         except (IndexError, DatabaseError, File.DoesNotExist) as e:
             return -1
         finally:
@@ -98,7 +98,7 @@ def get_duration(video_path):
             '-i', video_path,
         ], stderr=output)
         output.seek(0)
-        matches = re.search(r"Duration: (?P<hours>\d+):(?P<minutes>\d+):(?P<seconds>[0-9.]+),", output.read())
+        matches = re.search( b"Duration: (?P<hours>\d+):(?P<minutes>\d+):(?P<seconds>[0-9.]+),", output.read())
         if not matches:
             return 0
         vals = matches.groupdict()
