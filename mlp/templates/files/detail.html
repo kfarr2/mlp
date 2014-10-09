@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load permissions %}
-{% load unfriendly_tags %}
 {% block content %}
 <h3>{{ file.name|truncatechars:75 }}</h3>
 {% if file and user|can_edit_file:file %}

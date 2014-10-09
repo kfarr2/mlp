@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load permissions %}
 {% block content %}
-{% load unfriendly_tags %}
 {% url 'groups-detail' group.slug as group_url %}
 <a href="{{ group_url }}" class="btn btn-default pull-right">Back</a>
 <h3>{{ group.name }}</h3>

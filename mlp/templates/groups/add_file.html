@@ -4,7 +4,6 @@
 {{ form.media }} 
 {% endblock %}
 {% block content %}
-{% load unfriendly_tags %}
 {% url 'groups-detail' group.slug as group_url %}
 <a class="btn btn-default pull-right" href="{{ group_url }}">Back</a>
 <h2>{{ group.name }}</h2>

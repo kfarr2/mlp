@@ -1,5 +1,4 @@
 {% load permissions %}
-{% load unfriendly_tags %}
 {% if file.type == FileType.TEXT %}
 <div class="media">
     <div class="media-body" style="background-color:{{ file.filetag_set.tag.background_color }};">
