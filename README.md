@@ -2,16 +2,20 @@
 
 ## Introduction
 
-MLP
+MLP - NOTE: Python 2.6 is no longer supported. This site is now being upgraded to Python 3.3
 
 ## Installation
 
 In your working directory
 
-    virtualenv --no-site-packages .env
+    pyvenv-3.3 .env
     source .env/bin/activate
-    pip install -r requirements.txt
-        
+    wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
+    python3.3 ez_setup.py
+    easy_install-3.3 pip
+    rm -rf setuptools-6.0.2.zip ez_setup.py 
+    pip3.3 install -r requirements.txt
+
 Try to download ffmpeg *
 
     wget http://johnvansickle.com/ffmpeg/releases/ffmpeg-2.4.1-64bit-static.tar.xz
