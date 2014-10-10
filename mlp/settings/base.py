@@ -25,7 +25,7 @@ LOGIN_REDIRECT_URL = reverse_lazy("users-home")
 LOGOUT_URL = reverse_lazy("home")
 
 ELASTIC_SEARCH_CONNECTION = {
-    "urls": ["http://localhost:9200/"],
+        "urls": ["http://localhost:9200/"],
     "index": "mlp_dev",
 }
 
