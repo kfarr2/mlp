@@ -13,7 +13,7 @@ In your working directory
     wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
     python3.3 ez_setup.py
     easy_install-3.3 pip
-    rm -rf setuptools-6.0.2.zip ez_setup.py 
+    rm -rf setuptools-*.zip ez_setup.py 
     pip3.3 install -r requirements.txt
 
 Try to download ffmpeg *
