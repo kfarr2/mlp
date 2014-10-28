@@ -63,7 +63,7 @@ def admin(request):
     try:
         intro_text = intro_text.text 
     except AttributeError as e:
-        intro_text = "Welcome to the Mobile Learning Project"
+        intro_text = "The Mobile Learning Project brings together faculty from various Portland State University departments and units (World Languages and Literatures, Applied Linguistics, and the Literacy, Language, & Technology Research Group) as well as other national and international collaborators and research networks. Our efforts focus on two areas: (1) the design and implementation of formative pedagogical interventions that involve mobile and other digital technologies to create language learning opportunities, and (2) video-based research on the digital interventions we create that utilize interdisciplinary approaches associated with learning sciences and second language development research."
 
     return render(request, 'home/admin.html', {
         "intro_text": intro_text,
