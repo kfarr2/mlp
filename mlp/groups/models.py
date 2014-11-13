@@ -75,3 +75,5 @@ class GroupFile(models.Model):
 
     class Meta:
         db_table = "group_file"
+
+from . import search_indexes

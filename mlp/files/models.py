@@ -186,3 +186,5 @@ class AssociatedFile(models.Model):
 
     class Meta:
         db_table = "associated_files"
+
+from . import search_indexes
