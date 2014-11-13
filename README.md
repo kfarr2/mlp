@@ -8,20 +8,13 @@ MLP - NOTE: Python 2.6 is no longer supported. This site is now being upgraded t
 
 In your working directory
 
-    pyvenv-3.3 .env
+    python3 -m venv .env
+    curl https://raw.githubusercontent.com/pypa/pip/master/contrib/get-pip.py | python
     source .env/bin/activate
-    wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
-    python3.3 ez_setup.py
-    easy_install-3.3 pip
-    rm -rf setuptools-*.zip ez_setup.py 
+    mkdir bin
+    wget https://cdn.research.pdx.edu/ffmpeg/2.4.3/ffmpeg
+    mv ffmpeg bin
     pip3.3 install -r requirements.txt
-
-Try to download ffmpeg *
-
-    wget http://johnvansickle.com/ffmpeg/releases/ffmpeg-2.4.1-64bit-static.tar.xz
-    tar -xJf ffmpeg-2.4.1-64bit-static.tar.xz
-    mv ffmpeg-2.4.1-64bit-static/ffmpeg .env/bin
-    rm -rf ffmpeg-2.4.1-64bit-static ffmpeg-2.4.1-64bit-static.tar.xz
 
 Install RabbitMQ
 

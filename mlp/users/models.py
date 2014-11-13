@@ -71,3 +71,5 @@ class User(AbstractBaseUser):
             return getattr(UserRole, attr[len("is_"):].upper()) in self.roles
 
         raise AttributeError("You tried to access the attribute '%s' on an instance of a User model. That attribute isn't defined" % attr)
+
+from . import search_indexes

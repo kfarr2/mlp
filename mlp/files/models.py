@@ -17,7 +17,7 @@ class File(models.Model):
     type = models.IntegerField(choices=FileType)
     description = models.TextField()
     tmp_path = models.CharField(max_length=255, unique=True)
-    file = models.FileField(upload_to=lambda *args, **kwargs: '')
+    file = models.FileField()
     status = models.IntegerField(choices=FileStatus)
     duration = models.FloatField(default=0)
     language = models.CharField(max_length=255)
@@ -136,12 +136,13 @@ class File(models.Model):
 
     def save(self, *args, **kwargs):
         # generate a slug for the file
-        try:
-            self.slug = self.get_slug()
-        except IntegrityError as e: 
-            # Running this twice should fix any issues with collisions since there are well over
-            # 3x10^30 possibilities for ASCII strings of length 16 alone.
-            self.slug = self.get_slug()
+        if self.pk is None:
+            try:
+                self.slug = self.get_slug()
+            except IntegrityError as e:
+                # Running this twice should fix any issues with collisions since there are well over
+                # 3x10^30 possibilities for ASCII strings of length 16 alone.
+                self.slug = self.get_slug()
         to_return = super(File, self).save(*args, **kwargs)
         # make the file searchable
         make_searchable(self)
@@ -185,3 +186,5 @@ class AssociatedFile(models.Model):
 
     class Meta:
         db_table = "associated_files"
+
+from . import search_indexes

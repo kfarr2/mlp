@@ -3,6 +3,7 @@ from fnmatch import fnmatch
 from django.core.urlresolvers import reverse_lazy
 from django.contrib.messages import constants as messages
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP, LOGGING, AUTHENTICATION_BACKENDS
+from varlet import variable
 try:
     import pymysql
     pymysql.install_as_MySQLdb()
@@ -10,9 +11,26 @@ except ImportError: # pragma: no cover
     pass
 
 here = lambda *path: os.path.normpath(os.path.join(os.path.dirname(__file__), *path))
-ROOT = lambda *path: here("../../", *path)
+ROOT = lambda *path: here("../", *path)
 
-ALLOWED_HOSTS = []
+DEBUG = variable("DEBUG", False)
+TEMPLATE_DEBUG = DEBUG 
+
+FFMPEG_BINARY = ROOT("bin/ffmpeg")
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': variable("DB_NAME", 'language'),
+        'USER': variable("DB_USERNAME", 'root'),
+        'PASSWORD': variable("DB_PASSWORD", ""),
+        'HOST': variable("DB_HOST", 'localhost'),
+        'PORT': '',
+
+    },
+}
+
+ALLOWED_HOSTS = [".pdx.edu"]
 
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'no-reply@pdx.edu'
 
@@ -25,11 +43,10 @@ LOGIN_REDIRECT_URL = reverse_lazy("users-home")
 LOGOUT_URL = reverse_lazy("home")
 
 ELASTIC_SEARCH_CONNECTION = {
-        "urls": ["http://localhost:9200/"],
-    "index": "mlp_dev",
+    "urls": [variable("ELASTIC_SEARCH_HOST", "http://localhost:9200/")],
+    "index": variable("ELASTIC_SEARCH_INDEX_NAME", "mlp_dev"),
 }
 
-ELASTIC_SEARCH_URL = "http://127.0.0.1:9200/"
 ELASTIC_SEARCH_SETTINGS = {
     "settings": {
         "analysis": {
@@ -44,7 +61,7 @@ ELASTIC_SEARCH_SETTINGS = {
 }
 
 
-BROKER_URL = 'amqp://guest:guest@localhost//'
+BROKER_URL = variable("BROKER_URL", 'amqp://guest:guest@localhost//')
 CELERY_ACKS_LATE = True
 
 # uncomment to use CAS. You need to update requirements.txt too
@@ -91,7 +108,6 @@ INSTALLED_APPS = (
     'elasticmodels',
     'arcutils',
     'permissions',
-    'south',
     'cloak',
     'celery',
     'mlp.home',
@@ -153,7 +169,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    here("../", "static"),
+    here("static"),
 )
 
 MEDIA_URL = '/media/'
@@ -173,6 +189,11 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    here('../', "templates"),
+    here("templates"),
 )
 
+SECRET_KEY = variable("SECRET_KET", os.urandom(64).decode("latin1"))
+
+# the redis database number
+# and stuff
+REDIS_INDEX_NUMBER = variable("REDIS_INDEX_NUMERO", 123)

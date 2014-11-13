@@ -7,3 +7,6 @@ tmp/*
 htmlcov
 /static
 ngrok*
+bin/ffmpeg
+/variables.py
+celery.log
