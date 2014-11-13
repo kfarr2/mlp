@@ -9,3 +9,4 @@ htmlcov
 ngrok*
 bin/ffmpeg
 /variables.py
+celery.log
