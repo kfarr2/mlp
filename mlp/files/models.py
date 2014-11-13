@@ -17,7 +17,7 @@ class File(models.Model):
     type = models.IntegerField(choices=FileType)
     description = models.TextField()
     tmp_path = models.CharField(max_length=255, unique=True)
-    file = models.FileField(upload_to=lambda *args, **kwargs: '')
+    file = models.FileField()
     status = models.IntegerField(choices=FileStatus)
     duration = models.FloatField(default=0)
     language = models.CharField(max_length=255)

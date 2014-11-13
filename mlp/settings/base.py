@@ -91,7 +91,6 @@ INSTALLED_APPS = (
     'elasticmodels',
     'arcutils',
     'permissions',
-    'south',
     'cloak',
     'celery',
     'mlp.home',
