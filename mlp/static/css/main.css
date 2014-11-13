@@ -363,7 +363,7 @@ label.no-match {
 
 #header_image {
     padding-top: 135px;
-    background-image: url('http://www.pdx.edu/sites/all/themes/pdx_home/images/header/header-1.jpg');
+    background-image: url('../img/header.jpg');
     box-shadow: 0px 0px 10px #000;
 }
 

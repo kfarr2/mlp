@@ -193,7 +193,3 @@ TEMPLATE_DIRS = (
 )
 
 SECRET_KEY = variable("SECRET_KET", os.urandom(64).decode("latin1"))
-
-# the redis database number
-# and stuff
-REDIS_INDEX_NUMBER = variable("REDIS_INDEX_NUMERO", 123)
