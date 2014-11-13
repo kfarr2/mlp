@@ -127,7 +127,7 @@ def get_file_type(path):
     with tempfile.SpooledTemporaryFile() as output:
         # call ffmpeg to try to figure out the filetype
         subprocess.call([
-            'ffmpeg',
+            settings.FFMPEG_BINARY,
             '-i', path,
         ], stderr=output)
         output.seek(0)
@@ -144,7 +144,7 @@ def get_duration(video_path):
     with tempfile.SpooledTemporaryFile() as output:
         # ffmpeg outputs the duration to stderr for some reason
         subprocess.call([
-            'ffmpeg',
+            settings.FFMPEG_BINARY,
             '-i', video_path,
         ], stderr=output)
         output.seek(0)
@@ -169,7 +169,7 @@ def generate_thumbnail(file, time):
         stdout = stderr
 
     code = subprocess.call([
-        'ffmpeg',
+        settings.FFMPEG_BINARY,
         '-i', file.file.path,
         '-ss', time.isoformat(),
         '-vframes', "1",
@@ -196,7 +196,7 @@ def convert_audio(file):
         stdout = stderr
     
     mp3_code = subprocess.call([
-        "ffmpeg",
+        settings.FFMPEG_BINARY,
         "-i", file.file.path,       # input file
         "-f", "mp3",
         '-y',                       # overwrite previous files
@@ -206,7 +206,7 @@ def convert_audio(file):
     ], stderr=stderr, stdout=stdout)    
     
     ogg_code = subprocess.call([
-        "ffmpeg",
+        setting.FFMPEG_BINARY,
         "-i", file.file.path,       # input file
         "-f", "ogg",
         '-y',                       # overwrite previous files
@@ -224,7 +224,7 @@ def get_bitrate(file_path):
     Get the bitrate of a video file
     """
     full_output =  subprocess.Popen([
-        "ffmpeg",
+        settings.FFMPEG_BINARY,
         "-i", file_path,
     ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = full_output.communicate()
@@ -282,7 +282,7 @@ def convert_video_to_mp4(file, quality):
         _file = open(filename + ".mp4", "wb")
 
     mp4_code = subprocess.call([
-        "ffmpeg",
+        settings.FFMPEG_BINARY,
         "-i", file.file.path, # input file
         "-b:v", bitrate + "k", # bitrate of video | started at 200k
         "-f", "mp4", # force the output to be mp4
@@ -329,7 +329,7 @@ def convert_video_to_ogv(file, quality):
         _file = open(filename + ".ogv", "wb")
 
     ogv_code = subprocess.call([
-        "ffmpeg",
+        settings.FFMPEG_BINARY,
         "-i", file.file.path, # input file
         "-b:v", bitrate + "k", # bitrate of video | started at 700k
         "-r", "30", # fps

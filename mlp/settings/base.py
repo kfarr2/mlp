@@ -12,6 +12,8 @@ except ImportError: # pragma: no cover
 here = lambda *path: os.path.normpath(os.path.join(os.path.dirname(__file__), *path))
 ROOT = lambda *path: here("../../", *path)
 
+FFMPEG_BINARY = ROOT("bin/ffmpeg")
+
 ALLOWED_HOSTS = []
 
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'no-reply@pdx.edu'

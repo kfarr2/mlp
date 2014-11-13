@@ -7,3 +7,4 @@ tmp/*
 htmlcov
 /static
 ngrok*
+bin/ffmpeg
