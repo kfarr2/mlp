@@ -8,3 +8,4 @@ htmlcov
 /static
 ngrok*
 bin/ffmpeg
+/variables.py
