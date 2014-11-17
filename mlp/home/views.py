@@ -8,7 +8,9 @@ from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.utils.http import is_safe_url
 from mlp.users.forms import LoginForm
-from mlp.files.models import File
+from mlp.users.models import User
+from .models import IntroText
+from .forms import IntroTextForm
 
 def home(request):
     """
@@ -16,6 +18,10 @@ def home(request):
     """
     if request.user.is_authenticated():
         return HttpResponseRedirect(reverse("users-home"))
+    try:
+        intro_text = IntroText.objects.last().text
+    except AttributeError as e:
+        intro_text = "The Mobile Learning Project brings together faculty from various Portland State University departments and units (World Languages and Literatures, Applied Linguistics, and the Literacy, Language, & Technology Research Group) as well as other national and international collaborators and research networks. Our efforts focus on two areas: (1) the design and implementation of formative pedagogical interventions that involve mobile and other digital technologies to create language learning opportunities, and (2) video-based research on the digital interventions we create that utilize interdisciplinary approaches associated with learning sciences and second language development research."
 
     if request.POST:
         form = LoginForm(request.POST)
@@ -32,5 +38,34 @@ def home(request):
 
     return render(request, 'home/home.html', {
         "form": form,
+        "intro_text": intro_text,
     })
 
+@login_required
+def admin(request):
+    """
+    Admin page for editing the intro paragraph
+    """
+    if not request.user.is_staff:
+        return HttpResponseRedirect(reverse('users-home'))
+    
+    intro_text = IntroText.objects.last()
+    
+    if request.POST:
+        form = IntroTextForm(request.POST, instance=intro_text)
+        if form.is_valid():
+            messages.success(request, "Intro Text Updated.")
+            form.save()
+            intro_text = IntroText.objects.last()
+    else:
+        form = IntroTextForm(instance=intro_text)
+
+    try:
+        intro_text = intro_text.text 
+    except AttributeError as e:
+        intro_text = "The Mobile Learning Project brings together faculty from various Portland State University departments and units (World Languages and Literatures, Applied Linguistics, and the Literacy, Language, & Technology Research Group) as well as other national and international collaborators and research networks. Our efforts focus on two areas: (1) the design and implementation of formative pedagogical interventions that involve mobile and other digital technologies to create language learning opportunities, and (2) video-based research on the digital interventions we create that utilize interdisciplinary approaches associated with learning sciences and second language development research."
+
+    return render(request, 'home/admin.html', {
+        "intro_text": intro_text,
+        "form": form,
+    })

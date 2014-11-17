@@ -6,17 +6,6 @@ from elasticmodels.forms import SearchForm
 from .models import Tag
 from .search_indexes import TagIndex
 
-class TagSearchForm(SearchForm):
-
-    def __init__(self, *args, **kwargs):
-        super(TagSearchForm, self).__init__(*args, **kwargs)
-
-    def queryset(self):
-        return Tag.objects.all()
-
-    def search(self):
-        return TagIndex.objects.all()
-
 
 class TagWidget(forms.TextInput):
     """
@@ -70,47 +59,3 @@ class TagField(forms.MultipleChoiceField):
             raise forms.ValidationError("A tag contains '%s', which is not allowed" % invalid_chars.pop())
 
         return True
-
-
-class TagForm(forms.ModelForm):
-    class Meta:
-        model = Tag
-        fields = (
-            "name",
-            "description",
-            "color",
-            "background_color",
-        )
-
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop("user")
-                
-        if kwargs.get("instance") is not None:
-            # Set the color and background color to the defaults if they have not been set            
-            kwargs['instance'].color = kwargs['instance'].color or Tag.DEFAULT_COLOR
-            kwargs['instance'].background_color = kwargs['instance'].background_color or Tag.DEFAULT_BACKGROUND_COLOR
-
-        super(TagForm, self).__init__(*args, **kwargs)
-
-        # remove the blank choices
-        self.fields['color'].choices = self.fields['color'].choices[1:]
-        self.fields['background_color'].choices = self.fields['background_color'].choices[1:]
-
-        if kwargs.get("instance") is None:
-            color, background_color = Tag.get_random_tag_colors()            
-            self.fields['color'].initial = color           
-            self.fields['background_color'].initial = background_color
-
-
-    def in_create_mode(self):
-        """Returns True if calling save() would create a new record"""
-        return self.instance.pk is None
-
-    def save(self, *args, **kwargs):
-        if self.in_create_mode():
-            self.instance.created_by = self.user
-            
-        to_return = super(TagForm, self).save(*args, **kwargs)
-        
-        make_searchable(self.instance)
-        return to_return

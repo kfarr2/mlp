@@ -36,7 +36,7 @@
         <div class="{% if user.is_cloaked %}cloak-pushdown{% endif %}" id="cloak_div">
             <div id="header_image">
                 <div class="container">
-                    <a href="http://www.pdx.edu"><img src="http://www.pdx.edu/sites/all/themes/pdx_home/logo.png" alt="Home"></a>
+                    <a href="http://www.pdx.edu"><img src="{{ STATIC_URL }}img/logo.png" alt="Home"></a>
                 </div>
             </div>
             <nav class="navbar navbar-default">
@@ -46,7 +46,7 @@
                         {% if user.is_authenticated %}
                         <ul class="nav navbar-nav">
                             <li><a href="{% url 'users-workflow' %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
-                            <li><a href="{% url 'classes-list' %}"><span class="glyphicon glyphicon-book"></span> Classes</a></li>
+                            <li><a href="{% url 'groups-list' %}"><span class="glyphicon glyphicon-book"></span> Groups</a></li>
                             <li><a href="{% url 'files-list' %}"><span class="glyphicon glyphicon-folder-open"></span> Files</a></li>
                             {% if user|has_admin_access %}
                                 <li><a href="{% url 'users-list' %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>
@@ -58,6 +58,7 @@
                                 <li class="dropdown">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-th"></span></a>
                                     <ul class="dropdown-menu">
+                                        {% if user.is_staff %}<li><a href="{% url 'home-admin' %}"><span class="glyphicon glyphicon-pencil"></span> Admin</a></li>{% endif %}
                                         <li><a href="{% url 'users-edit' user.pk %}"><span class="glyphicon glyphicon-user"></span> Account</a></li>
                                         <li><a href="{% url 'logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
                                     </ul>

@@ -1,8 +1,10 @@
+import hashlib, os, sys
+from elasticmodels import make_searchable
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.core.urlresolvers import reverse
 from arcutils import will_be_deleted_with
-from mlp.classes.enums import UserRole
+from mlp.groups.enums import UserRole
 
 class User(AbstractBaseUser):
     """
@@ -19,6 +21,7 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True, blank=True, help_text="Inactive users cannot login")
     is_staff = models.BooleanField(default=False, blank=True)
 
+    slug = models.SlugField(max_length=25, unique=True)
 
     USERNAME_FIELD = 'email'
 
@@ -43,26 +46,18 @@ class User(AbstractBaseUser):
         else:
             return self.email
 
-    def get_absolute_url(self):
-        return reverse("users-detail", args=[self.pk])
-
-    def objects_to_delete_with_user(self):
-        related_objects = will_be_deleted_with(self)
-        user_set = set()
-        for cls, items in related_objects:
-            user_set.update(items)
-
-        will_be_deleted = user_set
-        return will_be_deleted
-
-    def __str__(self):
-        if self.last_name and self.first_name:
-            return self.get_full_name()
-        else:
-            return self.email
-
     def can_cloak_as(self, other_user):
         return self.is_staff
+
+    
+    def get_slug(self, length=8):
+        return str(hashlib.sha1(os.urandom(length)).hexdigest())
+
+    def save(self, *args, **kwargs):
+        self.slug = self.get_slug()
+        to_return = super(User, self).save(*args, **kwargs)
+        make_searchable(self)
+        return to_return
 
     def __getattr__(self, attr):
         """
@@ -76,3 +71,5 @@ class User(AbstractBaseUser):
             return getattr(UserRole, attr[len("is_"):].upper()) in self.roles
 
         raise AttributeError("You tried to access the attribute '%s' on an instance of a User model. That attribute isn't defined" % attr)
+
+from . import search_indexes

@@ -6,10 +6,10 @@ from elasticmodels.forms import SearchForm
 from elasticmodels import make_searchable
 from mlp.users.models import User
 from mlp.users.perms import has_admin_access
-from mlp.classes.models import Class, ClassFile, Roster
+from mlp.groups.models import Group, GroupFile, Roster
 from .search_indexes import FileIndex
 from .models import FileTag, File
-from .enums import FileStatus, FileOrderChoices
+from .enums import FileStatus, FileOrderChoices, FileType
 from .perms import can_list_all_files
 from bootstrap3_datetime.widgets import DateTimePicker
 
@@ -35,16 +35,16 @@ class FileSearchForm(SearchForm):
         if has_admin_access(self.user):
             files = File.objects.filter(
                 status=FileStatus.READY
-            ).select_related("uploaded_by_id").prefetch_related("filetag_set__tag")
+            ).exclude(type=FileType.TEXT).select_related("uploaded_by_id").prefetch_related("filetag_set__tag")
         else:
-            roster = Roster.objects.filter(user=self.user).values('_class')
-            classes = Class.objects.filter(class_id__in=roster)
-            class_files = ClassFile.objects.filter(_class__in=classes).values('file')
+            roster = Roster.objects.filter(user=self.user).values('group')
+            groups = Group.objects.filter(group_id__in=roster)
+            group_files = GroupFile.objects.filter(group__in=groups).values('file')
             
             files = File.objects.filter(
                 status=FileStatus.READY,
-                file_id__in=class_files,
-            ).select_related("uploaded_by_id").prefetch_related("filetag_set__tag")
+                file_id__in=group_files,
+            ).exclude(type=FileType.TEXT).select_related("uploaded_by_id").prefetch_related("filetag_set__tag")
         
         return files
 
@@ -78,8 +78,8 @@ class FileForm(forms.ModelForm):
     """
     This form is for editing an already existing File model.
     """
-    tags = TagField(required=False, label="")
-    description = CharField(required=False, label="", widget=forms.Textarea)
+    tags = TagField()
+    description = CharField(required=False, label="Description", widget=forms.Textarea)
 
     class Meta:
         model = File
@@ -92,6 +92,7 @@ class FileForm(forms.ModelForm):
         super(FileForm, self).__init__(*args, **kwargs)
         self.fields['tags'].initial = Tag.objects.filter(filetag_set__file_id=self.instance)
         self.fields['tags'].choices = Tag.objects.all()
+        self.fields['tags'].widget.attrs['placeholder'] = "Tags"
 
     def save(self, *args, **kwargs):
         user = kwargs.pop("user")

@@ -1,7 +1,7 @@
 from elasticmodels import Indexable
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
-from mlp.classes.models import Class, ClassFile, Roster
+from mlp.groups.models import Group, GroupFile, Roster
 from mlp.users.models import User
 from .models import File, FileTag
 
@@ -28,9 +28,9 @@ class FileIndex(Indexable):
         }
 
     def prepare(self, obj):
-        courses = ClassFile.objects.filter(file=obj).first()
+        courses = GroupFile.objects.filter(file=obj).first()
         if courses:
-            course = Class.objects.get(class_id=courses._class.class_id).name
+            course = Group.objects.get(group_id=courses.group.group_id).name
         else:
             course = None
 

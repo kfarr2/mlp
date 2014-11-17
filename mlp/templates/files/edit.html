@@ -1,34 +1,15 @@
 {% extends "base.html" %}
-{% load unfriendly_tags %}
+{% block head %}
+{{ form.media }}
+{% load permissions %}
+{% endblock %}
 {% block content %}
-<div class="col-md-4">
-    <h3>Edit
-    {% url 'files-detail' file.pk as file_url %}
-    <a class="btn btn-default pull-right" href="{{ file_url|obfuscate }}">Back</a>
-    </h3>
-    <form method="post">
-        {% if form %}
-            {{ form|bootstrap }}
-        {% endif %}
-        {% csrf_token %}
-        <div class="btn-group">
-            <input type="submit" name="submit" value="Submit" class="btn btn-default" />
-            <button class="btn btn-default" onclick="window.history.go(-1); return false">Cancel</button>    
-        </div>
-        <a href="{% url 'files-delete' file.pk %}" class="btn btn-default pull-right btn-xs">Delete File</a>
-    </form>
-</div>
 <div class="col-md-7">
-    <h3>{{ file.name|truncatechars:75 }}</h3>
+    <h3>Edit: {{ file.name|truncatechars:75 }}</h3>
     <hr />
 
     {% if file.type == FileType.VIDEO %}
-        <video controls>
-            {% for path, mime in file.video_urls %}
-                <source src="{{ path }}" type="{{ mime }}">
-            {% endfor %}
-            Your browser failed to load the video.
-        </video>
+        {% include "files/_video.html" %}
     {% endif %}
 
     {% if file.type == FileType.AUDIO %}
@@ -43,16 +24,45 @@
             No audio urls were specified.
         {% endif %}
     {% endif %}
-
-    <table class="table">
-        <tr>
-            <td>
-                <p><strong>Uploader:</strong> {{ file.uploaded_by }}</p>
-            </td>
-            <td>
-                <p><strong>Uploaded:</strong> {{ file.uploaded_on|date }}</p>
-            </td>
-        </tr>
+    <div class="well">
+        <table class="table">
+            <tr>
+                <td>
+                    <p><strong>Uploader:</strong> {{ file.uploaded_by }}</p>
+                </td>
+                <td>
+                    <p><strong>Uploaded:</strong> {{ file.uploaded_on|date }}</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="col-md-5">
+    <h3>
+    {% url 'files-detail' file.slug as file_url %}
+    <a class="btn btn-default pull-right" href="{{ file_url }}">Back</a>
+    </h3>
+    <br />
+    <form method="post">
+        {% if form %}
+            {{ form|bootstrap }}
+        {% endif %}
+        {% csrf_token %}
+        <div class="btn-group">
+            <input type="submit" name="submit" value="Submit" class="btn btn-default" />
+            <button class="btn btn-default" onclick="window.history.go(-1); return false">Cancel</button>    
+        </div>
+        {% if user|has_admin_access %}
+            <a href="{% url 'files-delete' file.slug %}" class="btn btn-default pull-right btn-xs">Delete File</a>
+        {% endif %}
+    </form>
+    <hr />
+    <p><strong>Associated Files:</strong><a href="{% url 'files-upload-associated' file.slug %}" class="btn btn-default pull-right btn-xs"><span class="glyphicon glyphicon-upload"></span> Upload Associated File</a>
+    <table>
+        {% for file in associated_files %}<tr>{% include "files/_file.html" %}<a href="{% url 'files-delete-associated' file.slug %}"><span class="glyphicon glyphicon-remove pull-right" style="margin-top: -20px;"></span></a></tr>
+        {% empty %}
+            <div class="alert alert-default">There are no text files associated with this file.</div>
+        {% endfor %}    
     </table>
 </div>
 {% endblock %}

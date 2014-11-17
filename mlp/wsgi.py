@@ -14,7 +14,8 @@ import sys
 # add the virtualenv
 root = os.path.normpath(os.path.join(os.path.dirname(__file__), "../"))
 sys.path.append(root)
-site.addsitedir(os.path.join(root, ".env/lib/python2.6/site-packages"))
+site.addsitedir(os.path.join(root, ".env/lib64/python3.3/site-packages"))
+site.addsitedir(os.path.join(root, ".env/lib/python3.3/site-packages"))
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mlp.settings")
 

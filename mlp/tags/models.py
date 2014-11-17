@@ -151,3 +151,5 @@ class Tag(models.Model):
         )
 
         return random.choice(COLOR_COMBINATIONS)
+
+from . import search_indexes

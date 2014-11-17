@@ -1,12 +1,27 @@
-{% load unfriendly_tags %}
+{% load permissions %}
+{% if file.type == FileType.TEXT %}
 <div class="media">
-    <a class="pull-left media-thumbnail-link" href="{% url 'files-download' file.pk %}">
-        <img class="media-object" src="{{ file.thumbnail_url|default:"holder.js/64x64" }}" alt="Thumbnail"/>
+    <div class="media-body" style="background-color:{{ file.filetag_set.tag.background_color }};">
+        <h5 class="media-heading">
+            {% url 'files-download' file.slug as file_url %}
+            <a href="{{ file_url }}"><span class="glyphicon glyphicon-download"></span><strong> {{ file.name }}</strong></a> <em>(uploaded {{ file.uploaded_on }})</em>
+        </h5>
+    </div>
+</div>
+{% else %}
+<div class="media">
+    {% url 'files-download' file.slug as file_url %}
+    <a class="pull-left media-thumbnail-link" id="file-link" href="{{ file_url }}">
+        {% if file.type == FileType.VIDEO %}
+            <img class="media-object" src="{{ file.thumbnail_url|default:"holder.js/64x64" }}" alt="Thumbnail"/>
+        {% else %}
+            <span class="glyphicon glyphicon-volume-up"></span>
+        {% endif %}
     </a>
     <div class="media-body" style="background-color:{{ file.filetag_set.tag.background_color }};">
         <h5 class="media-heading">
-            {% url 'files-detail' file.pk as file_url%}
-            <a href="{{ file_url|obfuscate }}"><strong>{{ file.name }}</strong></a> <em>(uploaded {{ file.uploaded_on }})</em>
+            {% url 'files-detail' file.slug as file_url%}
+            <a href="{{ file_url }}"><strong>{{ file.name }}</strong></a> <em>(uploaded {{ file.uploaded_on }})</em>
         </h5>
         <p class="pull-right" style="padding-left:5px">
         {% for file_tag in file.filetag_set.all %}
@@ -18,3 +33,4 @@
         <p>{{ file.description|default:"(no description)" }}</p>
     </div>
 </div>
+{% endif %}

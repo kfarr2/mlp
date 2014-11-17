@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load permissions %}
-{% load unfriendly_tags %}
 {% block content %}
 <h3>User List<a href="{% url 'users-create' %}" class="btn btn-default pull-right"><span class="glyphicon glyphicon-user"></span> New User</a></h3>
 <hr />
@@ -35,7 +34,7 @@
     <tr>
         <td>
             {% url 'users-detail' user.pk as user_url %}
-            <a href="{{ user_url|obfuscate }}" class="btn btn-default"><span class="glyphicon glyphicon-zoom-in"></span></a>
+            <a href="{{ user_url }}" class="btn btn-default"><span class="glyphicon glyphicon-zoom-in"></span></a>
         </td>
         <td>{{ user.last_name }}</td>
         <td>{{ user.first_name }}</td>
@@ -47,6 +46,8 @@
         <td>
             {% if user in teachers %}
                 Teacher
+            {% elif user in lead_students %}
+                Lead Student
             {% elif user in students %}
                 Student
             {% else %}

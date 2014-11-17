@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load permissions %}
+{% block head %}
+{{ form.media }} 
+{% endblock %}
+{% block content %}
+{% url 'groups-detail' group.slug as group_url %}
+<a class="btn btn-default pull-right" href="{{ group_url }}">Back</a>
+<h2>{{ group.name }}</h2>
+<form method='get' class='form-inline' id='search-form' action="{{ request.path }}">
+    {% include "_field.html" with field=form.q %}
+    {% include "_field.html" with field=form.tags %}
+    <div class="btn-group">
+        <button type="submit" name="search" class="btn btn-default btn-sm">Search</button>
+        <a href="{% url 'groups-file_list' group.slug %}" class="btn btn-default btn-sm">Clear</a>
+    </div>
+    <a href="#" id='expander'>Advanced</a>
+    <div class="tab-content" style="display:none">
+        <div class="tab-pane active">
+            <div class="input-group date">
+                {% include '_field.html' with field=form.start_date %} 
+                {% include "_field.html" with field=form.end_date %}
+                {% include "_field.html" with field=form.order %}
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="col-md-6">
+    <h3>Files</h3>
+    <hr />
+    {% if files %}
+        <table class="table">
+        {% for file in files %}
+        <tr>
+            <td>
+                <a href="{% url 'groups-file_add' group.slug file.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-plus"></span></a>
+            </td>
+            <td>{% include "files/_file.html" %}</td>
+        </tr>
+        {% endfor %}
+        </table>
+    {% elif all_files %}    
+        <div class="alert alert-default">No files match your search.</div>
+    {% else %}
+        <div class="alert alert-default">No files have been uploaded yet.</div>
+    {% endif %}
+</div>
+<div class="col-md-6">
+    <h3>Group Files 
+    {% if user|can_upload_to_group:group %}
+    <a href="{% url 'files-upload-to-group' group.slug %}" class="btn btn-default pull-right"><span class="glyphicon glyphicon-upload"></span> Upload To Group</a>
+    {% endif %}
+    </h3>
+    <hr />
+    {% if group_files %}
+        <table class="table">
+        {% for file in group_files %}
+        <tr>
+            <td>
+                {% if user|can_edit_group:group %}
+                <a href="{% url 'groups-file_remove' group.slug file.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-minus"></span></a>
+                {% endif %}        
+            </td>
+            <td>{% include "files/_file.html" %}</td>
+        </tr>
+        {% endfor %}
+        </table>
+    {% else %}
+        <div class="alert alert-default">No files have been added to this group yet.</div>
+    {% endif %}
+</div>
+
+<script>
+    $(document).ready(function(){
+        $("#expander").click(function(e){
+            e.preventDefault()
+            var closed = $(".tab-content").is(":hidden");
+            if(closed == true)
+                $(this).parent().find(".tab-content").show();
+            else
+                $(this).parent().find(".tab-content").hide();
+
+                $.cookie('open',closed,{ path: '/'});
+        });
+
+        var openToggle = $.cookie('open');
+        if( openToggle == 'true' ){
+            $('.expander').parent().find(".tab-content").show();
+        }    
+        else{
+            $('.expander').parent().find(".tab-content").hide();
+        }
+    });
+</script>
+{% endblock %}

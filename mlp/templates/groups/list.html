@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load permissions %}
+{% block content %}
+{% if user|can_list_all_groups %}
+<div class="col-md-6">
+    <h3>All Groups</h3>
+    <hr />
+    <form method='get' class='form-inline' id='search-form' action="{{ request.path }}">
+        {% include "_field.html" with field=form.q %}
+        <div class="btn-group btn-group-sm">
+            <button type="submit" name="search" class="btn btn-default btn-sm">Search</button>
+            <a href="{% url 'groups-list' %}" class="btn btn-default btn-sm">Clear</a>
+        </div>
+    </form>
+    {% if groups %}
+        {% include "groups/group.html" %}
+    {% elif all_groups %}
+        <div class="alert alert-default">No groups match your search.</div>
+    {% else %}
+        <div class="alert alert-default">No groups have been created yet.</div>
+    {% endif %}
+</div>
+{% endif %}
+<div class="col-md-6">
+    <h3>Your Groups</h3>
+    {% if user|can_create_group %}
+    <a href="{% url 'groups-create' %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-book"></span> New Group</a>
+    {% endif %}
+    <hr />
+    {% if user_groups %}
+        {% with user_groups as groups %} 
+        {% include "groups/group.html" %}
+        {% endwith %}
+    {% else %}
+        <div class="alert alert-default">You are not currently involved in any groups.</div>
+    {% endif %}
+
+</div>
+{% endblock %}

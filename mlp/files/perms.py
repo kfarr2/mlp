@@ -2,9 +2,11 @@ import os
 from permissions import permission
 from django.db.models import Q
 from mlp.users.models import User
-from mlp.classes.enums import UserRole
-from mlp.classes.models import Class, Roster, ClassFile
+from mlp.groups.enums import UserRole
+from mlp.groups.models import Group, Roster, GroupFile
+from mlp.groups.perms import is_lead_student
 from mlp.users.perms import has_admin_access
+from .enums import FileType
 from .models import File
 
 @permission
@@ -12,9 +14,9 @@ def can_upload_file(user):
     # only teachers and staff can upload files
     return has_admin_access(user)
 
-@permission(model=Class)
-def can_upload_to_class(user, _class):
-    return has_admin_access(user)
+@permission(model=Group)
+def can_upload_to_group(user, group):
+    return has_admin_access(user) or is_lead_student(user,group)
 
 @permission(model=File)
 def can_edit_file(user, file):
@@ -34,4 +36,4 @@ def can_view_file(user, file):
 
 @permission(model=File)
 def can_download_file(user, file):
-    return can_edit_file(user, file)
+    return can_edit_file(user, file) or file.type == FileType.TEXT

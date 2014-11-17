@@ -1,4 +1,4 @@
-import re
+import re, hashlib
 import os, sys, shutil
 from elasticmodels import make_searchable
 from django.db import models
@@ -6,6 +6,7 @@ from django.conf import settings
 from mlp.users.models import User
 from mlp.tags.models import Tag, TaggableManager
 from .enums import FileType, FileStatus
+
 
 class File(models.Model):
     """
@@ -16,7 +17,7 @@ class File(models.Model):
     type = models.IntegerField(choices=FileType)
     description = models.TextField()
     tmp_path = models.CharField(max_length=255, unique=True)
-    file = models.FileField(upload_to=lambda *args, **kwargs: '')
+    file = models.FileField()
     status = models.IntegerField(choices=FileStatus)
     duration = models.FloatField(default=0)
     language = models.CharField(max_length=255)
@@ -24,6 +25,8 @@ class File(models.Model):
     uploaded_on = models.DateTimeField(auto_now_add=True)
     edited_on = models.DateTimeField(auto_now=True)
     md5_sum = models.CharField(max_length=32, blank=True)
+
+    slug = models.SlugField(max_length=50, unique=True)
 
     class Meta:
         db_table = "files"
@@ -47,12 +50,11 @@ class File(models.Model):
         """
         if not self.file:
             return None
-
-        path = self.path_with_extension("png")
-        if not os.path.exists(path):
+        elif not self.slug:
             return None
 
-        return settings.MEDIA_URL + os.path.relpath(path, settings.MEDIA_ROOT)
+        slug = self.slug + '/'
+        return settings.MEDIA_URL + slug + "file.png"
 
     @property
     def size(self):
@@ -66,6 +68,9 @@ class File(models.Model):
             self._size = total_size 
         return self._size
 
+    @property
+    def log(self):
+        return open(self.path_with_extension("log"), "a+")
 
     @property
     def directory(self):
@@ -88,6 +93,12 @@ class File(models.Model):
         """
         return os.path.normpath(settings.MEDIA_URL + os.path.relpath(os.path.dirname(self.file.path), settings.MEDIA_ROOT) + "/file." + ext)
 
+    def filepath_high(self):
+        return os.path.join(settings.MEDIA_URL, str(self.pk), 'original_high')
+
+    def filepath_low(self):
+        return os.path.join(settings.MEDIA_URL, str(self.pk), 'original_low')
+    
     @property
     def video_urls(self):
         """
@@ -119,15 +130,29 @@ class File(models.Model):
     def __unicode__(self):
         return "%s (%s)" % (self.name, FileType._choices[self.type][1])
 
+    def get_slug(self, length=16):
+        """Generates a random string of default length 16 as a slug for the file"""
+        return hashlib.sha1(os.urandom(length)).hexdigest()
+
     def save(self, *args, **kwargs):
-        # make the file searchable
+        # generate a slug for the file
+        if self.pk is None:
+            try:
+                self.slug = self.get_slug()
+            except IntegrityError as e:
+                # Running this twice should fix any issues with collisions since there are well over
+                # 3x10^30 possibilities for ASCII strings of length 16 alone.
+                self.slug = self.get_slug()
         to_return = super(File, self).save(*args, **kwargs)
+        # make the file searchable
         make_searchable(self)
         return to_return
 
     def delete(self):
         # delete related objects
         FileTag.objects.filter(file=self).delete()
+        associated_files = AssociatedFile.objects.filter(main_file=self)
+        associated_files.delete()
         try:
             shutil.rmtree(str(self.directory))
         except OSError as e:
@@ -150,3 +175,16 @@ class FileTag(models.Model):
     class Meta:
         db_table = "file_tag"
 
+
+class AssociatedFile(models.Model):
+    """
+    Used to map media files to their assiciated files
+    """
+    id = models.AutoField(primary_key=True)
+    main_file = models.ForeignKey(File, related_name="main_file_set", null=True, on_delete=models.SET_NULL)
+    associated_file = models.ForeignKey(File, related_name="associated_file_set", null=True, on_delete=models.SET_NULL)
+
+    class Meta:
+        db_table = "associated_files"
+
+from . import search_indexes

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block head %}
+{% load permissions %}
+{{ form.media }}
+{% endblock %}
+{% block content %}
+<h3>{% if group.name %}Edit: {{ group.name }}{% else %}Create{% endif %}</h3>
+<div class="col-md-4">
+    <form method="post">
+        {% if form %}
+            {{ form|bootstrap }}
+            {% csrf_token %}
+        {% endif%}
+        {% if not group.slug %}
+            {{ roster_form|bootstrap }}
+            {% csrf_token %}
+        {% endif %}
+        <div class="btn-group">
+            <input type="submit" name="submit" value="Submit" class="btn btn-default" />
+            <button class="btn btn-default" onclick="window.history.go(-1); return false">Cancel</button>    
+        </div>
+        {% if group.slug %}<a href="{% url 'groups-delete' group.slug %}" class="btn btn-default btn-xs pull-right">Delete Group</a>{% endif %}
+    </form>
+</div>
+<div class="col-md-8">
+    {% if group.slug %}
+    <form method="post">
+        <h3>Current Teachers:</h3>
+        <table class="table">
+            {% for teacher in instructor %}
+                <tr>
+                    <td>{{ teacher.last_name }}</td>
+                    <td>{{ teacher.first_name }}</td>
+                    <td>{{ teacher.email }}</td>
+                    <td>
+                        <a href="{% url 'groups-remove_instructor' group.slug teacher.pk %}" class="btn btn-default btn-sm">Remove Teacher</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        {% csrf_token %}
+    </form>
+    <br />
+    <form method="post">
+        <h3>Current Students:</h3>
+        <table class="table">
+            {% for student in enrolled %}
+            <tr>
+                <td>{{ student.last_name }}</td>
+                <td>{{ student.first_name }}</td>
+                <td>{{ student.email }}</td> 
+                <td>
+                    <a class="btn btn-default btn-sm" href="{% url 'groups-make_instructor' group.slug student.pk %}">Make Teacher</a>
+                </td>
+                <td>
+                    {% if student|is_lead_student:group %}
+                        <a class="btn btn-default btn-sm" href="{% url 'groups-remove-ta' group.slug student.pk %}">Remove Lead Student</a>
+                    {% else %}
+                        <a class="btn btn-default btn-sm" href="{% url 'groups-make-ta' group.slug student.pk %}">Make Lead Student</a>
+                    {% endif %}
+                </td>
+            
+            </tr>
+            {% endfor %}
+        </table>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

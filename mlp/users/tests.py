@@ -5,8 +5,8 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.unittest import skipIf
-from mlp.classes.models import Class, Roster
-from mlp.classes.enums import UserRole
+from mlp.groups.models import Group, Roster
+from mlp.groups.enums import UserRole
 from mlp.files.models import File, FileTag
 from mlp.files.enums import FileType, FileStatus
 from mlp.files.forms import FileForm
@@ -35,15 +35,15 @@ def create_users(self):
     i.save()
     self.inactive = i
 
-def create_classes(self):
+def create_groups(self):
     """
-    Create new classes
+    Create new groups
     """
-    c = Class(crn=12345, name="class 101", description="this is a description")
+    c = Group(crn=12345, name="class 101", description="this is a description")
     c.save()
-    self.classes = c
+    self.groups = c
 
-    r = Roster(user=self.admin, _class=c, role=UserRole.ADMIN)
+    r = Roster(user=self.admin, group=c, role=UserRole.ADMIN)
     r.save()
     self.roster = r
 
@@ -87,7 +87,7 @@ class UserViewsTest(TestCase):
     def setUp(self):
         super(UserViewsTest, self).setUp()
         create_users(self)
-        create_classes(self)
+        create_groups(self)
         create_files(self)
         self.client.login(email=self.admin.email, password="foobar")
 
@@ -107,7 +107,7 @@ class UserViewsTest(TestCase):
     def test_list_view(self):
         response = self.client.get(reverse('users-list'))
         self.assertEqual(response.status_code, 200)
-
+        
     def test_detail_view(self):
         response = self.client.get(reverse('users-detail', args=(self.admin.pk,)))
         self.assertEqual(response.status_code, 200)
@@ -155,4 +155,17 @@ class UserViewsTest(TestCase):
 
     def test_cloak_as(self):
         self.assertTrue(self.admin.can_cloak_as(self.user))
+
+    def test_hire(self):
+        count = User.objects.filter(is_staff=True).count()
+        response = self.client.get(reverse('users-hire', args=(self.user.pk,)))
+        self.assertRedirects(response, reverse('users-edit', args=(self.user.pk,)))
+        self.assertEqual(count+1, User.objects.filter(is_staff=True).count())
     
+    def test_fire(self):
+        self.user.is_staff = True
+        self.user.save()
+        count = User.objects.filter(is_staff=True).count()
+        response = self.client.get(reverse('users-fire', args=(self.user.pk,)))
+        self.assertRedirects(response, reverse('users-edit', args=(self.user.pk,)))
+        self.assertEqual(count-1, User.objects.filter(is_staff=True).count())

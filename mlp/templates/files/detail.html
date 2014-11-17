@@ -2,18 +2,17 @@
 {% load permissions %}
 {% block content %}
 <h3>{{ file.name|truncatechars:75 }}</h3>
+{% if file and user|can_edit_file:file %}
+    {% if file.status == FileStatus.READY %}
+    <a class="btn btn-default pull-right" href="{% url 'files-edit' file.slug %}" style="margin-top: -40px;"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
+    {% endif %}
+{% endif %}
 <div class="col-md-7">
     <hr />
 
     {% if file.type == FileType.VIDEO %}
-        <video controls>
-            {% for path, mime in file.video_urls %}
-                <source src="{{ path }}" type="{{ mime }}">
-            {% endfor %}
-            Your browser failed to load the video.
-        </video>
+        {% include "files/_video.html" %}
     {% endif %}
-
     {% if file.type == FileType.AUDIO %}
         {% if file.audio_urls %}
             <audio controls>
@@ -32,31 +31,11 @@
                 <td>
                     <p><strong>Uploader:</strong> {{ file.uploaded_by }}</p>
                 </td>
-                <td><p><strong>Duration:</strong> {{ duration }}</p></td>
+                <td><p><strong>Uploaded:</strong> {{ file.uploaded_on|date }}</p></td>
                 <td>
                     {% if file.file and user.is_authenticated %}
-                    <p><a class="btn btn-default" href="{% url 'files-download' file.pk %}" download="{{ file.file }}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
-                    {% endif %}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <p><strong>Tags:</strong>
-                    <span class="filetag">
-                        {% for file_tag in file_tags %}
-                            <span>{{ file_tag.tag }}</span> 
-                        {% endfor %}
-                    </span>
-                </td>
-                <td>
-                    <p><strong>Uploaded:</strong> {{ file.uploaded_on|date }}</p>
-                </td>
-                <td>
-                    {% if file and user|can_edit_file:file %}
-                        {% if file.status == FileStatus.READY %}
-                        <a class="btn btn-default" href="{% url 'files-edit' file.pk %}"><span class="glyphicon glyphicon-pencil"></span> Edit</a>
-                        <br />
-                        {% endif %}
+                    {% url 'files-download' file.slug as file_url %}
+                    <p><a class="btn btn-default" href="{{ file_url }}" download="{{ file.file }}"><span class="glyphicon glyphicon-download-alt"></span> Download</a></p>
                     {% endif %}
                 </td>
             </tr>
@@ -69,16 +48,23 @@
         <p><strong>Description:</strong></p>
         <p>{{ file.description }}</p>
     </div>
-    {% if user.is_authenticated %}
-    <div>
-        {% if used_in %}
-            {% with used_in as classes %} 
-            {% include "classes/_class.html" %}
-            {% endwith %}
-        {% else %}
-            <div class="alert alert-default">This file is not used in any classes.</div>
-        {% endif %}
+    <hr />
+    <div class="well">
+    <p><strong>Tags:</strong>
+        <span class="filetag">
+            {% for file_tag in file_tags %}
+                <span>{{ file_tag.tag }}</span> 
+            {% empty %}
+                This file has not been tagged yet.
+            {% endfor %}
+        </span>
     </div>
-    {% endif %}
+    <h3>Associated Files:</h3>
+    <br />
+    {% for file in associated_files %}
+        {% include "files/_file.html" %}
+    {% empty %}
+        <div class="alert alert-default">There are no text files associated with this file.</div>
+    {% endfor %}
 </div>
 {% endblock %}

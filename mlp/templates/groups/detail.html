@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load permissions %}
+{{ form.media }}
+{% block content %}
+<div class="text-center"><h1>{{ group.name }}</h1></div>
+{% if user.is_authenticated %}
+    {% if not user|can_edit_group:group and user not in roster %}
+        <a href="{% url 'signed_up-add' group.slug user.pk %}" class="btn btn-default pull-right" style="margin-top: -40px;">Sign Up</a>
+    {% endif %}
+{% endif %}
+<hr />
+<div class="col-md-5">
+    <h3>Info
+    {% if user.is_authenticated %}
+        {% if user|can_edit_group:group %}
+            <a href="{% url 'groups-edit' group.slug %}" class="btn btn-default pull-right"><span class="glyphicon glyphicon-book"></span> Edit</a>
+        {% endif %}
+    {% endif %}
+    </h3>
+    <hr />
+    <p><strong>Instructors:</strong></p>
+        {% for teacher in instructor %}
+            <p>{{ teacher.last_name }}, {{ teacher.first_name }}</p>
+        {% endfor %}        
+    {% if group.crn %}<p><strong>Course Reference Number:</strong> {{ group.crn }}</p>{% endif %}
+    <p><strong>Description:</strong> {{ group.description }}</p>
+    <p><strong>Number of users enrolled in this group</strong> {{ enrolled }}</p>
+    <br />
+    {% if user.is_authenticated %}
+        {% if user|can_enroll_students:group %}
+            <h3>Sign-up Requests</h3>
+            {% if signed_up %}
+                <table class="table">
+                    <tr>
+                        <td>Last</td>
+                        <td>First</td>
+                        <td></td>
+                    </tr>
+                    {% for student in signed_up %}
+                        <tr>
+                            <td>{{ student.last_name }}</td>
+                            <td>{{ student.first_name }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'roster-add' group.slug student.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></a>
+                                    <a href="{% url 'signed_up-remove' group.slug student.pk %}" class="btn btn-default"><span class="glyphicon glyphicon-remove"></span></a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <div class="alert alert-default">No pending requests</div>
+            {% endif %}
+            <br />
+        {% endif %}
+    {% endif %}
+
+    <h3>Roster</h3>
+    {% if user.is_authenticated %}
+        {% if user|can_edit_group:group %}
+            <a href="{% url 'groups-enroll' group.slug %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-user"></span> Edit</a>
+        {% endif %}
+    {% endif %}
+    {% if roster %}
+        <table class="table">
+            <tr>
+                <td>Last</td>
+                <td>First</td>
+                <td>Role</td>
+                <td></td>
+            </tr>
+            {% for ros in roster %}
+            <tr>
+                <td>{{ ros.last_name }}</td>
+                <td>{{ ros.first_name }}</td>
+                <td>
+                    {% for student in students %}
+                        {% if student.user == ros %}
+                            {% if student.role == UserRole.RESEARCHER %}
+                                Researcher 
+                            {% elif student.role == UserRole.STUDENT %}
+                                Student
+                            {% elif student.role == UserRole.TA %}
+                                Lead Student
+                            {% else %}
+                                Admin
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% if user.is_authenticated %}
+                        {% if user|can_edit_user:ros %}
+                        <div class="btn-group">
+                            {% url 'users-detail' ros.pk as user_url %}
+                            <a href="{{ user_url }}" class="btn btn-default">View</a>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div class="alert alert-default">Nobody is enrolled in this group.</div>
+    {% endif %}
+</div>
+<div class="col-md-7">
+    <h3>Files</h3>
+    {% if user.is_authenticated %}
+        {% if user|can_upload_to_group:group %}<a href="{% url 'groups-file_list' group.slug %}" class="btn btn-default pull-right" style="margin-top: -40px;"><span class="glyphicon glyphicon-folder-open"></span> Edit</a>{% endif %}
+    {% endif %}    
+    <hr />
+    {% for file in files %}
+        {% include "files/_file.html" %} 
+    {% empty %}
+        <div class="alert alert-default">No files have been added yet.</div>
+    {% endfor %}
+</div>
+{% endblock %}

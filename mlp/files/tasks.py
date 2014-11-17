@@ -1,4 +1,5 @@
 from __future__ import absolute_import, print_function
+import json
 import re
 import collections
 import tempfile
@@ -13,12 +14,44 @@ from functools import partial
 from django.conf import settings
 from django.db import IntegrityError, transaction, DatabaseError
 from celery import shared_task
-from .enums import FileStatus, VIDEO_FILE_MIME_TYPES, FileType, AUDIO_FILE_MIME_TYPES
+from .enums import FileStatus, VIDEO_FILE_MIME_TYPES, FileType, AUDIO_FILE_MIME_TYPES, TEXT_FILE_MIME_TYPES
 from .models import File
 
+THUMBNAIL_SIZE = 64
 
 @shared_task
 def process_uploaded_file(total_number_of_chunks, file):
+    try:
+        # assume the file upload failed until we can prove otherwise
+        file.status = FileStatus.FAILED
+        _process_uploaded_file(total_number_of_chunks, file)
+    except Exception as e:
+        # Catch everything just because there is so much that can go wrong
+        # during the file conversion
+        file.status = FileStatus.FAILED
+        # write the exception trace to the log file and to stdout
+        file.log = open(file.path_with_extension("log"), "a")
+        file.log.write(traceback.format_exc())
+        print(traceback.format_exc())
+    finally:
+        # since we were passed in serialized File object, some of the fields (like the
+        # name or description may have changed, so we only want to update the
+        # relevant fields). And, the file object in the DB could have been deleted
+        # by the time we get here, so we make sure it still exists.
+        with transaction.atomic():
+            try:
+                # this query ensures we get a lock on the File object, and it (still) exists
+                row = File.objects.select_for_update().get(pk=file.pk)
+                file.save(update_fields=['status', 'file', 'type', 'duration', 'slug'])
+            except File.DoesNotExist as e:
+                pass 
+            
+            file.log.flush()
+            shutil.rmtree(file.tmp_path)
+
+        return file.status
+    
+def _process_uploaded_file(total_number_of_chunks, file):
     """
     This handles a chunked uploaded by concatenating the chunks together to
     form a single file, converting the file to different file types if
@@ -30,7 +63,11 @@ def process_uploaded_file(total_number_of_chunks, file):
     try:
         os.makedirs(file.directory)
     except OSError as e: # pragma no cover
-        pass
+        # if the directory exists, that's fine. Everything else 
+        # is an issue though.
+        if e.errno != errno.EEXIST:
+            raise
+
     ext = os.path.splitext(file.name)[1] or ".unknown"
     final_resting_file_path = os.path.join(file.directory, 'original' + ext)
     concat_file = open(final_resting_file_path, "wb")
@@ -42,140 +79,76 @@ def process_uploaded_file(total_number_of_chunks, file):
 
     concat_file.close()
     file.file = os.path.relpath(final_resting_file_path, settings.MEDIA_ROOT)
-    file.status = FileStatus.FAILED
+    
+    #
+    # add code for detecting the file type
+    #
     mime_type = mimetypes.guess_type(final_resting_file_path)[0]
-    if mime_type in VIDEO_FILE_MIME_TYPES:
-        file.type = FileType.VIDEO
+    if mime_type in TEXT_FILE_MIME_TYPES:
+       # use imagemagick to convert the first page of the PDF (that's the [0] syntax) to a png
+       if 0 == subprocess.call(["convert", file.file.path + "[0]", "-thumbnail", "%dx%d" % (THUMBNAIL_SIZE, THUMBNAIL_SIZE), file.path_with_extension("png")], stderr=file.log, stdout=file.log):
+           file.type = FileType.TEXT
+           file.status = FileStatus.READY
+       else:
+           file.log = open(file.path_with_extension("log"), "a")
+           file.log.write("PDF file could not be read by convert\n") 
+    else:
+        file.type = get_file_type(final_resting_file_path)
+    
+    
+    if file.type == FileType.VIDEO:
         was_successful = convert_video(file)
         file.duration = get_duration(final_resting_file_path)
-
-        if was_successful:
+        if file.duration < 1:
+            file.log = open(file.path_with_extension("log"), "a")
+            file.log.write("Files must be longer than 1 second")
+        elif was_successful:
             file.status = FileStatus.READY
             generate_thumbnail(file, datetime.time(second=1))
-    elif mime_type in AUDIO_FILE_MIME_TYPES:
-        
-        file.type = FileType.AUDIO
+    elif file.type == FileType.AUDIO:
         was_successful = convert_audio(file)
         file.duration = get_duration(final_resting_file_path)
- 
-        if was_successful:
+        if file.duration < 1:
+            file.log = open(file.path_with_extension("log"), "a")
+            file.log.write("Files must be longer than 1 second")
+        elif was_successful:
             file.status = FileStatus.READY
+
     else:
-        file.status = FileStatus.FAILED
+        file.log = open(file.path_with_extension("log"), "a")
+        file.log.write("File was not a usable video, audio or text file") 
 
-    # since we were passed in serialized File object, some of the fields (like the
-    # name or description may have changed, so we only want to update the
-    # relevant fields). And, the file object in the DB could have been deleted
-    # by the time we get here, so we make sure it still exists.
-    with transaction.atomic():
-        try:
-            # this query ensures we get a lock on the File object, and it (still) exists
-            row = File.objects.select_for_update().get(pk=file.pk)
-            file.save(update_fields=['status', 'file', 'type', 'duration'])
-        except (IndexError, DatabaseError, File.DoesNotExist) as e:
-            return -1
-        finally:
-            # clean up
-            shutil.rmtree(file.tmp_path)
 
-    return file.status
+def get_file_type(path):
+    """
+    Returns a FileType enum based on what the file 
+    type looks like
+    """
+    with tempfile.SpooledTemporaryFile() as output:
+        # call ffmpeg to try to figure out the filetype
+        subprocess.call([
+            settings.FFMPEG_BINARY,
+            '-i', path,
+        ], stderr=output)
+        output.seek(0)
+        string = output.read().decode("utf-8")
+        if re.search(r"    Stream.*Video:", string):
+            return FileType.VIDEO
+        if re.search(r"    Stream.*Audio:", string):
+            return FileType.AUDIO
+    return FileType.UNKNOWN
 
-def get_matching_file(path):
-    '''
-    returns a File object with a md5_sum that matches that of path,
-    IF it exists. Otherwise, returns None.
-    
-    There's some tricky stuff with permissions, so in its current state,
-    this should only be used when importing orgs.
-    '''
-    md5_sum = get_md5_sum(path)
-    
-    files = File.objects.filter(md5_sum=md5_sum)
-    
-    if len(files) > 0:
-        return files[0]
-    else:
-        return None
-    
-def conditional_copy(src_path, dest_path):
-    '''
-    only copies the file if the destination doesn't match the source,
-    either because it doesn't exist or because the file sizes don't match.
-    '''
-    if are_duplicate_files(src_path, dest_path):
-        return
-    
-    shutil.copyfile(src_path, dest_path)
-        
-def are_duplicate_files(src_path, dest_path):
-    ''' assumes the 1st file exists. doesn't assume anything about the 2nd. '''    
-    if os.path.isfile(dest_path):
-        src_size = os.stat(src_path).st_size
-        dst_size = os.stat(dest_path).st_size
-
-        if src_size == dst_size:
-            return True        
-    return False
-
-def get_media_file_duration(filepath):
-    '''
-    gets the duration of a media file, using ffmpeg.
-    '''
-    # we need to determine what to do with filepath, which MAY or MAY NOT contain a file extension
-    # this code is almost identical to code in process_imported_video. might want to make a separate function.    
-    ext = os.path.splitext(filepath)[1] or None
-    
-    if ext is None:
-        if os.path.isfile(filepath + '.mp4'):
-            filepath = filepath + '.mp4'
-        elif os.path.isfile(filepath + '.ogv'):
-            filepath = filepath + '.ogv'
-        else:
-            print("Couldn't find file %s" % filepath)
-            return 0
-    else:
-        if not os.path.isfile(filepath):
-            print("Couldn't find file %s" % filepath)
-            return 0
-    
-    command = ['ffmpeg', '-i', filepath]
-
-    output = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[1]        # entire output comes through as an error, for some reason.
-    
-    try:    
-        duration_string = re.search('(?<=Duration: )[\d:.]+', output).group(0)          # fixme: error-checking
-    except AttributeError as e:
-        print("Error getting media file duration!")
-        return 0
-    
-    hours, minutes, seconds, subseconds = re.findall('\d+', duration_string)
-    duration = int(hours) * 3600 + int(minutes) * 60 + int(seconds) + float(subseconds) / 100
-    
-    return duration                  
-
-def get_md5_sum(filename):
-    '''
-    returns an md5_sum as a 32-character string
-    '''
-    with open(filename, mode='rb') as file:
-        md5 = hashlib.md5()
-        for buffer in iter(partial(file.read, 128), b''):
-            md5.update(buffer)
-    return md5.hexdigest()
-
-def path_has_extension(path):
-    return True if len(os.path.splitext(path)[1]) > 0 else False
 
 def get_duration(video_path):
     """Returns the duration of the file in seconds"""
     with tempfile.SpooledTemporaryFile() as output:
         # ffmpeg outputs the duration to stderr for some reason
         subprocess.call([
-            'ffmpeg',
+            settings.FFMPEG_BINARY,
             '-i', video_path,
         ], stderr=output)
         output.seek(0)
-        matches = re.search(r"Duration: (?P<hours>\d+):(?P<minutes>\d+):(?P<seconds>[0-9.]+),", output.read())
+        matches = re.search( b"Duration: (?P<hours>\d+):(?P<minutes>\d+):(?P<seconds>[0-9.]+),", output.read())
         if not matches:
             return 0
         vals = matches.groupdict()
@@ -192,11 +165,11 @@ def generate_thumbnail(file, time):
     stdout = stderr
 
     if settings.TEST:
-        stderr = open("/tmp/vcp.log", "w")
+        stderr = open("/tmp/mlp.log", "w")
         stdout = stderr
 
     code = subprocess.call([
-        'ffmpeg',
+        settings.FFMPEG_BINARY,
         '-i', file.file.path,
         '-ss', time.isoformat(),
         '-vframes', "1",
@@ -219,11 +192,11 @@ def convert_audio(file):
     stdout = stderr
 
     if settings.TEST:
-        stderr = open("/tmp/vcp.log", "w")
+        stderr = open("/tmp/mlp.log", "w")
         stdout = stderr
     
     mp3_code = subprocess.call([
-        "ffmpeg",
+        settings.FFMPEG_BINARY,
         "-i", file.file.path,       # input file
         "-f", "mp3",
         '-y',                       # overwrite previous files
@@ -233,7 +206,7 @@ def convert_audio(file):
     ], stderr=stderr, stdout=stdout)    
     
     ogg_code = subprocess.call([
-        "ffmpeg",
+        setting.FFMPEG_BINARY,
         "-i", file.file.path,       # input file
         "-f", "ogg",
         '-y',                       # overwrite previous files
@@ -246,33 +219,72 @@ def convert_audio(file):
     
     return mp3_code == 0 and ogg_code == 0
 
+def get_bitrate(file_path):
+    """
+    Get the bitrate of a video file
+    """
+    full_output =  subprocess.Popen([
+        settings.FFMPEG_BINARY,
+        "-i", file_path,
+    ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = full_output.communicate()
+    start = str(err).find("bitrate") + len("bitrate: ")
+    end = str(err).find("b/s") - len(" k")
+    try:
+        bitrate = int(str(err)[start:end])
+    except ValueError as e:
+        bitrate = 0
+    return str(bitrate)
+
 def convert_video(file):
     """
     Convert a video to mp4 and ogv
-    """    
-    mp4_code = convert_video_to_mp4(file)
-    ogv_code = convert_video_to_ogv(file)
+    """   
+    high = 1
+    low = 0
+    mp4_code_high = convert_video_to_mp4(file, high)
+    mp4_code_low = convert_video_to_mp4(file, low)
+    ogv_code_high = convert_video_to_ogv(file, high)
+    ogv_code_low = convert_video_to_ogv(file, low)
     
+    ogv_code = ogv_code_low + ogv_code_high
+    mp4_code = mp4_code_low + mp4_code_high
+
     # returns True if both conversions were successful
     return ogv_code == 0 and mp4_code == 0
 
-def convert_video_to_mp4(file):
+def convert_video_to_mp4(file, quality):
     """
     Convert a video to mp4
     Returns 0 on success.
     """    
     
+    bitrate = get_bitrate(file.file.path)
     stderr = open(file.path_with_extension("log"), "a")
     stdout = stderr
 
+    if bitrate == '0':
+        file.status = FileStatus.FAILED
+        return 1
+
     if settings.TEST:
-        stderr = open("/tmp/vcp.log", "w")
+        stderr = open("/tmp/mlp.log", "w")
         stdout = stderr
 
+    ext = os.path.splitext(file.name)[1] or ".unknown"
+    if quality == 1:
+        filename = os.path.join(file.directory, 'original_high')
+        _file = open(filename + ".mp4", "wb")
+
+    else:
+        bitrate = str(int(bitrate) // 3)
+        filename = os.path.join(file.directory, 'original_low')
+        _file = open(filename + ".mp4", "wb")
+
     mp4_code = subprocess.call([
-        "ffmpeg",
+        settings.FFMPEG_BINARY,
         "-i", file.file.path, # input file
-        "-b:v", "200k", # bitrate of video
+        "-b:v", bitrate + "k", # bitrate of video | started at 200k
         "-f", "mp4", # force the output to be mp4
         "-vcodec", "libx264", # video codec
         "-acodec", "aac", # audio codec
@@ -280,44 +292,54 @@ def convert_video_to_mp4(file):
         "-ar", "44100", # Set the audio sampling frequency. For output streams it is set by default to the frequency of the corresponding input stream
         "-ab", "128k", # audio bitrate (I think)
         "-r", "30", # fps
-        # video filter: scale using -2 to ensure that width and height are both even, a requirement for the mp4 codec
-        "-vf", "scale='if (gte (iw/512\, ih/384)\, 512) + ifnot(gte(iw/512\, ih/384)\, -2): if (gte(ih/384\, iw/512)\, 384) + ifnot(gte(ih/384\, iw/512)\, -2)'",
         # Overwrite output files without asking.
         '-y',
         '-strict', 'experimental', # since AAC audio encoding is considered experimental, we need this flag
         # output filename
-        file.path_with_extension("mp4")
+        filename + ".mp4",
     ], stderr=stderr, stdout=stdout)
-
+    _file.close()
     return mp4_code
 
-def convert_video_to_ogv(file):
+def convert_video_to_ogv(file, quality):
     """
     Convert a video to ogv
     Returns 0 on success.
     """    
-      
+    
+    bitrate = get_bitrate(file.file.path)
     stderr = open(file.path_with_extension("log"), "a")
     stdout = stderr
+   
+    if bitrate == '0':
+        file.status = FileStatus.FAILED
+        return 1
 
     if settings.TEST:
-        stderr = open("/tmp/vcp.log", "w")
+        stderr = open("/tmp/mlp.log", "w")
         stdout = stderr
 
+    ext = os.path.splitext(file.name)[1] or ".unknown"
+    if quality == 1:
+        filename = os.path.join(file.directory, 'original_high')
+        _file = open(filename + ".ogv", "wb")
+    else:
+        bitrate = str(int(bitrate) // 3)
+        filename = os.path.join(file.directory, 'original_low')
+        _file = open(filename + ".ogv", "wb")
+
     ogv_code = subprocess.call([
-        "ffmpeg",
+        settings.FFMPEG_BINARY,
         "-i", file.file.path, # input file
-        "-b:v", "700k", # bitrate of video
+        "-b:v", bitrate + "k", # bitrate of video | started at 700k
         "-r", "30", # fps
         "-f", "ogg", # force the output to be ogg
         "-vcodec", "libtheora", # video codec
         "-acodec", "libvorbis", # audio codec
         "-g", "30", # don't know what this is for
-        # video filter: scale using -2 to ensure that width and height are both even, a requirement for the mp4 codec
-        "-vf", "scale='if (gte (iw/512\, ih/384)\, 512) + ifnot(gte(iw/512\, ih/384)\, -2): if (gte(ih/384\, iw/512)\, 384) + ifnot(gte(ih/384\, iw/512)\, -2)'",
         # Overwrite output files without asking.
         '-y',
-        file.path_with_extension("ogv")
+        filename + ".ogv"
     ], stderr=stderr, stdout=stdout)
-
+    _file.close()
     return ogv_code

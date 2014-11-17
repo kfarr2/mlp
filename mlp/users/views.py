@@ -8,11 +8,12 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
-from mlp.files.models import File, FileTag
+from mlp.files.models import File, FileTag, AssociatedFile
 from mlp.files.forms import FileSearchForm
-from mlp.classes.models import Class, Roster, ClassFile, SignedUp
-from mlp.classes.enums import UserRole
-from mlp.classes.forms import ClassSearchForm
+from mlp.files.enums import FileStatus, FileType
+from mlp.groups.models import Group, Roster, GroupFile, SignedUp
+from mlp.groups.enums import UserRole
+from mlp.groups.forms import GroupSearchForm
 from .perms import decorators
 from .models import User
 from .forms import UserForm, UserSearchForm
@@ -40,10 +41,13 @@ def list_(request):
     teachers = User.objects.filter(user_id__in=teachers)
     students = Roster.objects.filter(role=UserRole.STUDENT).values('user')
     students = User.objects.filter(user_id__in=students)
-
+    lead_students = Roster.objects.filter(role=UserRole.TA).values('user')
+    lead_students = User.objects.filter(user_id__in=lead_students)
+    
     return render(request, "users/list.html", {
         "teachers": teachers,
         "students": students,
+        "lead_students": lead_students,
         "roles": roles,
         "form": form,
         "users": users,
@@ -55,33 +59,35 @@ def workflow(request):
     Workflow page. Basically a home/profile page for users
     that do not have admin access.
     """
-    classes_list = Roster.objects.filter(user=request.user).values('_class')
-    classes = Class.objects.filter(class_id__in=classes_list)
-    num_classes = classes_list.count()
+    groups_list = Roster.objects.filter(user=request.user).values('group')
+    groups = Group.objects.filter(group_id__in=groups_list)
+    num_groups = groups_list.count()
     form = FileSearchForm(request.GET, user=request.user)
     form.is_valid()
     files = form.results(page=request.GET.get("page"))
     num_files = File.objects.filter(uploaded_by=request.user).count()
 
     return render(request, "users/workflow.html", {
-        "num_classes": num_classes,
+        "num_groups": num_groups,
         "num_files": num_files,
-        "classes": classes,
+        "groups": groups,
         "files": files,
+        'FileType': FileType,
+        'FileStatus': FileStatus,
     })
 
 @decorators.can_view_user_detail
 def detail(request, user_id):
     """
-    User detail page. Admins and admins of classes can view user details.
+    User detail page. Admins and admins of groups can view user details.
     """
     user = get_object_or_404(User, pk=user_id)
-    class_list = Roster.objects.filter(user=user).values('_class')
-    classes = Class.objects.filter(class_id__in=class_list)
+    group_list = Roster.objects.filter(user=user).values('group')
+    groups = Group.objects.filter(group_id__in=group_list)
 
     return render(request, "users/detail.html", {
         "user": user,
-        "classes": classes,
+        "groups": groups,
     })
 
 @decorators.can_edit_user
@@ -104,15 +110,18 @@ def _edit(request, user_id):
     else:
         user = get_object_or_404(User, pk=user_id)
 
-    roster = Roster.objects.filter(user=user).values('_class')
-    classes = Class.objects.filter(class_id__in=roster)
-    files = File.objects.filter(uploaded_by=user)
+    roster = Roster.objects.filter(user=user).values('group')
+    groups = Group.objects.filter(group_id__in=roster)
+    files = File.objects.filter(uploaded_by=user, status=FileStatus.READY)
 
     if request.POST:
         form = UserForm(request.POST, instance=user, user=request.user)
         if form.is_valid():
             user = form.save()
-            messages.success(request, "Updated")
+            if user_id:
+                messages.success(request, "Updated")
+            else:
+                messages.success(request, "New User Created!")
             if request.user.is_staff:
                 return HttpResponseRedirect(reverse("users-list"))
             else:
@@ -123,28 +132,35 @@ def _edit(request, user_id):
     return render(request, "users/edit.html", {
         "other_user": user,
         "files": files,
-        "classes": classes,
+        "groups": groups,
         "form": form,
+        'FileType': FileType,
+        'FileStatus': FileStatus,
     })
 
 def hire(request, user_id):
     """
     Elevate another users priviledges. (make staff)
     """
-    user = get_object_or_404(User, pk=user_id)
-    user.is_staff = True
-    user.save()
-    return HttpResponseRedirect(reverse("users-edit", args=(user_id,)))
-
+    if request.user.is_staff:
+        user = get_object_or_404(User, pk=user_id)
+        user.is_staff = True
+        user.save()
+        return HttpResponseRedirect(reverse("users-edit", args=(user_id,)))
+    else:
+        return HttpResponseRedirect(reverse("users-home"))
 
 def fire(request, user_id):
     """
     Elevate another users priviledges. (make staff)
     """
-    user = get_object_or_404(User, pk=user_id)
-    user.is_staff = False
-    user.save()
-    return HttpResponseRedirect(reverse("users-edit", args=(user_id,)))
+    if request.user.is_staff:
+        user = get_object_or_404(User, pk=user_id)
+        user.is_staff = False
+        user.save()
+        return HttpResponseRedirect(reverse("users-edit", args=(user_id,)))
+    else:
+        return HttpResponseRedirect(reverse("users-home"))
 
 @decorators.can_edit_user
 def delete(request, user_id):
@@ -156,22 +172,19 @@ def delete(request, user_id):
 
     # Make a list of everything that will be deleted
     roster = Roster.objects.filter(user=user)
-    is_teacher = roster.filter(role=UserRole.ADMIN)
-    if is_teacher:
-        classes = Class.objects.filter(class_id__in=is_teacher.values('_class'))
-    else:
-        classes = None
-
     files = File.objects.filter(uploaded_by=user)
+    group_files = GroupFile.objects.filter(file_id__in=files)
+    associated_files = AssociatedFile.objects.filter(main_file__in=files)
 
     # add related objects to the list
     for r in roster:
         will_be_deleted.append(r)
-    if classes:
-        for c in classes:
-            will_be_deleted.append(c)
     for f in files:
         will_be_deleted.append(f)
+    for g in group_files:
+        will_be_deleted.append(g)
+    for a in associated_files:
+        will_be_deleted.append(a)
 
     if request.method == "POST":
         if user:
