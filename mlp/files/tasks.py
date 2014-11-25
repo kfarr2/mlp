@@ -86,15 +86,15 @@ def _process_uploaded_file(total_number_of_chunks, file):
     mime_type = mimetypes.guess_type(final_resting_file_path)[0]
     if mime_type in TEXT_FILE_MIME_TYPES:
        # use imagemagick to convert the first page of the PDF (that's the [0] syntax) to a png
-       if 0 == subprocess.call(["convert", file.file.path + "[0]", "-thumbnail", "%dx%d" % (THUMBNAIL_SIZE, THUMBNAIL_SIZE), file.path_with_extension("png")], stderr=file.log, stdout=file.log):
-           file.type = FileType.TEXT
-           file.status = FileStatus.READY
-       else:
-           file.log = open(file.path_with_extension("log"), "a")
-           file.log.write("PDF file could not be read by convert\n") 
+        if 0 == subprocess.call(["convert", file.file.path + "[0]", "-thumbnail", "%dx%d" % (THUMBNAIL_SIZE, THUMBNAIL_SIZE), file.path_with_extension("png")], stderr=file.log, stdout=file.log):
+            file.type = FileType.TEXT
+            file.status = FileStatus.READY
+            return
+        else:
+            file.log = open(file.path_with_extension("log"), "a")
+            file.log.write("PDF file could not be read by convert\n") 
     else:
         file.type = get_file_type(final_resting_file_path)
-    
     
     if file.type == FileType.VIDEO:
         was_successful = convert_video(file)
@@ -266,6 +266,7 @@ def convert_video_to_mp4(file, quality):
     if bitrate == '0':
         file.status = FileStatus.FAILED
         return 1
+
 
     if settings.TEST:
         stderr = open("/tmp/mlp.log", "w")

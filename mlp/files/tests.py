@@ -341,7 +341,7 @@ class StoreViewTest(TestCase):
         post_count = File.objects.count()
         self.assertEqual(pre_count+1, post_count)
         f = File.objects.order_by("-pk").first()
-        self.assertEqual(f.status, FileStatus.FAILED)
+        self.assertEqual(f.status, FileStatus.UPLOADED)
         self.assertEqual(f.type, FileType.UNKNOWN)
         self.assertEqual(f.uploaded_by, self.admin)
 
@@ -434,7 +434,7 @@ class StoreViewTest(TestCase):
         # make sure temp was cleaned up correctly
         self.assertEqual(original_num_files_in_tmp, len(os.listdir(settings.TMP_ROOT)))
         # and the file was put together correctly in the media dir
-        f = File.objects.all().order_by("-pk").first()
+        f = File.objects.order_by("-pk").first()
         self.assertEqual(f.name, "UNIQUE_STRING.txt")
         file_path = os.path.join(settings.MEDIA_ROOT, str(f.pk), "original.txt")
         self.assertEqual(self.file_content*2, open(file_path).read())

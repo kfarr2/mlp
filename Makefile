@@ -1,4 +1,7 @@
-.PHONY: run clean test coverage reload
+.PHONY: run clean test coverage reload install
+
+PYTHON=python3
+export PATH:=.env/bin:$(PATH)
 
 # run the django web server
 run:
@@ -20,3 +23,21 @@ coverage:
 
 reload:
 	./manage.py migrate && ./manage.py collectstatic --noinput && touch mlp/wsgi.py
+
+# install the site
+install: .env
+	$(shell sudo source .env/bin/activate)
+	# Install ffmpeg from CDN
+	mkdir bin
+	wget https://cdn.research.pdx.edu/ffmpeg/2.4.3/ffmpeg
+	mv ffmpeg bin
+	# Install requirements
+	pip install -r requirements.txt
+	# Database stuff
+	mysql -e "CREATE DATABASE IF NOT EXISTS mlp"
+	./manage.py migrate
+	./manage.py loaddata choices
+
+.env:
+	$(PYTHON) -m venv .env
+	curl https://raw.githubusercontent.com/pypa/pip/master/contrib/get-pip.py | python
