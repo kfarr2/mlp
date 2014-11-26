@@ -293,7 +293,14 @@ def media(request, slug):
     path = os.path.join(file.directory, file_part)
     size = os.stat(path).st_size
     file = RangedFileReader(open(path, 'rb'))
-    response = StreamingHttpResponse(file, mimetypes.guess_type(path)[0])
+    content_type = mimetypes.guess_type(path)[0]
+    if not settings.DEBUG:
+        response = HttpResponse()
+        response['X-Sendfile'] = path
+        response['Content-Type'] = content_type
+        return response
+
+    response = StreamingHttpResponse(file, content_type)
     response['Content-Length'] = size
     response['Accept-Ranges'] = "bytes"
 

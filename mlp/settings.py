@@ -30,6 +30,8 @@ DATABASES = {
     },
 }
 
+ADMINS = [["mdj2", "mdj2@pdx.edu"]]
+
 ALLOWED_HOSTS = [".pdx.edu"]
 
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'no-reply@pdx.edu'
