@@ -165,7 +165,8 @@ def _upload(request, slug):
         group = get_object_or_404(Group, slug=slug)
         group = Roster.objects.filter(group=group, user=request.user)
 
-    associated_files = AssociatedFile.objects.all().values('associated_file')
+    associated_files = AssociatedFile.objects.values('associated_file')
+    associated_files = File.objects.filter(file_id__in=associated_files)
     my_files = File.objects.filter(uploaded_by=request.user, status=FileStatus.READY).exclude(file_id__in=associated_files)
     to_delete = File.objects.filter(uploaded_by=request.user, status=FileStatus.READY, type=FileType.TEXT).exclude(file_id__in=associated_files)
     if to_delete.exists():
@@ -223,12 +224,12 @@ def upload_associated_file(request, slug):
             messages.error(request, request.POST["error_message"])
         else:
             messages.success(request, "Associated Files Uploaded! Processing...")
-    
+
         for associated_file in File.objects.filter(uploaded_by=request.user, type=FileType.TEXT):
             if AssociatedFile.objects.filter(associated_file=associated_file).exists():
                 pass
             else:
-                AssociatedFile.objects.create(main_file=main_file, associated_file=associated_file)            
+                AssociatedFile.objects.create(main_file=main_file, associated_file=associated_file) 
 
         return HttpResponseRedirect(reverse('files-edit', args=(slug,)))
 
