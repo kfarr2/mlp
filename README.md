@@ -9,10 +9,6 @@ In your working directory
 
 ## Database Configuration
 
-Edit variables as needed
-
-    vi variables.py
-
 Sync the database
 
     ./manage.py syncdb
@@ -21,6 +17,10 @@ Sync the database
 Rebuild the search index
 
     ./manage.py rebuild_index
+
+Edit variables as needed
+
+    vi variables.py
 
 ## Running the server
 
