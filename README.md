@@ -2,7 +2,9 @@
 
 ## Introduction
 
-MLP - NOTE: Python 2.6 is no longer supported. This site is now being upgraded to Python 3.3
+MLP - NOTE: You can also install from the makefile by typing
+
+    make install
 
 ## Installation
 
