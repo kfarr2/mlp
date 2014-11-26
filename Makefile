@@ -26,7 +26,6 @@ reload:
 
 # install the site
 install: .env
-	$(shell sudo source .env/bin/activate)
 	# Install ffmpeg from CDN
 	mkdir bin
 	wget https://cdn.research.pdx.edu/ffmpeg/2.4.3/ffmpeg
