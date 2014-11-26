@@ -35,7 +35,6 @@ install: .env
 	# Database stuff
 	mysql -e "CREATE DATABASE IF NOT EXISTS mlp"
 	./manage.py migrate
-	./manage.py loaddata choices
 
 .env:
 	$(PYTHON) -m venv .env
