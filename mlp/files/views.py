@@ -97,7 +97,7 @@ def edit(request, slug):
     Edit a file
     """
     file = get_object_or_404(File, slug=slug)
-    if request.FILES.exists():
+    if request.FILES:
         for a_file in request.FILES.iteritems():
             AssociatedFile.objects.get_or_create(associated_file=a_file, main_file=main_file)
     associated_files = AssociatedFile.objects.filter(main_file=file).values('associated_file')
