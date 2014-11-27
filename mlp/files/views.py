@@ -224,12 +224,7 @@ def upload_associated_file(request, slug):
             messages.error(request, request.POST["error_message"])
         else:
             messages.success(request, "Associated Files Uploaded! Processing...")
-
-        for associated_file in File.objects.filter(uploaded_by=request.user, type=FileType.TEXT):
-            if AssociatedFile.objects.filter(associated_file=associated_file).exists():
-                pass
-            else:
-                AssociatedFile.objects.create(main_file=main_file, associated_file=associated_file) 
+            # we'll update the database on the redirect
 
         return HttpResponseRedirect(reverse('files-edit', args=(slug,)))
 
