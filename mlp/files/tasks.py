@@ -79,7 +79,6 @@ def _process_uploaded_file(total_number_of_chunks, file):
 
     concat_file.close()
     file.file = os.path.relpath(final_resting_file_path, settings.MEDIA_ROOT)
-    
     #
     # add code for detecting the file type
     #
@@ -91,8 +90,12 @@ def _process_uploaded_file(total_number_of_chunks, file):
             file.status = FileStatus.READY
             return
         else:
-            file.log = open(file.path_with_extension("log"), "a")
-            file.log.write("PDF file could not be read by convert\n") 
+            file.type = FileType.TEXT
+            file.status = FileStatus.READY
+            # Causing the upload to end and fail early for .doc, .docx and .rtf files
+            #file.log = open(file.path_with_extension("log"), "a")
+            #file.log.write("PDF file could not be read by convert\n") 
+            return
     else:
         file.type = get_file_type(final_resting_file_path)
     
