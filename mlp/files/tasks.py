@@ -30,7 +30,7 @@ def process_uploaded_file(total_number_of_chunks, file):
         # during the file conversion
         file.status = FileStatus.FAILED
         # write the exception trace to the log file and to stdout
-        file.log = open(file.path_with_extension("log"), "a")
+        file.log = open(file.path_with_extension("log"), "a+")
         file.log.write(traceback.format_exc())
         print(traceback.format_exc())
     finally:
@@ -44,19 +44,26 @@ def process_uploaded_file(total_number_of_chunks, file):
                 row = File.objects.select_for_update().get(pk=file.pk)
                 file.save(update_fields=['status', 'file', 'type', 'duration', 'slug'])
                 try:
-                    if file.main_file_slug:
+                    if file.type == FileType.UNKNOWN:
+                        file.status = FileStatus.FAILED
+                        file.log.write('Unknown file type not supported.')
+                    elif file.main_file_slug != 'upload':
                         main_file = File.objects.get(slug=file.main_file_slug)
                         associated_file = AssociatedFile(main_file=main_file, associated_file=file)
                         associated_file.save()
+                        file.log.write("Associated file uploaded.")
                     elif file.type == FileType.TEXT:
                         # user tried to upload a text file by itself. get rid of it.
                         file.status = FileStatus.FAILED
+                        file.log.write('Stand alone text files not allowed.')
+
                 except File.DoesNotExist as e:
                     pass # there is no associated file to create
 
             except File.DoesNotExist as e:
                 pass 
-            
+
+
             file.log.flush()
             shutil.rmtree(file.tmp_path)
 
@@ -95,11 +102,11 @@ def _process_uploaded_file(total_number_of_chunks, file):
     #
 
     file.type = get_file_type(final_resting_file_path)
-    stderr = open(file.path_with_extension("log"), "a")
+    stderr = open(file.path_with_extension("log"), "a+")
     stdout = stderr
 
     # Handle text files
-    if file.type == FileType.TEXT:
+    if (file.type == FileType.TEXT) and (file.status != FileStatus.FAILED):
         # use imagemagick to convert the first page of the PDF (that's the [0] syntax) to a png
         subprocess.call(["convert", file.file.path + "[0]", "-thumbnail", "%dx%d" % (THUMBNAIL_SIZE, THUMBNAIL_SIZE), file.path_with_extension("png")], stderr=stderr, stdout=stdout)
         file.status = FileStatus.READY
@@ -109,7 +116,7 @@ def _process_uploaded_file(total_number_of_chunks, file):
         was_successful = convert_video(file)
         file.duration = get_duration(final_resting_file_path)
         if file.duration < 1:
-            file.log = open(file.path_with_extension("log"), "a")
+            file.log = open(file.path_with_extension("log"), "a+")
             file.log.write("Files must be longer than 1 second")
         elif was_successful:
             file.status = FileStatus.READY
@@ -120,14 +127,14 @@ def _process_uploaded_file(total_number_of_chunks, file):
         was_successful = convert_audio(file)
         file.duration = get_duration(final_resting_file_path)
         if file.duration < 1:
-            file.log = open(file.path_with_extension("log"), "a")
+            file.log = open(file.path_with_extension("log"), "a+")
             file.log.write("Files must be longer than 1 second")
         elif was_successful:
             file.status = FileStatus.READY
 
     # Handle unsupported files
     else:
-        file.log = open(file.path_with_extension("log"), "a")
+        file.log = open(file.path_with_extension("log"), "a+")
         file.log.write("File was not a usable video, audio or text file") 
 
 def get_file_type(path):
@@ -177,7 +184,7 @@ def generate_thumbnail(file, time):
     PNG in the same directory the video file is in. The thumbnail will be at
     most 64x64 pixels. The aspect ratio is preserved
     """
-    stderr = open(file.path_with_extension("log"), "a")
+    stderr = open(file.path_with_extension("log"), "a+")
     stdout = stderr
 
     if settings.TEST:
@@ -204,7 +211,7 @@ def convert_audio(file):
     """
     Convert a audio file to HTML5 formats
     """
-    stderr = open(file.path_with_extension("log"), "a")
+    stderr = open(file.path_with_extension("log"), "a+")
     stdout = stderr
 
     if settings.TEST:
@@ -276,7 +283,7 @@ def convert_video_to_mp4(file, quality):
     """    
     
     bitrate = get_bitrate(file.file.path)
-    stderr = open(file.path_with_extension("log"), "a")
+    stderr = open(file.path_with_extension("log"), "a+")
     stdout = stderr
 
     if bitrate == '0':
@@ -325,7 +332,7 @@ def convert_video_to_ogv(file, quality):
     """    
     
     bitrate = get_bitrate(file.file.path)
-    stderr = open(file.path_with_extension("log"), "a")
+    stderr = open(file.path_with_extension("log"), "a+")
     stdout = stderr
    
     if bitrate == '0':
