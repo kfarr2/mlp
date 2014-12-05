@@ -1,3 +1,4 @@
+import tempfile
 import re, hashlib
 import os, sys, shutil
 from elasticmodels import make_searchable
@@ -68,9 +69,24 @@ class File(models.Model):
             self._size = total_size 
         return self._size
 
+#    @property
+#    def log(self):
+#        return open(self.path_with_extension("log"), "a+")
     @property
     def log(self):
-        return open(self.path_with_extension("log"), "a+")
+        """
+        Returns a reference to the log file for this file open for appending
+        and reading
+        """
+        try:
+            f = open(self.path_with_extension("log"), "a+") 
+            f.seek(os.SEEK_SET)
+            return f
+        except IOError as e:
+            # something has gone wrong, this shouldn't happen, but if it does,
+            # we'll write to a file that will automatically get garbage
+            # collected
+            return tempfile.TemporaryFile()
 
     @property
     def directory(self):
