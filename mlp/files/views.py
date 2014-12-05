@@ -42,7 +42,7 @@ def list_(request):
     failed = File.objects.filter(
         status=FileStatus.FAILED,
         uploaded_by=request.user,
-    ).exclude(type=FileType.TEXT)
+    )
 
     return render(request, 'files/list.html', {
         'files': files,
