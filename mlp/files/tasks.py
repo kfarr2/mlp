@@ -15,7 +15,7 @@ from django.conf import settings
 from django.db import IntegrityError, transaction, DatabaseError
 from celery import shared_task
 from .enums import FileStatus, VIDEO_FILE_MIME_TYPES, FileType, AUDIO_FILE_MIME_TYPES, TEXT_FILE_MIME_TYPES
-from .models import File
+from .models import File, AssociatedFile
 
 THUMBNAIL_SIZE = 64
 
@@ -43,6 +43,17 @@ def process_uploaded_file(total_number_of_chunks, file):
                 # this query ensures we get a lock on the File object, and it (still) exists
                 row = File.objects.select_for_update().get(pk=file.pk)
                 file.save(update_fields=['status', 'file', 'type', 'duration', 'slug'])
+                try:
+                    if file.main_file_slug:
+                        main_file = File.objects.get(slug=file.main_file_slug)
+                        associated_file = AssociatedFile(main_file=main_file, associated_file=file)
+                        associated_file.save()
+                    elif file.type == FileType.TEXT:
+                        # user tried to upload a text file by itself. get rid of it.
+                        file.status = FileStatus.FAILED
+                except File.DoesNotExist as e:
+                    pass # there is no associated file to create
+
             except File.DoesNotExist as e:
                 pass 
             
@@ -82,24 +93,19 @@ def _process_uploaded_file(total_number_of_chunks, file):
     #
     # add code for detecting the file type
     #
-    mime_type = mimetypes.guess_type(final_resting_file_path)[0]
-    if mime_type in TEXT_FILE_MIME_TYPES:
-       # use imagemagick to convert the first page of the PDF (that's the [0] syntax) to a png
-        if 0 == subprocess.call(["convert", file.file.path + "[0]", "-thumbnail", "%dx%d" % (THUMBNAIL_SIZE, THUMBNAIL_SIZE), file.path_with_extension("png")], stderr=file.log, stdout=file.log):
-            file.type = FileType.TEXT
-            file.status = FileStatus.READY
-            return
-        else:
-            file.type = FileType.TEXT
-            file.status = FileStatus.READY
-            # Causing the upload to end and fail early for .doc, .docx and .rtf files
-            #file.log = open(file.path_with_extension("log"), "a")
-            #file.log.write("PDF file could not be read by convert\n") 
-            return
-    else:
-        file.type = get_file_type(final_resting_file_path)
-    
-    if file.type == FileType.VIDEO:
+
+    file.type = get_file_type(final_resting_file_path)
+    stderr = open(file.path_with_extension("log"), "a")
+    stdout = stderr
+
+    # Handle text files
+    if file.type == FileType.TEXT:
+        # use imagemagick to convert the first page of the PDF (that's the [0] syntax) to a png
+        subprocess.call(["convert", file.file.path + "[0]", "-thumbnail", "%dx%d" % (THUMBNAIL_SIZE, THUMBNAIL_SIZE), file.path_with_extension("png")], stderr=stderr, stdout=stdout)
+        file.status = FileStatus.READY
+
+    # Handle video files
+    elif file.type == FileType.VIDEO:
         was_successful = convert_video(file)
         file.duration = get_duration(final_resting_file_path)
         if file.duration < 1:
@@ -108,6 +114,8 @@ def _process_uploaded_file(total_number_of_chunks, file):
         elif was_successful:
             file.status = FileStatus.READY
             generate_thumbnail(file, datetime.time(second=1))
+
+    # Handle audio files
     elif file.type == FileType.AUDIO:
         was_successful = convert_audio(file)
         file.duration = get_duration(final_resting_file_path)
@@ -117,16 +125,21 @@ def _process_uploaded_file(total_number_of_chunks, file):
         elif was_successful:
             file.status = FileStatus.READY
 
+    # Handle unsupported files
     else:
         file.log = open(file.path_with_extension("log"), "a")
         file.log.write("File was not a usable video, audio or text file") 
-
 
 def get_file_type(path):
     """
     Returns a FileType enum based on what the file 
     type looks like
     """
+
+    mime_type = mimetypes.guess_type(path)[0]
+    if mime_type in TEXT_FILE_MIME_TYPES:
+        return FileType.TEXT
+
     with tempfile.SpooledTemporaryFile() as output:
         # call ffmpeg to try to figure out the filetype
         subprocess.call([

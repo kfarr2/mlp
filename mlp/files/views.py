@@ -97,9 +97,6 @@ def edit(request, slug):
     Edit a file
     """
     file = get_object_or_404(File, slug=slug)
-    if request.FILES:
-        for a_file in request.FILES['file']:
-            AssociatedFile.objects.get_or_create(associated_file=a_file, main_file=main_file)
     associated_files = AssociatedFile.objects.filter(main_file=file).values('associated_file')
     associated_files = File.objects.filter(file_id__in=associated_files, status=FileStatus.READY)
     if request.POST:
@@ -225,12 +222,6 @@ def upload_associated_file(request, slug):
     if request.method == "POST":
         if request.POST.get("error_message"):
             messages.error(request, request.POST["error_message"])
-        else:
-            messages.success(request, "Associated Files Uploaded! Processing...")
-            # we'll update the database on the redirect
-            a_file=File.objects.last()
-            AssociatedFile.objects.create(main_file=main_file, associated_file=a_file)
-        
         return HttpResponseRedirect(reverse('files-edit', args=(slug,)))
 
     uploaded = File.objects.filter(
@@ -270,7 +261,6 @@ def delete_associated_file(request, slug):
 def download(request, slug):
     """
     Basic download view
-    
     TODO: this will actually need to be fixed to stop XSS injections in files.
     Files should be downloaded over a completely different domain.
     """
@@ -386,6 +376,7 @@ def store(request):
             tmp_path=dir_path,
         )
         f.save()
+        f.main_file_slug = request.POST.get("main_file_slug")
     except DatabaseError as e:
         # the file object was already created and handled
         return HttpResponse("OK")
