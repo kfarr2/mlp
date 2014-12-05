@@ -12,8 +12,9 @@ var r = new Resumable({
     maxChunkRetries: 3,
     chunkRetryInterval: 1000,
     generateUniqueIdentifier: getUUID,
-    chunkSize: CHUNK_SIZE
-})
+    chunkSize: CHUNK_SIZE,
+    query: {"main_file_slug": window.location.toString().replace(/\/$/, '').split("/").pop()}
+});
 
 // update the progress bar
 r.on('progress', function(){
