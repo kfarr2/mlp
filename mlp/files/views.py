@@ -183,14 +183,14 @@ def _upload(request, slug):
             # add files to a class if one was specified
             for file in File.objects.filter(status=FileStatus.UPLOADED, uploaded_by=request.user):
                 file_add(request, slug, file.pk) 
-            
+
         if slug:
             return HttpResponseRedirect(reverse('groups-file_list', args=(slug,)))
         elif request.user.is_staff or admin.exists():
             return HttpResponseRedirect(reverse('files-list'))
         else:
             return HttpResponseRedirect(reverse('files-upload'))
-    
+
     uploaded = File.objects.filter(
         status=FileStatus.UPLOADED,
         uploaded_by=request.user,
@@ -314,6 +314,7 @@ def media(request, slug):
     return response
 
 @csrf_exempt
+@decorators.can_upload_file
 def store(request):
     """
     This view recieves a chunk of a file and saves it. When all
