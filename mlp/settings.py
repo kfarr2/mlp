@@ -31,6 +31,7 @@ DATABASES = {
 }
 
 ADMINS = [["mdj2", "mdj2@pdx.edu"]]
+ATOMIC_REQUESTS = True
 
 ALLOWED_HOSTS = [".pdx.edu"]
 
