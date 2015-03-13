@@ -26,19 +26,18 @@ DATABASES = {
         'PASSWORD': variable("DB_PASSWORD", ""),
         'HOST': variable("DB_HOST", 'localhost'),
         'PORT': '',
-
+        'ATOMIC_REQUESTS': True,
     },
 }
 
 ADMINS = [["mdj2", "mdj2@pdx.edu"]]
-ATOMIC_REQUESTS = True
 
 ALLOWED_HOSTS = [".pdx.edu"]
 
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'no-reply@pdx.edu'
 
 # in test mode?
-TEST = False
+TEST = variable("TEST", False) 
 TEST_RUNNER = "mlp.runner.MLPRunner"
 
 LOGIN_URL = reverse_lazy("home")
