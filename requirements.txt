@@ -8,7 +8,7 @@ Sphinx==1.2.2
 amqp==1.4.5
 anyjson==0.3.3
 billiard==3.3.0.18
-celery==3.1.13
+celery==5.2.2
 coverage==3.7.1
 -e git://github.com/PSU-OIT-ARC/django-arcutils.git#egg=django_arcutils-master
 django-bootstrap3-datetimepicker==2.2.3
